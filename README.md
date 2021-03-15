@@ -1,17 +1,31 @@
-## Getting Started
-.
+# Systolic CNN AcceLErator Simulator (SCALE Sim) v2
 
-### 30 seconds to SCALE-Sim!
+SCALE Sim is a simulator for systolic array based accelerators for Convolution, Feed Forward, and any layer that uses GEMMs. 
+This is a refreshed version of the simulator with feature enhancements, restructured code to aid feature additions, and ease of distribution.
 
-Getting started is simple! SCALE-Sim is completely written in python. At the moment, it has dependencies on the following python packages. Make sure you have them in your environment.
+The previous version of the simulator can be found [here](https://github.com/ARM-software/SCALE-Sim).
 
-* os
-* subprocess
-* numpy
-* math
-* configparser
-* tqdm
+## Getting started in 30 seconds
 
+### *Installing the package*
+
+Getting started is simple! SCALE-Sim is completely written in python and is available both as a package and could be run from source.
+
+You can install SCALE-Sim in your environment using the following command
+
+```$ pip3 install scalesim```
+
+Alternatively you can install the package from the source as well
+
+```$ python3 setup.py install```
+
+### *Launching a run*
+
+SCALE-Sim can be run by using the ```scale.py``` script from the repository and providing the paths to the architecture configuration, and the topology descriptor csv file.
+
+```$ python3 scale.py -c <path_to_config_file> -t <path_to_topology_file>```
+
+Try it now in the google colab notebook (**TBD**)
 
 ### Custom Experiment
 
