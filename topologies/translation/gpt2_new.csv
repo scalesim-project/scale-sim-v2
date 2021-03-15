@@ -1,0 +1,7 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+QKT,10000,64,1,64,1,10000,1,
+QKTV,10000,10000,1,10000,1,64,1,
+Linear1,10000,1600,1,1600,1,4800,1,
+Linear2,10000,1600,1,1600,1,1600,1,
+PW-FF-L1,10000,1600,1,1600,1,3072,1,
+PW-FF-L2,10000,3072,1,3072,1,1600,1,

@@ -1,0 +1,6 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+Language_Modelling_1_gate_x, 1, 1, 1, 1, 1536, 4, 1,
+Language_Modelling_1_gate_h, 1, 1, 1, 1, 1536, 4, 1,
+Language_Modelling_1_ptwise1, 1, 1, 1, 1, 1536, 1, 1,
+Language_Modelling_1_ptwise2, 1, 1, 1, 1, 1536, 1, 1,
+Language_Modelling_1_ptwise3, 1, 1, 1, 1, 1536, 1, 1,

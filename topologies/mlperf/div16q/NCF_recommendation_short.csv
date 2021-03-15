@@ -1,0 +1,8 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides
+
+MF_Embedding_user,1,1,1,1,138000,1,1,
+MLP_Embedding_user,1,1,1,1,138000,2,1,
+MLP_FC1,1,1,1,1,64,2,1,
+MLP_FC2,1,1,1,1,32,1,1,
+MLP_FC3,1,1,1,1,16,1,1,
+Predict_FC,1,1,1,1,16,1,1,

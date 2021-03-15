@@ -1,0 +1,6 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+,,,,,,,,
+Embedding Layer,1024,1,1,1,30000,5,1,
+Conv1,5,1024,3,3,1,1024,1,
+Conv2,5,1024,3,3,1,1024,1,
+FC,1,1,1,1,2048,2,1, 

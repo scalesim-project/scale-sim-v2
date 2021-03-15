@@ -1,0 +1,10 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+
+Embedding_layer,1,256,1,1,30000,1,1, 
+FC1,1,1,1,1,256,64,1, 
+LSTM1_igate_h,1,1,1,1,1024,64,1,
+LSTM1_ptwise1,1,1,1,1,1024,1,1, 
+FC2,1,1,1,1,2048,64,1, 
+LSTM2_igate_h,1,1,1,1,1024,64,1,
+LSTM2_ptwise1,1,1,1,1,1024,1,1, 
+FC3,1,1,1,1,2,1,1,

@@ -1,0 +1,11 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+LSTM1,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM2,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM3,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM4,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM5,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM6,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM7,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM8,  1, 1024,    1, 1024,      1,      4,     1,
+LSTM9,  1, 1024,    1, 1024,      1,      4,     1,
+

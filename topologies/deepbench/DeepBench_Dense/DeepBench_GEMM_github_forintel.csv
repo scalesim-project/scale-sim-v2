@@ -1,0 +1,5 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+Gemm1, 1760,  1760,     1, 1760,      1,    128,    1,
+Gemm2, 7860,  2560,     1, 2560,      1,    64,    1,
+Gemm3, 2560,  2560,     1, 2560,      1,    64,    1,
+Gemm5, 3072,  1024,     1, 1024,      1,    128,    1,

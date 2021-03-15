@@ -1,0 +1,5 @@
+Layer, IFMAP Width, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+OCR_1,480,48,3,3,1,16,1,
+OCR_2,240,24,3,3,16,32,1,
+OCR_3,120,12,3,3,32,64,1,
+OCR_4,60,6,3,3,64,128,1,

@@ -1,0 +1,7 @@
+Layer, IFMAP Width, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+DeepSpeech_1,700,161,20,5,1,32,2,
+DeepSpeech_2,700,161,20,5,1,32,2,
+DeepSpeech_3,700,161,20,5,1,32,2,
+DeepSpeech_4,341,79,10,5,32,32,2,
+DeepSpeech_5,341,79,10,5,32,32,2,
+DeepSpeech_6,341,79,10,5,32,32,2,

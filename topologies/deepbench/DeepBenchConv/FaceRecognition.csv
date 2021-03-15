@@ -1,0 +1,6 @@
+Layer, IFMAP Width, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+FaceRecognition_1,108,108,3,3,3,64,2,
+FaceRecognition_2,54,54,3,3,64,64,1,
+FaceRecognition_3,27,27,3,3,128,128,1,
+FaceRecognition_4,14,14,3,3,128,256,1,
+FaceRecognition_5,7,7,3,3,256,512,1,

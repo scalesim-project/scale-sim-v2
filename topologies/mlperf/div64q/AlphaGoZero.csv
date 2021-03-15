@@ -1,0 +1,10 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides
+,,,,,,,
+Conv,19,19,3,3,17,4,1
+Res_conv1,19,19,3,3,256,4,1
+Res_conv2,19,19,3,3,256,4,1
+ValueHead_conv,19,19,1,1,256,1,1
+ValueHead_FC1,1,1,1,1,361,4,1
+ValueHead_FC2,1,1,1,1,256,1,1
+PolicyHead_Conv,19,19,1,1,256,1,1
+PolidyHead_FC,1,1,1,1,722,5,1

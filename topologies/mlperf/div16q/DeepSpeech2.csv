@@ -1,0 +1,7 @@
+Layer, IFMAP Width, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+DeepSpeech_conv1,700,161,41,11,1,2,2,
+DeepSpeech_conv2,341,79,21,11,32,2,2,
+BatchRNN1,672,2560,1,2560,1,1,1, 
+BatchRNN2,2560,2560,1,2560,1,1,1, 
+BatchRNN3,2560,2560,1,2560,1,1,1, 
+FC,1,2560,1,2560,1,2,1,

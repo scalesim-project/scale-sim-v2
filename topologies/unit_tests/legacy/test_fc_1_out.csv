@@ -1,0 +1,2 @@
+Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+FC_one_out,  1, 8,    1, 8,    1,      2,     1,

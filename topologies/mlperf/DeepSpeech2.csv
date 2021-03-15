@@ -1,0 +1,7 @@
+Layer, IFMAP Width, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides,
+Conv1,700,161,41,11,1,32,2,
+Conv2,341,79,21,11,32,32,2,
+BatchRNN1,672,2560,1,2560,1,4,1, 
+BatchRNN2,2560,2560,1,2560,1,4,1, 
+BatchRNN3,2560,2560,1,2560,1,4,1, 
+FC,1,2560,1,2560,1,29,1,
