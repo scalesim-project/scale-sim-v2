@@ -56,8 +56,9 @@ The detailed documentation for the config file could be found **here (TBD)**
 
 ### Topology file
 
-The topology file is a csv file which decribes the layers of the workload topology. The layers are typically described as convolution layer parameters.
-The following is an example **TBD**
+The topology file is a *CSV* file which decribes the layers of the workload topology. The layers are typically described as convolution layer parameters as shown in the example below.
+
+![sample topo](link here "sample topo")
 
 For other layer types, SCALE-Sim also accepts the workload desciption in M, N, K format of the equivalent GEMM operation as shown in the example below **TBD**.
 
