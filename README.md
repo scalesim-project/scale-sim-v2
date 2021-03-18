@@ -47,7 +47,7 @@ SCALE-Sim uses two input files to run, a configuration file and a topology file.
 The configuration file is used to specify the architecture and run parameters for the simulations. 
 The following shows a sample config file: **TODO: Update with latest image**
 
-![sample config](https://raw.githubusercontent.com/AnandS09/SCALE-Sim/master/images/config_example.png "sample config") 
+![sample config](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/config-file-example.png "sample config") 
 
 The config file has three sections. The "*general*" section specifies the run name, which is user specific. The "*architecture_presets*" section describes the parameter of the systolic array hardware to simulate. 
 The "*run_preset*" section specifies if the simulator should run with user specified bandwidth, or should it calculate the optimal bandwidth for stall free execution. 
