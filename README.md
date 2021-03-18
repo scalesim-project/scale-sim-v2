@@ -45,7 +45,7 @@ SCALE-Sim uses two input files to run, a configuration file and a topology file.
 ### Configuration file
 
 The configuration file is used to specify the architecture and run parameters for the simulations. 
-The following shows a sample config file: **TODO: Update with latest image**
+The following shows a sample config file:
 
 ![sample config](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/config-file-example.png "sample config") 
 
@@ -58,7 +58,7 @@ The detailed documentation for the config file could be found **here (TBD)**
 
 The topology file is a *CSV* file which decribes the layers of the workload topology. The layers are typically described as convolution layer parameters as shown in the example below.
 
-![sample topo](link here "sample topo")
+![sample topo](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/topo-file-example.png "sample topo")
 
 For other layer types, SCALE-Sim also accepts the workload desciption in M, N, K format of the equivalent GEMM operation as shown in the example below **TBD**.
 
