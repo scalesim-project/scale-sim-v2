@@ -187,13 +187,6 @@ class double_buffered_scratchpad:
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0] - 1
 
-            if ifmap_stalls[0] >0:
-                print('IFMAP Stall: ' +str(ifmap_stalls))
-            if filter_stalls[0] >0:
-                print('Filter Stall: ' +str(filter_stalls))
-            if ofmap_stalls[0] >0:
-                print('OFMAP Stall: ' +str(ofmap_stalls))
-
             self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
 
         if self.estimate_bandwidth_mode:
