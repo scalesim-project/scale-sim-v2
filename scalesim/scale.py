@@ -5,11 +5,11 @@ from scalesim.scale_sim import scalesim
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', metavar='Topology file', type=str,
-                        default="../topologies/test.csv",
+                        default="../topologies/conv_nets/alexnet_part.csv",
                         help="Path to the topology file"
                         )
     parser.add_argument('-c', metavar='Config file', type=str,
-                        default="../configs/unit_tests/scale_test1.cfg",
+                        default="../configs/scale.cfg",
                         help="Path to the config file"
                         )
 
