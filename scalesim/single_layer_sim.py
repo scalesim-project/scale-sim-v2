@@ -140,6 +140,7 @@ class single_layer_sim:
             ifmap_backing_bw = 1
             filter_backing_bw = 1
             ofmap_backing_bw = 1
+            estimate_bandwidth_mode = False
             if self.config.use_user_dram_bandwidth():
                 bws = self.config.get_bandwidths_as_list()
                 ifmap_backing_bw = bws[0]
@@ -149,16 +150,12 @@ class single_layer_sim:
             else:
                 dataflow = self.config.get_dataflow()
                 arr_row, arr_col = self.config.get_array_dims()
+                estimate_bandwidth_mode = True
 
-                if dataflow == 'os' or dataflow == 'ws':
-                    ifmap_backing_bw = arr_row
-                    filter_backing_bw = arr_col
-                    ofmap_backing_bw = arr_col
-
-                elif dataflow == 'is':
-                    ifmap_backing_bw = arr_col
-                    filter_backing_bw = arr_row
-                    ofmap_backing_bw = arr_col
+                # The number 10 elems per cycle is arbitrary
+                ifmap_backing_bw = 10
+                filter_backing_bw = 10
+                ofmap_backing_bw = arr_col
 
             self.memory_system.set_params(
                     word_size=word_size,
@@ -169,14 +166,17 @@ class single_layer_sim:
                     ifmap_backing_buf_bw=ifmap_backing_bw,
                     filter_backing_buf_bw=filter_backing_bw,
                     ofmap_backing_buf_bw=ofmap_backing_bw,
-                    verbose=self.verbose
+                    verbose=self.verbose,
+                    estimate_bandwidth_mode=estimate_bandwidth_mode
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup
-        self.memory_system.set_read_buf_prefetch_matrices(ifmap_prefetch_mat=ifmap_prefetch_mat,
-                                                          filter_prefetch_mat=filter_prefetch_mat)
+        if self.config.use_user_dram_bandwidth() :
+            self.memory_system.set_read_buf_prefetch_matrices(ifmap_prefetch_mat=ifmap_prefetch_mat,
+                                                              filter_prefetch_mat=filter_prefetch_mat)
 
-        # 2.3 Start sending the requests through the memory system until all the OFMAP memory requests have been serviced
+        # 2.3 Start sending the requests through the memory system until
+        # all the OFMAP memory requests have been serviced
         self.memory_system.service_memory_requests(ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat)
 
         self.runs_ready = True

@@ -3,6 +3,7 @@ import numpy as np
 from tqdm import tqdm
 
 from scalesim.memory.read_buffer import read_buffer as rdbuf
+from scalesim.memory.read_buffer_estimate_bw import ReadBufferEstimateBw as rdbuf_est
 from scalesim.memory.read_port import read_port as rdport
 from scalesim.memory.write_buffer import write_buffer as wrbuf
 from scalesim.memory.write_port import write_port as wrport
@@ -50,28 +51,51 @@ class double_buffered_scratchpad:
         self.ofmap_dram_stop_cycle = 0
         self.ofmap_dram_writes = 0
 
+        self.estimate_bandwidth_mode = False,
         self.traces_valid = False
         self.params_valid_flag = True
 
     #
     def set_params(self,
                    verbose=True,
+                   estimate_bandwidth_mode=False,
                    word_size=1,
                    ifmap_buf_size_bytes=2, filter_buf_size_bytes=2, ofmap_buf_size_bytes=2,
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
                    ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1):
 
-        self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
-                                  total_size_bytes=ifmap_buf_size_bytes,
-                                  word_size=word_size,
-                                  active_buf_frac=rd_buf_active_frac,
-                                  backing_buf_bw=ifmap_backing_buf_bw)
+        self.estimate_bandwidth_mode = estimate_bandwidth_mode
 
-        self.filter_buf.set_params(backing_buf_obj=self.filter_port,
-                                   total_size_bytes=filter_buf_size_bytes,
-                                   word_size=word_size,
-                                   active_buf_frac=rd_buf_active_frac,
-                                   backing_buf_bw=filter_backing_buf_bw)
+        if self.estimate_bandwidth_mode:
+            self.ifmap_buf = rdbuf_est()
+            self.filter_buf = rdbuf_est()
+
+            self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
+                                      total_size_bytes=ifmap_buf_size_bytes,
+                                      word_size=word_size,
+                                      active_buf_frac=rd_buf_active_frac,
+                                      backing_buf_default_bw=ifmap_backing_buf_bw)
+
+            self.filter_buf.set_params(backing_buf_obj=self.filter_port,
+                                       total_size_bytes=filter_buf_size_bytes,
+                                       word_size=word_size,
+                                       active_buf_frac=rd_buf_active_frac,
+                                       backing_buf_default_bw=filter_backing_buf_bw)
+        else:
+            self.ifmap_buf = rdbuf()
+            self.filter_buf = rdbuf()
+
+            self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
+                                      total_size_bytes=ifmap_buf_size_bytes,
+                                      word_size=word_size,
+                                      active_buf_frac=rd_buf_active_frac,
+                                      backing_buf_bw=ifmap_backing_buf_bw)
+
+            self.filter_buf.set_params(backing_buf_obj=self.filter_port,
+                                       total_size_bytes=filter_buf_size_bytes,
+                                       word_size=word_size,
+                                       active_buf_frac=rd_buf_active_frac,
+                                       backing_buf_bw=filter_backing_buf_bw)
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
                                   total_size_bytes=ofmap_buf_size_bytes,
@@ -144,6 +168,7 @@ class double_buffered_scratchpad:
         for i in tqdm(range(ofmap_lines), disable=pbar_disable):
 
             cycle_arr = np.zeros((1,1)) + i + self.stall_cycles
+
             ifmap_demand_line = ifmap_demand_mat[i, :].reshape((1,ifmap_demand_mat.shape[1]))
             ifmap_cycle_out = self.ifmap_buf.service_reads(incoming_requests_arr_np=ifmap_demand_line,
                                                             incoming_cycles_arr=cycle_arr)
@@ -164,8 +189,11 @@ class double_buffered_scratchpad:
 
             self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
 
-            #if i > 1021:
-            #    print('Trap')
+        if self.estimate_bandwidth_mode:
+            # IDE shows warning as complete_all_prefetches is not implemented in read_buffer class
+            # It is harmless since, in estimate bandwidth mode, read_buffer_estimate_bw is instantiated
+            self.ifmap_buf.complete_all_prefetches()
+            self.filter_buf.complete_all_prefetches()
 
         self.ofmap_buf.empty_all_buffers(ofmap_serviced_cycles[-1])
 
