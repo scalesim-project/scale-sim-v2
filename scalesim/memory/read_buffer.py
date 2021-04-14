@@ -399,6 +399,10 @@ class read_buffer:
         return self.hit_latency
 
     #
+    def get_latency(self):
+        return self.hit_latency
+
+    #
     def get_num_accesses(self):
         assert self.trace_valid, 'Traces not ready yet'
         return self.num_access

@@ -37,6 +37,7 @@ class ReadBufferEstimateBw:
         self.prefetch_buffer_set_end_id = -1
         self.last_prefetch_start_cycle = -2
         self.last_prefetch_end_cycle = -1
+        self.first_request_rcvd_cycle = 0
 
         # Internal data structures
         self.current_set = set()
@@ -45,6 +46,7 @@ class ReadBufferEstimateBw:
         self.num_sets_prefetch_buffer = 1
 
         # Flags
+        self.first_request_seen = False
         self.params_set_flag = False
         self.active_buffer_prefetch_done = False
         self.trace_valid = False
@@ -99,6 +101,10 @@ class ReadBufferEstimateBw:
             cycle = int(incoming_cycles_arr[i][0])
 
             requests_this_cycle = incoming_requests_arr_np[i]
+            if not self.first_request_seen:
+                if max(requests_this_cycle) > -1:
+                    self.first_request_rcvd_cycle = cycle
+                    self.first_request_seen = True
 
             for addr in requests_this_cycle:
                 if not addr == -1:
@@ -126,7 +132,7 @@ class ReadBufferEstimateBw:
                 if self.current_set_id == self.read_buffer_set_end_id + 1:  # This should be prefetched
                     if not self.active_buffer_prefetch_done:
                         self.prefetch_bandwidth = self.default_bandwidth
-                        self.last_prefetch_end_cycle = -1 - self.backing_buffer.get_latency()
+                        self.last_prefetch_end_cycle = self.first_request_rcvd_cycle - 1 - self.backing_buffer.get_latency()
 
                         cycles_needed = (self.num_sets_prefetch_buffer * self.num_items_per_set) \
                                         / self.prefetch_bandwidth
@@ -257,6 +263,11 @@ class ReadBufferEstimateBw:
                 self.trace_matrix = np.concatenate((self.trace_matrix, empty_cols), axis=1)
 
             self.trace_matrix = np.concatenate((self.trace_matrix, this_prefetch_traces), axis=0)
+
+    #
+    def get_latency(self):
+        assert self.params_set_flag, 'Parameters are not valid'
+        return self.hit_latency
 
     #
     def get_trace_matrix(self):
