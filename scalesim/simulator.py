@@ -56,6 +56,18 @@ class simulator:
 
             self.single_layer_sim_object_list.append(this_layer_sim)
 
+        if not os.path.isdir(self.top_path):
+            cmd = 'mkdir ' + self.top_path
+            os.system(cmd)
+
+        report_path = self.top_path + '/' + self.conf.get_run_name()
+
+        if not os.path.isdir(report_path):
+            cmd = 'mkdir ' + report_path
+            os.system(cmd)
+
+        self.top_path = report_path
+
         # 2. Run each layer
         # TODO: This is parallelizable
         for single_layer_obj in self.single_layer_sim_object_list:
@@ -84,10 +96,6 @@ class simulator:
                 print('Average IFMAP DRAM BW: ' + "{:.3f}".format(avg_ifmap_bw) + ' words/cycle')
                 print('Average Filter DRAM BW: ' + "{:.3f}".format(avg_filter_bw) + ' words/cycle')
                 print('Average OFMAP DRAM BW: ' + "{:.3f}".format(avg_ofmap_bw) + ' words/cycle')
-
-            if not os.path.isdir(self.top_path):
-                cmd = 'mkdir ' + self.top_path
-                os.system(cmd)
 
             if self.save_trace:
                 if self.verbose:
