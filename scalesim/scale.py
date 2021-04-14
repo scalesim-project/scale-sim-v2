@@ -5,7 +5,7 @@ from scalesim.scale_sim import scalesim
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', metavar='Topology file', type=str,
-                        default="../topologies/conv_nets/alexnet_part.csv",
+                        default="../topologies/conv_nets/test.csv",
                         help="Path to the topology file"
                         )
     parser.add_argument('-c', metavar='Config file', type=str,
