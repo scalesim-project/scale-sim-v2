@@ -17,7 +17,7 @@ if __name__ == '__main__':
     topology = args.t
     config = args.c
 
-    s = scalesim(save_disk_space=False, verbose=True,
+    s = scalesim(save_disk_space=True, verbose=True,
               config=config,
               topology=topology
               )
