@@ -9,7 +9,7 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='scalesim',
-    version='2.0',
+    version='2.0.1',
     description='Systolic CNN AcceLerator Simulator',
     long_description=README,
     long_description_content_type="text/markdown",
