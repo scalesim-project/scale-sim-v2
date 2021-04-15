@@ -21,7 +21,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=False,                                 # The include_package_data argument controls whether non-code files are copied when your package is installed
-    install_requires=["numpy","configparser","absl-py", "tqdm"],
+    install_requires=["numpy","configparser","absl-py", "tqdm", "pandas"],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
