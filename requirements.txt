@@ -2,3 +2,5 @@ absl-py
 tqdm
 configparser
 numpy
+pandas
+cython
