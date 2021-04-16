@@ -51,6 +51,21 @@ class ScalesimReport:
 
         return elems
 
+    #
+    def get_sram_ifmap_reads_single_layer(self, layer_id=0):
+        assert self.details_df_ready, 'Data not read yet'
+        col_name = 'SRAM IFMAP Reads'
+        elem = self.details_df[col_name][layer_id]
+
+        return elem
+
+    #
+    def get_sram_ifmap_reads_all_layer(self):
+        assert self.details_df_ready, 'Data not read yet'
+        col_name = 'SRAM IFMAP Reads'
+        elems = self.details_df[col_name].to_list()
+
+        return elems
 
 if __name__ == '__main__':
     rpt = ScalesimReport()
