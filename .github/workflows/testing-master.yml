@@ -15,7 +15,7 @@ jobs:
     - name: Install SCALE-Sim
       run: source venv/bin/activate && python setup.py install
     - name: Linting
-      run: source venv/bin/activate && python -m pylint sclaesim
+      run: source venv/bin/activate && python -m pylint sclaesim/
     - name: Test 1
       run: source venv/bin/activate && cd scalesim && python scale.py
 
