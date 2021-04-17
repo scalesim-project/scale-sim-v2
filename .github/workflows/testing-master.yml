@@ -1,11 +1,5 @@
 name: Testing Master
-on:
-  push: 
-    branches: 
-    - master
-    - '*'
-  pull_request:
-    branches: [master]
+on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest 
