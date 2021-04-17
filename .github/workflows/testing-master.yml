@@ -13,9 +13,9 @@ jobs:
     - name: Create Venv
       run: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && pip install pylint
     - name: Install SCALE-Sim
-      run: python setup.py install
+      run: source venv/bin/activate && python setup.py install
     - name: Linting
-      run: python -m pylint sclaesim
+      run: source venv/bin/activate && python -m pylint sclaesim
     - name: Test 1
-      run: cd scalesim && python scale.py
+      run: source venv/bin/activate && cd scalesim && python scale.py
 
