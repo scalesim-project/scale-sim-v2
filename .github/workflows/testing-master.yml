@@ -1,7 +1,9 @@
 name: Testing Master
 on:
   push: 
-    branches: [master, dev/moritz/test]
+    branches: 
+    - master
+    - '*'
   pull_request:
     branches: [master]
 jobs:
