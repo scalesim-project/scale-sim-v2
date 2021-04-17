@@ -1,0 +1,25 @@
+name: Testing Master
+on:
+  push: 
+    branches: [master, dev/moritz/test]
+  pull_request:
+    branches: [master]
+jobs:
+  build:
+    runs-on: ubuntu-latest 
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Update Ubuntu
+      run: sudo apt update
+    - name: Install Dependencies
+      run: sudo apt install python3 python3-venv
+    - name: Create Venv
+      run: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && pip install pylint
+    - name: Install SCALE-Sim
+      run: python setup.py install
+    - name: Linting
+      run: python -m pylint sclaesim
+    - name: Test 1
+      run: cd scalesim && python scale.py
+
