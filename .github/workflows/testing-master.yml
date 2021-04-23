@@ -1,0 +1,21 @@
+name: Testing Master
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest 
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Update Ubuntu
+      run: sudo apt update
+    - name: Install Dependencies
+      run: sudo apt install python3 python3-venv
+    - name: Create Venv
+      run: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && pip install pylint
+    - name: Install SCALE-Sim
+      run: source venv/bin/activate && python setup.py install
+    - name: Linting
+      run: source venv/bin/activate && python -m pylint --fail-under=7.5 scalesim/
+    - name: Test 1
+      run: source venv/bin/activate && cd scalesim && python scale.py
+
