@@ -352,7 +352,7 @@ class scale_config:
         else:
             return min(self.bandwidths)
 
-    #
+    # FIX ISSUE #14
     @staticmethod
     def get_default_conf_as_list():
         dummy_obj = scale_config()
