@@ -1,10 +1,11 @@
 import configparser as cp
-import numpy as np
 import os
+import sys
 
 from scalesim.memory_map import memory_map
 
-class scale_config():
+
+class scale_config:
     def __init__(self):
         self.run_name = "scale_run"
         # Anand: ISSUE #2. Patch
@@ -28,7 +29,9 @@ class scale_config():
 
         self.valid_df_list = ['os', 'ws', 'is']
 
+    #
     def read_conf_file(self, conf_file_in):
+
         me = 'scale_config.' + 'read_conf_file()'
 
         config = cp.ConfigParser()
@@ -63,12 +66,14 @@ class scale_config():
 
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
-            self.bandwidths = [int(x.strip()) for x in config.get(section, 'Bandwidth').strip().split(',')]
+            self.bandwidths = [int(x.strip())
+                               for x in config.get(section, 'Bandwidth').strip().split(',')]
 
             # Anand: ISSUE #12. Fix
-            assert self.memory_banks == len(self.bandwidths), 'In USER mode bandwidths for each memory bank is a required input'
+            assert self.memory_banks == len(self.bandwidths), \
+                'In USER mode bandwidths for each memory bank is a required input'
 
-        if not self.df in self.valid_df_list:
+        if self.df not in self.valid_df_list:
             print("WARNING: Invalid dataflow")
 
         # Anand: Added the memory bank check to avoid stray errors
@@ -76,22 +81,18 @@ class scale_config():
             section = 'memory_map_files'
             if not os.path.exists(config.get(section, 'MemoryMapIfmap')):
                 print("Ifmap file does not exist")
-                exit(-1)
-
-            #self.memory_map[0] = np.genfromtxt(config.get(section, 'MemoryMapIfmap'), delimiter=',')
+                sys.exit(-1)
             ifmap_mem_map_file = config.get(section, 'MemoryMapIfmap')
 
             if not os.path.exists(config.get(section, 'MemoryMapFilter')):
                 print("Filter file does not exist")
-                exit(-1)
-            #self.memory_map[1] = np.genfromtxt(config.get(section, 'MemoryMapFilter'), delimiter=',')
+                sys.exit(-1)
             filter_mem_map_file = config.get(section, 'MemoryMapFilter')
 
             if not os.path.exists(config.get(section, 'MemoryMapOfmap')):
                 print("Ofmap file does not exist")
-                exit(-1)
+                sys.exit(-1)
 
-            #self.memory_map[2] = np.genfromtxt(config.get(section, 'MemoryMapOfmap'), delimiter=',')
             ofmap_mem_map_file = config.get(section, 'MemoryMapOfmap')
 
             self.memory_map.set_params(num_banks=self.memory_banks,
@@ -104,14 +105,15 @@ class scale_config():
                                                     ofmap_offset=self.ofmap_offset)
 
         if config.has_section('network_presets'):  # Read network_presets
-           self.topofile = config.get(section, 'TopologyCsvLoc').split('"')[1]
+            self.topofile = config.get(section, 'TopologyCsvLoc').split('"')[1]
 
         self.valid_conf_flag = True
 
     #
     def update_from_list(self, conf_list):
         if not len(conf_list) > 11:
-            print("ERROR: scale_config.update_from_list: Incompatible number of elements in the list")
+            print("ERROR: scale_config.update_from_list: "
+                  "Incompatible number of elements in the list")
 
         self.run_name = conf_list[0]
         self.array_rows = int(conf_list[1])
@@ -123,24 +125,28 @@ class scale_config():
         self.filter_offset = int(conf_list[7])
         self.ofmap_offset = int(conf_list[8])
         self.df = conf_list[9]
-        self.bw_mode_string = str(conf_list[10])
-        
-        if self.bw_mode_string == "USER":
+        bw_mode_string = str(conf_list[10])
+
+        assert bw_mode_string in ['CALC', 'USER'], 'Invalid mode of operation'
+        if bw_mode_string == "USER":
             assert not len(conf_list) < 12, 'The user bandwidth needs to be provided'
             self.bandwidths = conf_list[11]
+            self.use_user_bandwidth = True
+        elif bw_mode_string == 'CALC':
+            self.use_user_bandwidth = False
 
         if len(conf_list) > 12:
             self.memory_banks = conf_list[12]
         else:
             self.memory_banks = 1
-        
-        if self.bw_mode_string == "USER":
+
+        if bw_mode_string == "USER":
             assert len(self.bandwidths) == self.memory_banks, 'Bandwidths and num banks dont match'
 
         if self.memory_banks > 1:
             assert not len(conf_list) < 14, 'Memory maps should be provided'
             self.memory_map = conf_list[13]
-            
+
             assert len(self.memory_map) == self.memory_banks, 'Each bank should have an unique map'
 
         if len(conf_list) == 15:
@@ -176,9 +182,6 @@ class scale_config():
         config.set(section, 'Dataflow', str(self.df))
         config.set(section, 'Bandwidth', ','.join([str(x) for x in self.bandwidths]))
         config.set(section, 'MemoryBanks', str(self.memory_banks))
-
-        # TODO: This is incorrect. Memory map is an object of mem map class
-        config.set(section, 'MemoryMap', str(self.memory_map))
 
         section = 'network_presets'
         config.add_section(section)
@@ -247,11 +250,6 @@ class scale_config():
             print(message)
             return
 
-        # Anand: ISSUE #2. Patch
-        #if len(self.bandwidths) > 0:
-        #    return True
-        #else:
-        #    return False
         return self.use_user_bandwidth
 
     #
@@ -279,7 +277,8 @@ class scale_config():
         out_list.append(str(self.topofile))
         out_list.append(str(self.memory_banks))
 
-        # TODO: This is incorrect
+        # Note: This will just show the memory location of the object.
+        #       Making this visible to the user is necessary so that no errors are committed
         out_list.append(str(self.memory_map))
 
         return out_list
@@ -350,6 +349,13 @@ class scale_config():
             me = 'scale_config.' + 'get_min_dram_bandwidth()'
             message = 'ERROR: ' + me + ': No user bandwidth provided'
             print(message)
-            return
         else:
             return min(self.bandwidths)
+
+    # FIX ISSUE #14
+    @staticmethod
+    def get_default_conf_as_list():
+        dummy_obj = scale_config()
+        dummy_obj.force_valid()
+        out_list = dummy_obj.get_conf_as_list()
+        return out_list
