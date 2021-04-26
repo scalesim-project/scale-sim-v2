@@ -1,5 +1,4 @@
 import configparser as cp
-import numpy as np
 import os
 
 from scalesim.memory_map import memory_map
@@ -67,9 +66,10 @@ class scale_config:
             self.bandwidths = [int(x.strip()) for x in config.get(section, 'Bandwidth').strip().split(',')]
 
             # Anand: ISSUE #12. Fix
-            assert self.memory_banks == len(self.bandwidths), 'In USER mode bandwidths for each memory bank is a required input'
+            assert self.memory_banks == len(self.bandwidths), \
+                'In USER mode bandwidths for each memory bank is a required input'
 
-        if not self.df in self.valid_df_list:
+        if self.df not in self.valid_df_list:
             print("WARNING: Invalid dataflow")
 
         # Anand: Added the memory bank check to avoid stray errors
@@ -248,18 +248,13 @@ class scale_config:
             print(message)
             return
 
-        # Anand: ISSUE #2. Patch
-        #if len(self.bandwidths) > 0:
-        #    return True
-        #else:
-        #    return False
         return self.use_user_bandwidth
 
     #
-    def get_conf_as_list(self, __force=False):
+    def get_conf_as_list(self):
         out_list = []
 
-        if not self.valid_conf_flag and not __force:
+        if not self.valid_conf_flag:
             print("ERROR: scale_config.get_conf_as_list: Configuration is not valid")
             return
 
@@ -359,5 +354,6 @@ class scale_config:
     @staticmethod
     def get_default_conf_as_list():
         dummy_obj = scale_config()
-        out_list = dummy_obj.get_conf_as_list(__force=True)
+        dummy_obj.force_valid()
+        out_list = dummy_obj.get_conf_as_list()
         return out_list
