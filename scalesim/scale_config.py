@@ -4,7 +4,8 @@ import os
 
 from scalesim.memory_map import memory_map
 
-class scale_config():
+
+class scale_config:
     def __init__(self):
         self.run_name = "scale_run"
         # Anand: ISSUE #2. Patch
@@ -255,10 +256,10 @@ class scale_config():
         return self.use_user_bandwidth
 
     #
-    def get_conf_as_list(self):
+    def get_conf_as_list(self, __force=False):
         out_list = []
 
-        if not self.valid_conf_flag:
+        if not self.valid_conf_flag and not __force:
             print("ERROR: scale_config.get_conf_as_list: Configuration is not valid")
             return
 
@@ -353,3 +354,10 @@ class scale_config():
             return
         else:
             return min(self.bandwidths)
+
+    #
+    @staticmethod
+    def get_default_conf_as_list():
+        dummy_obj = scale_config()
+        out_list = dummy_obj.get_conf_as_list(__force=True)
+        return out_list
