@@ -30,9 +30,9 @@ class topologies(object):
         self.topo_file_name = ''
         self.current_toponame = ''
         self.layer_name = layer_name
-        self.apppend_topo_arrays(layer_name, elems_list)
+        self.append_topo_arrays(layer_name, elems_list)
 
-        self.num_layer += 1
+        self.num_layers += 1
         self.topo_load_flag = True
 
     # Load the topology data from the file
