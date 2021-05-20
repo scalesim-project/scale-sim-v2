@@ -12,13 +12,18 @@ if __name__ == '__main__':
                         default="../configs/scale.cfg",
                         help="Path to the config file"
                         )
+    parser.add_argument('-p', metavar='log dir', type=str,
+                        default="../test_runs",
+                        help="Path to log dir"
+                        )
 
     args = parser.parse_args()
     topology = args.t
     config = args.c
+    logpath = args.p
 
     s = scalesim(save_disk_space=True, verbose=True,
               config=config,
               topology=topology
               )
-    s.run_scale(top_path='../test_runs')
+    s.run_scale(top_path=logpath)
