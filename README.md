@@ -62,7 +62,7 @@ The topology file is a *CSV* file which decribes the layers of the workload topo
 
 For other layer types, SCALE-Sim also accepts the workload desciption in M, N, K format of the equivalent GEMM operation as shown in the example below.
 
-![sample mnk topo](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/topo-mnk-file-example.png "sample mnk topo")
+![sample mnk topo](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/topo-mnk-file-example.png "sample mnk topo")
 
 The tool however expects the inputs to be in the convolution format by default. When using the mnk format for input, please specify using the  ```-i gemm``` switch, as shown in the example below.
 
@@ -71,7 +71,7 @@ The tool however expects the inputs to be in the convolution format by default. 
 ### Output
 
 Here is an example output dumped to stdout when running Yolo Tiny (whose configuration is in yolo_tiny.csv):
-![screen_out](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/output.png "std_out")
+![screen_out](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/output.png "std_out")
 
 Also, the simulator generates read write traces and summary logs at ```<run_dir>/../scalesim_outputs/```. The user can also provide a custom location using ```-p <custom_output_directory>``` when using `scalesim.py` file.
 There are three summary logs:
