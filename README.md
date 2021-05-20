@@ -62,7 +62,7 @@ The topology file is a *CSV* file which decribes the layers of the workload topo
 
 For other layer types, SCALE-Sim also accepts the workload desciption in M, N, K format of the equivalent GEMM operation as shown in the example below.
 
-![sample mnk topo](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/topo-mnk-file-example.png "sample mnk topo")
+![sample mnk topo](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/topo-mnk-file-example.png "sample mnk topo")
 
 The tool however expects the inputs to be in the convolution format by default. When using the mnk format for input, please specify using the  ```-i gemm``` switch, as shown in the example below.
 
