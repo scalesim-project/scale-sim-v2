@@ -9,7 +9,8 @@ class scalesim:
                  save_disk_space=False,
                  verbose=True,
                  config='',
-                 topology=''):
+                 topology='',
+                 input_type_gemm=False):
 
         # Data structures
         self.config = scale_config()
@@ -24,6 +25,7 @@ class scalesim:
         self.runner = sim()
 
         # Flags
+        self.read_gemm_inputs = input_type_gemm
         self.save_space = save_disk_space
         self.verbose_flag = verbose
         self.run_done_flag = False
@@ -64,7 +66,7 @@ class scalesim:
             self.config.set_topology_file(self.topology_file)
 
         # Parse the topology
-        self.topo.load_arrays(topofile=self.topology_file)
+        self.topo.load_arrays(topofile=self.topology_file, mnk_inputs=self.read_gemm_inputs)
 
         #num_layers = self.topo.get_num_layers()
         #self.config.scale_memory_maps(num_layers=num_layers)

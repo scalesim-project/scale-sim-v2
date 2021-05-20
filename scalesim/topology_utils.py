@@ -35,8 +35,50 @@ class topologies(object):
         self.num_layers += 1
         self.topo_load_flag = True
 
+    #
+    def load_arrays(self, topofile='', mnk_inputs=False):
+        if mnk_inputs:
+            self.load_arrays_gemm(topofile)
+        else:
+            self.load_arrays_conv(topofile)
+
+    #
+    def load_arrays_gemm(self, topofile=''):
+
+        self.topo_file_name = topofile.split('/')[-1]
+        name_arr = self.topo_file_name.split('.')
+        if len(name_arr) > 1:
+            self.current_topo_name = self.topo_file_name.split('.')[-2]
+        else:
+            self.current_topo_name = self.topo_file_name
+
+        f = open(topofile, 'r')
+        first = True
+
+        for row in f:
+            row = row.strip()
+            if first:
+                first = False
+                continue
+            elif row == '':
+                continue
+            else:
+                elems = row.split(',')[:-1]
+                assert len(elems) > 3, 'There should be at least 4 entries per row'
+                layer_name = elems[0].strip()
+                m = elems[1].strip()
+                n = elems[2].strip()
+                k = elems[3].strip()
+
+                # Entries: Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt, stride h, stride w
+                entries = [m, k, 1, k, 1, n, 1, 1]
+                self.append_topo_arrays(layer_name=layer_name, elems=entries)
+
+        self.num_layers = len(self.topo_arrays)
+        self.topo_load_flag = True
+
     # Load the topology data from the file
-    def load_arrays(self, topofile=""):
+    def load_arrays_conv(self, topofile=""):
         first = True
         self.topo_file_name = topofile.split('/')[-1]
         name_arr = self.topo_file_name.split('.')
