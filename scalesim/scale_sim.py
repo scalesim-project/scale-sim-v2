@@ -5,8 +5,7 @@ from scalesim.simulator import simulator as sim
 
 
 class scalesim:
-    """
-    The top level class for the SCALE-Sim v2 simulator
+    """The top level class for the SCALE-Sim v2 simulator
     Provides methods for setting parameters, running sims, and generating results
     """
     def __init__(self,
@@ -14,13 +13,12 @@ class scalesim:
                  verbose=True,
                  config='',
                  topology=''):
-        """
-        Initilize the class object
-        :return: None
+        """Initilize the class object
         :param save_disk_space: Boolean If set, cycle accurate traces will not be save (default: False)
         :param verbose: Boolean If set verbose output will be generated on the console (default: True)
         :param config: Path to the scalesim config file
         :param topology: Path to the scalesim topology file
+        :return: None
 
         """
 
@@ -48,10 +46,11 @@ class scalesim:
     def set_params(self,
                    config_filename='',
                    topology_filename='' ):
-        """
-        Set or update the paths to the scalesim input files
+        """Set or update the paths to the scalesim input files
+
         :param config_filename: Name and path to the config file
         :param topology_filename: Name and path to the topology file
+
         :return: None
         """
 
@@ -91,9 +90,10 @@ class scalesim:
 
     #
     def run_scale(self, top_path='.'):
-        """
-        Method to initialize the internal simulation objects and run scalesim once
+        """Method to initialize the internal simulation objects and run scalesim once
+
         :param top_path: Path to the directory where generated outputs will be dumped
+
         :return: None
         """
 
@@ -109,8 +109,8 @@ class scalesim:
         self.run_once()
 
     def run_once(self):
-        """
-        Method to run the simulation once with preset config and topology objects
+        """Method to run the simulation once with preset config and topology objects
+
         :return: None
         """
 
@@ -127,8 +127,8 @@ class scalesim:
 
     #
     def print_run_configs(self):
-        """
-        Method to print the banner of input parameters for verbose scalesim runs
+        """Method to print the banner of input parameters for verbose scalesim runs
+
         :return: None
         """
 
@@ -165,9 +165,8 @@ class scalesim:
 
     #
     def get_total_cycles(self):
-        """
-        Method to get the total cycles (stalls + compute) for the workload
-        once the simulation is completed
+        """Method to get the total cycles (stalls + compute) for the workload once the simulation is completed
+
         :return: Total cycles
         """
         me = 'scale.' + 'get_total_cycles()'

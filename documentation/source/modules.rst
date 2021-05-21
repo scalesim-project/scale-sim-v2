@@ -1,5 +1,3 @@
-.. _scalesim:
-
 scalesim
 ========
 
