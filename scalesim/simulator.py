@@ -6,7 +6,12 @@ from scalesim.single_layer_sim import single_layer_sim as layer_sim
 
 
 class simulator:
+    """Class which runs the simulations and manages generated data across various layers
+    """
     def __init__(self):
+        """
+        The constructor method for the class
+        """
         self.conf = cfg()
         self.topo = topo()
 
@@ -29,6 +34,18 @@ class simulator:
                    verbosity=True,
                    save_trace=True
                    ):
+        """
+        Method to set the run parameters including inputs and parameters for housekeeping.
+
+        :param config_obj: Object of scalesim.scale_config which is used to lookup the architecture and \
+        run parameters set by the user
+        :param topo_obj: Object of scalesim.topologies which is used to obtain the workload dimensions
+        :param top_path: Path where the generated logs and traces will be saved
+        :param verbosity: Flag to indicate verbosity of runs. If set to False, no output is generated on console
+        :param save_trace: Flag to indicate if cycle accurate traces needs to be saved
+
+        :return: None
+        """
 
         self.conf = config_obj
         self.topo = topo_obj
@@ -44,6 +61,16 @@ class simulator:
 
     #
     def run(self):
+        """
+        Method to run scalesim simulation for all layers.
+        This method first runs compute and memory simulations for each layer and gathers the required stats.
+        Once the simulation runs are done, it gathers the stats from single_layer_sim objects and calls
+        generate_report() method to create the report files.
+        If save_trace flag is set, then layer wise traces are saved as well.
+
+        :return: None
+        """
+
         assert self.params_set_flag, 'Simulator parameters are not set'
 
         # 1. Create the layer runners for each layer
@@ -69,7 +96,7 @@ class simulator:
         self.top_path = report_path
 
         # 2. Run each layer
-        # TODO: This is parallelizable
+        # Note: This is parallelizable
         for single_layer_obj in self.single_layer_sim_object_list:
 
             if self.verbose:
@@ -110,6 +137,13 @@ class simulator:
 
     #
     def generate_reports(self):
+        """
+        Method to generate the report files for scalesim run if the runs are already completed.
+        For each layer, this method collects the report data from single_layer_sim objects and then prints them out
+        into COMPUTE_REPORT.csv, BANDWIDTH_REPORT.csv, and DETAILED_ACCESS_REPORT.csv files.
+
+        :return: None
+        """
         assert self.all_layer_run_done, 'Layer runs are not done yet'
 
         compute_report_name = self.top_path + '/COMPUTE_REPORT.csv'
@@ -160,6 +194,13 @@ class simulator:
 
     #
     def get_total_cycles(self):
+        """
+        Method which aggregates the total cycles (both compute and stall) across all the layers for the given
+        workload.
+
+        :return:  Total runtime in cycles across all layers
+        :rtype: int
+        """
         assert self.all_layer_run_done, 'Layer runs are not done yet'
 
         total_cycles = 0

@@ -13,21 +13,16 @@ Feed Forward, and any layer that uses GEMMs.
 This is a refreshed version of the simulator with feature enhancements,
 restructured code to aid feature additions, and ease of distribution.
 
-Input and Output files
-======================
-
 .. toctree::
    :maxdepth: 2
-   :caption: File Description:
+   :caption: Input and Output files:
 
    config
    topology
 
-API documentation
-=================
 .. toctree::
    :maxdepth: 2
-   :caption: Modules:
+   :caption: API Documentation:
 
    modules
 
