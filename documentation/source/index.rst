@@ -7,11 +7,29 @@
 SCALE-Sim V2 Documentation
 ==========================
 
+Welcome to SCALE-Sim v2 documentation.
+SCALE Sim is a simulator for systolic array based accelerators for Convolution,
+Feed Forward, and any layer that uses GEMMs.
+This is a refreshed version of the simulator with feature enhancements,
+restructured code to aid feature additions, and ease of distribution.
+
+Input and Output files
+======================
+
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: File Description:
 
+   config
+   topology
 
+API documentation
+=================
+.. toctree::
+   :maxdepth: 2
+   :caption: Modules:
+
+   modules
 
 Indices and tables
 ==================

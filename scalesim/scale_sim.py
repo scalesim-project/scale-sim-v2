@@ -5,11 +5,24 @@ from scalesim.simulator import simulator as sim
 
 
 class scalesim:
+    """
+    The top level class for the SCALE-Sim v2 simulator
+    Provides methods for setting parameters, running sims, and generating results
+    """
     def __init__(self,
                  save_disk_space=False,
                  verbose=True,
                  config='',
                  topology=''):
+        """
+        Initilize the class object
+        :return: None
+        :param save_disk_space: Boolean If set, cycle accurate traces will not be save (default: False)
+        :param verbose: Boolean If set verbose output will be generated on the console (default: True)
+        :param config: Path to the scalesim config file
+        :param topology: Path to the scalesim topology file
+
+        """
 
         # Data structures
         self.config = scale_config()
@@ -35,6 +48,13 @@ class scalesim:
     def set_params(self,
                    config_filename='',
                    topology_filename='' ):
+        """
+        Set or update the paths to the scalesim input files
+        :param config_filename: Name and path to the config file
+        :param topology_filename: Name and path to the topology file
+        :return: None
+        """
+
         # First check if the user provided a valid topology file
         if not topology_filename == '':
             if not os.path.exists(topology_filename):
@@ -71,6 +91,11 @@ class scalesim:
 
     #
     def run_scale(self, top_path='.'):
+        """
+        Method to initialize the internal simulation objects and run scalesim once
+        :param top_path: Path to the directory where generated outputs will be dumped
+        :return: None
+        """
 
         self.top_path = top_path
         save_trace = not self.save_space
@@ -84,26 +109,17 @@ class scalesim:
         self.run_once()
 
     def run_once(self):
+        """
+        Method to run the simulation once with preset config and topology objects
+        :return: None
+        """
 
         if self.verbose_flag:
             self.print_run_configs()
 
-        #save_trace = not self.save_space
-
-        # TODO: Anand
-        # TODO: This release
-        # TODO: Call the class member functions
-        #self.runner.run_net(
-        #    config=self.config,
-        #    topo=self.topo,
-        #    top_path=self.top_path,
-        #    save_trace=save_trace,
-        #    verbosity=self.verbose_flag
-        #)
         self.runner.run()
         self.run_done_flag = True
 
-        #self.runner.generate_all_logs()
         self.logs_generated_flag = True
 
         if self.verbose_flag:
@@ -111,6 +127,11 @@ class scalesim:
 
     #
     def print_run_configs(self):
+        """
+        Method to print the banner of input parameters for verbose scalesim runs
+        :return: None
+        """
+
         df_string = "Output Stationary"
         df = self.config.get_dataflow()
 
@@ -144,6 +165,11 @@ class scalesim:
 
     #
     def get_total_cycles(self):
+        """
+        Method to get the total cycles (stalls + compute) for the workload
+        once the simulation is completed
+        :return: Total cycles
+        """
         me = 'scale.' + 'get_total_cycles()'
         if not self.run_done_flag:
             message = 'ERROR: ' + me
