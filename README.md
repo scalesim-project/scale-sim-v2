@@ -54,7 +54,7 @@ The following shows a sample config file:
 The config file has three sections. The "*general*" section specifies the run name, which is user specific. The "*architecture_presets*" section describes the parameter of the systolic array hardware to simulate.
 The "*run_preset*" section specifies if the simulator should run with user specified bandwidth, or should it calculate the optimal bandwidth for stall free execution.
 
-The detailed documentation for the config file could be found **here (TBD)**
+The detailed documentation for the config file could be found [here](https://scale-sim-project.readthedocs.io/en/latest/).
 
 ### Topology file
 
