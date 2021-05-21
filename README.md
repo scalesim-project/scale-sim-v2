@@ -3,7 +3,7 @@
 SCALE Sim is a simulator for systolic array based accelerators for Convolution, Feed Forward, and any layer that uses GEMMs.
 This is a refreshed version of the simulator with feature enhancements, restructured code to aid feature additions, and ease of distribution.
 
-![scalesim overview](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/scalesim-overview.png "sample config")
+![scalesim overview](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/scalesim-overview.png "scalesim overview")
 
 The previous version of the simulator can be found [here](https://github.com/ARM-software/SCALE-Sim).
 
