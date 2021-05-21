@@ -1,5 +1,7 @@
 # Systolic CNN AcceLErator Simulator (SCALE Sim) v2
 
+[![Documentation Status](https://readthedocs.org/projects/scale-sim-project/badge/?version=latest)](https://scale-sim-project.readthedocs.io/en/latest/?badge=latest)
+
 SCALE Sim is a simulator for systolic array based accelerators for Convolution, Feed Forward, and any layer that uses GEMMs.
 This is a refreshed version of the simulator with feature enhancements, restructured code to aid feature additions, and ease of distribution.
 
