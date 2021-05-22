@@ -16,14 +16,24 @@ if __name__ == '__main__':
                         default="../test_runs",
                         help="Path to log dir"
                         )
+    parser.add_argument('-i', metavar='input type', type=str,
+                        default="conv",
+                        help="Type of input topology, gemm: MNK, conv: conv"
+                        )
 
     args = parser.parse_args()
     topology = args.t
     config = args.c
     logpath = args.p
+    inp_type = args.i
+
+    gemm_input = False
+    if inp_type == 'gemm':
+        gemm_input = True
 
     s = scalesim(save_disk_space=True, verbose=True,
-              config=config,
-              topology=topology
-              )
+                 config=config,
+                 topology=topology,
+                 input_type_gemm=gemm_input
+                 )
     s.run_scale(top_path=logpath)
