@@ -9,7 +9,7 @@ email, or any other method with the owners of this repository before making a ch
 
 1. Ensure any install or build dependencies are removed before the end of the layer when doing a
    build. Please do not commit temporary files to the repo.
-2. Update the documentation in the doc/-folder with details of changes to the interface, this includes new environment
+2. Update the documentation in the documentation/-folder with details of changes to the interface, this includes new environment
    variables, exposed ports, useful file locations and container parameters.
 3. Add a tutorial how to use your new feature in form of a jupyter notebook to the documentation, as well. This makes sure that others can use your code!
 4. Add test cases to our unit test system for your contribution.
