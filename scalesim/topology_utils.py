@@ -63,7 +63,7 @@ class topologies(object):
             elif row == '':
                 continue
             else:
-                elems = row.split(',')[:-1]
+                elems = row.split(',')
                 assert len(elems) > 3, 'There should be at least 4 entries per row'
                 layer_name = elems[0].strip()
                 m = elems[1].strip()
