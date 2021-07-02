@@ -153,7 +153,7 @@ class topologies(object):
     def append_topo_arrays(self, layer_name, elems):
         entry = [layer_name]
 
-        for i in range(1, len(elems)):
+        for i in range(0, len(elems)):
             val = int(str(elems[i]).strip())
             entry.append(val)
             if i == 7 and len(elems) < 9:
