@@ -71,7 +71,7 @@ class topologies(object):
                 k = elems[3].strip()
 
                 # Entries: Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt, stride h, stride w
-                entries = [m, k, 1, k, 1, n, 1, 1]
+                entries = [layer_name,m, k, 1, k, 1, n, 1, 1]
                 self.append_topo_arrays(layer_name=layer_name, elems=entries)
 
         self.num_layers = len(self.topo_arrays)
