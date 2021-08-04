@@ -163,18 +163,17 @@ class operand_matrix(object):
         i_col = ofmap_col * c_stride
 
         # Starting address of the convolution window
-        window_addr = i_row * ifmap_cols * channel + i_col * channel
+        window_addr = i_row * ifmap_cols + i_col
 
         # Calculate the row and col in the conv window
         c_row = int(math.floor(j / (filter_col * channel)))
         k = int(j % (filter_col * channel))
         c_col = int(math.floor(k / channel))
-        c_ch = int(k % channel)
+        
         if c_row + i_row >= self.ifmap_rows or c_col + i_col >= self.ifmap_cols:  # for padded address
             ifmap_px_addr = -1
         else:
-            internal_address = c_row * (ifmap_cols * channel) + c_col * channel + c_ch  # Address inside conv window
-            ifmap_px_addr = internal_address + window_addr + offset  # Global address
+            ifmap_px_addr = window_addr + offset  # Global address
         return ifmap_px_addr
 
     # creates the ofmap operand
