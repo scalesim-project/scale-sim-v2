@@ -154,6 +154,11 @@ class ReadBufferEstimateBw:
                         self.prefetch_buffer_set_start_id += self.num_sets_prefetch_buffer
                         self.prefetch_buffer_set_end_id += self.num_sets_prefetch_buffer
 
+                    i = self.read_buffer_set_start_id
+                    for j in range(self.num_sets_prefetch_buffer):
+                        self.list_of_sets[i+j] = None
+
+
                     self.read_buffer_set_start_id += self.num_sets_prefetch_buffer
                     self.read_buffer_set_end_id += self.num_sets_prefetch_buffer
                     self.last_prefetch_start_cycle = self.last_prefetch_end_cycle +1
