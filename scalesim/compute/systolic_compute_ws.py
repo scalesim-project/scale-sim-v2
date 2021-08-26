@@ -181,7 +181,9 @@ class systolic_compute_ws:
         inter_fold_gap_prefix = self.arr_row
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_row)) * -1
 
-        inter_fold_gap_suffix = self.arr_col - 1
+        inter_fold_gap_suffix = self.arr_row + self.arr_col - 2
+        #The last input needs self.arr_row - 1 cycles to reach the last column of PE array and then self.arr_col - 1 cycles to reduce along the last column.
+
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_row)) * -1
 
         for fc in range(self.col_fold):
