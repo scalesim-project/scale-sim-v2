@@ -153,7 +153,8 @@ class ReadBufferEstimateBw:
                         self.prefetch()
                         self.prefetch_buffer_set_start_id += self.num_sets_prefetch_buffer
                         self.prefetch_buffer_set_end_id += self.num_sets_prefetch_buffer
-
+                    
+                    #Solving memory leak by discarding sets that are no longer in use
                     i = self.read_buffer_set_start_id
                     for j in range(self.num_sets_prefetch_buffer):
                         self.list_of_sets[i+j] = None
