@@ -174,6 +174,8 @@ class operand_matrix(object):
             ifmap_px_addr = -1
         else:
             ifmap_px_addr = window_addr + offset  # Global address
+            #There should be only 'ifmap_height*ifmap_width' unique addresses in ifmap operand matrix because in 2D convolution same input image is used across different filter channels to extract different features of the same image.
+            #so ifmap_px_addr should be independent of the 'channel' variable. 'internal_address' variable was also removed because it contained terms dependent on the 'channel' variable.
         return ifmap_px_addr
 
     # creates the ofmap operand
