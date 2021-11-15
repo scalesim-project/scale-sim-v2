@@ -5,7 +5,7 @@ This directory contains sample RTL code for implemeting basic traditional systol
 Following items are included: 
 
  - traditional_systolic_array: Paramterizable RTL for systolic array with 8bit words
- - RASA-baseline-sytolic: MAC unit with BFloat 16 word operants
+ - BF16_processing_element : MAC unit with BFloat 16 word operants
 
 Authors: 
 1) Ananda Samajdar
