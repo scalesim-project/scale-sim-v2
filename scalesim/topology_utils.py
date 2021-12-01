@@ -70,8 +70,9 @@ class topologies(object):
                 n = elems[2].strip()
                 k = elems[3].strip()
 
-                # Entries: Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt, stride h, stride w
-                entries = [m, k, 1, k, 1, n, 1, 1]
+                # Entries: layer name, Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt, stride h, stride w
+                entries = [layer_name, m, k, 1, k, 1, n, 1, 1]
+                #entries are later iterated from index 1. Index 0 is used to store layer name in convolution mode. So, to rectify assignment of M, N and K in GEMM mode, layer name has been added at index 0 of entries. 
                 self.append_topo_arrays(layer_name=layer_name, elems=entries)
 
         self.num_layers = len(self.topo_arrays)
