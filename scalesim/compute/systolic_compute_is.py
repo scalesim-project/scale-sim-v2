@@ -292,7 +292,7 @@ class systolic_compute_is:
 
                 this_fold_demand = self.ofmap_op_mat[col_start_id: col_end_idx, :]
                 this_fold_demand = np.transpose(this_fold_demand)
-                self.ofmap_writes = this_fold_demand.shape[0] * this_fold_demand.shape[1]
+                self.ofmap_writes += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 
                 # Adding null requests when there is under utilization ie. no mapping along a few rows or cols
                 if col_delta > 0:
