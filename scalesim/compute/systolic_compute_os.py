@@ -34,6 +34,13 @@ class systolic_compute_os:
         self.ofmap_demand_matrix = np.zeros((1,1))
         self.filter_demand_matrix = np.zeros((1,1))
 
+        #lists to be used as leaf nodes for binary tree concatenation
+        self.ifmap_demand_nodes = []
+        self.ofmap_demand_nodes = []
+        self.filter_demand_nodes = []
+        self.ifmap_prefetch_nodes = []
+        self.filter_prefetch_nodes = []
+
         # Generated metrics
         self.ifmap_reads = 0
         self.filter_reads = 0
@@ -106,10 +113,9 @@ class systolic_compute_os:
                 null_req_mat = np.ones((self.T, delta)) * -1
                 this_fold_prefetch = np.concatenate((this_fold_prefetch, null_req_mat), axis=1)
 
-            if fr == 0:
-                self.ifmap_prefetch_matrix = this_fold_prefetch
-            else:
-                self.ifmap_prefetch_matrix = np.concatenate((self.ifmap_prefetch_matrix, this_fold_prefetch), axis=0)
+            self.ifmap_prefetch_nodes.append(this_fold_prefetch)
+
+        self.ifmap_prefetch_matrix=self.binary_concatenate(self.ifmap_prefetch_nodes)
 
         # Fixing ISSUE #15, #16
         # Roll out the matrices along the diagonal to account for temporal locality when there is a skew in demand
@@ -161,10 +167,9 @@ class systolic_compute_os:
                 null_req_mat = np.ones((self.T, delta)) * -1
                 this_fold_prefetch = np.concatenate((this_fold_prefetch, null_req_mat), axis=1)
 
-            if fc == 0:
-                self.filter_prefetch_matrix = this_fold_prefetch
-            else:
-                self.filter_prefetch_matrix = np.concatenate((self.filter_prefetch_matrix, this_fold_prefetch), axis=0)
+            self.filter_prefetch_nodes.append(this_fold_prefetch)
+
+        self.filter_prefetch_matrix=self.binary_concatenate(self.filter_prefetch_nodes)
 
         # Fixing ISSUE #15, #16
         # Roll out the matrices along the diagonal to account for temporal locality when there is a skew in demand
@@ -252,14 +257,13 @@ class systolic_compute_os:
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
 
-                if fr == 0 and fc == 0:
-                    self.ifmap_demand_matrix = this_fold_demand
-                else:
-                    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
+                self.ifmap_demand_nodes.append(this_fold_demand)
 
                 pbar.update(1)
-
         pbar.close()
+
+        self.ifmap_demand_matrix=self.binary_concatenate(self.ifmap_demand_nodes)
+
         # TODO: cleanup
         # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
         #self.ifmap_demand_matrix = skew_matrix(self.ifmap_demand_matrix)
@@ -301,10 +305,14 @@ class systolic_compute_os:
                     self.filter_demand_matrix = this_fold_demand
                 else:
                     self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
-
+                
+                self.filter_demand_nodes.append(this_fold_demand)
                 pbar.update(1)
 
         pbar.close()
+
+        self.filter_demand_matrix=self.binary_concatenate(self.filter_demand_nodes)
+
         # TODO: Cleanup
         # Add skew to the Filter demand matrix to reflect systolic pipeline fill
         #self.filter_demand_matrix = skew_matrix(self.filter_demand_matrix)
@@ -369,14 +377,14 @@ class systolic_compute_os:
                 # Add skew to the OFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
 
-                if fr == 0 and fc == 0:
-                    self.ofmap_demand_matrix = this_fold_demand
-                else:
-                    self.ofmap_demand_matrix = np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
+                self.ofmap_demand_nodes.append(this_fold_demand)
 
                 pbar.update(1)
 
         pbar.close()
+
+        self.ofmap_demand_matrix=self.binary_concatenate(self.ofmap_demand_nodes)
+
         # TODO: cleanup
         # Add skew to the OFMAP demand matrix to reflect systolic pipeline fill
         #self.ofmap_demand_matrix = skew_matrix(self.ofmap_demand_matrix)
@@ -466,6 +474,15 @@ class systolic_compute_os:
     def get_ofmap_requests(self):
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ofmap_writes
+
+    #to concatenate matrices in a binary tree manner, starting from leaves and ending at the root node
+    def binary_concatenate(self,list_of_nodes):
+        n = len(list_of_nodes)
+        for i in range(math.ceil(math.log(n,2))):
+            for j in range(math.ceil(n/(2**(i+1)))):
+                if ((2**(i+1))*j+2**i)<n:
+                    list_of_nodes[(2**(i+1))*j] = np.concatenate((list_of_nodes[(2**(i+1))*j],list_of_nodes[(2**(i+1))*j+2**i]),axis=0)
+        return(list_of_nodes[0])
 
 #
 def skew_matrix(input_matrix_np):
