@@ -26,7 +26,7 @@ jobs:
       # to test the functionality of weight stationary dataflow
     - name: Run script file
       run: |
-         chmod +x ./test/script/function_test.sh
-         ./test/script/function_test.sh
+         chmod +x ./test/scripts/function_test.sh
+         ./test/scripts/function_test.sh
       shell: bash
 
