@@ -5,7 +5,7 @@ path="./"
 sed -i "s/run_name = scale_example_run_32x32_os/run_name = scale_example_run_32x32_ws/" $path/configs/scale.cfg
 sed -i "s/Dataflow : os/Dataflow : ws/" $path/configs/scale.cfg
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
-sed -i "s/verbose=True/verbose=False/" $path/scalesim/scale.py
+# sed -i "s/verbose=True/verbose=False/" $path/scalesim/scale.py
 
 source $path/venv/bin/activate
 
@@ -23,30 +23,30 @@ CMP9=$(cmp $path/../test_runs/scale_example_run_32x32_ws/layer0/OFMAP_SRAM_TRACE
 
 
 if [ "$CMP1" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP2" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP3" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP4" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP5" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP6" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP7" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP8" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 elif [ "$CMP9" != "" ]; then
-    echo "Output does not match!" > logfile.log
+    echo "Output does not match!" 
     exit 125
 fi
