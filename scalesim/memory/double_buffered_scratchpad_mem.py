@@ -21,9 +21,9 @@ class double_buffered_scratchpad:
 
         self.verbose = True
 
-        self.ifmap_trace_matrix = np.zeros((1,1), dtype=np.int)
-        self.filter_trace_matrix = np.zeros((1,1), dtype=np.int)
-        self.ofmap_trace_matrix = np.zeros((1,1), dtype=np.int)
+        self.ifmap_trace_matrix = np.zeros((1,1), dtype=int)
+        self.filter_trace_matrix = np.zeros((1,1), dtype=int)
+        self.ofmap_trace_matrix = np.zeros((1,1), dtype=int)
 
         # Metrics to gather for generating run reports
         self.total_cycles = 0

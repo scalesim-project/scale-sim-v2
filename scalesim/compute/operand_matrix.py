@@ -30,9 +30,9 @@ class operand_matrix(object):
         self.matrix_offset_arr = [0, 10000000, 20000000]
 
         # Address matrices
-        self.ifmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.conv_window_size), dtype=np.int)
-        self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype=np.int)
-        self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=np.int)
+        self.ifmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.conv_window_size), dtype=int)
+        self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype=int)
+        self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=int)
 
         # Flags
         self.params_set_flag = False
