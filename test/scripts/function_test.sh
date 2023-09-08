@@ -10,51 +10,51 @@ source $path/venv/bin/activate
 
 python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/conv_nets/alexnet_part.csv -p $path/test_runs
 
-CMP1=$(cmp $path/test_runs/scale_example_run_32x32_ws/BANDWIDTH_REPORT.csv $path/test/golden_trace/BANDWIDTH_REPORT.csv)
-CMP2=$(cmp $path/test_runs/scale_example_run_32x32_ws/COMPUTE_REPORT.csv $path/test/golden_trace/COMPUTE_REPORT.csv)
-CMP3=$(cmp $path/test_runs/scale_example_run_32x32_ws/DETAILED_ACCESS_REPORT.csv $path/test/golden_trace/DETAILED_ACCESS_REPORT.csv)
-CMP4=$(cmp $path/test_runs/scale_example_run_32x32_ws/layer0/FILTER_DRAM_TRACE.csv $path/test/golden_trace/layer0/FILTER_DRAM_TRACE.csv)
-CMP5=$(cmp $path/test_runs/scale_example_run_32x32_ws/layer0/FILTER_SRAM_TRACE.csv $path/test/golden_trace/layer0/FILTER_SRAM_TRACE.csv)
-CMP6=$(cmp $path/test_runs/scale_example_run_32x32_ws/layer0/IFMAP_DRAM_TRACE.csv $path/test/golden_trace/layer0/IFMAP_DRAM_TRACE.csv)
-CMP7=$(cmp $path/test_runs/scale_example_run_32x32_ws/layer0/IFMAP_SRAM_TRACE.csv $path/test/golden_trace/layer0/IFMAP_SRAM_TRACE.csv)
-CMP8=$(cmp $path/test_runs/scale_example_run_32x32_ws/layer0/OFMAP_DRAM_TRACE.csv $path/test/golden_trace/layer0/OFMAP_DRAM_TRACE.csv)
-CMP9=$(cmp $path/test_runs/scale_example_run_32x32_ws/layer0/OFMAP_SRAM_TRACE.csv $path/test/golden_trace/layer0/OFMAP_SRAM_TRACE.csv)
+DIFF1=$(diff $path/test_runs/scale_example_run_32x32_ws/BANDWIDTH_REPORT.csv $path/test/golden_trace/BANDWIDTH_REPORT.csv)
+DIFF2=$(diff $path/test_runs/scale_example_run_32x32_ws/COMPUTE_REPORT.csv $path/test/golden_trace/COMPUTE_REPORT.csv)
+DIFF3=$(diff $path/test_runs/scale_example_run_32x32_ws/DETAILED_ACCESS_REPORT.csv $path/test/golden_trace/DETAILED_ACCESS_REPORT.csv)
+DIFF4=$(diff $path/test_runs/scale_example_run_32x32_ws/layer0/FILTER_DRAM_TRACE.csv $path/test/golden_trace/layer0/FILTER_DRAM_TRACE.csv)
+DIFF5=$(diff $path/test_runs/scale_example_run_32x32_ws/layer0/FILTER_SRAM_TRACE.csv $path/test/golden_trace/layer0/FILTER_SRAM_TRACE.csv)
+DIFF6=$(diff $path/test_runs/scale_example_run_32x32_ws/layer0/IFMAP_DRAM_TRACE.csv $path/test/golden_trace/layer0/IFMAP_DRAM_TRACE.csv)
+DIFF7=$(diff $path/test_runs/scale_example_run_32x32_ws/layer0/IFMAP_SRAM_TRACE.csv $path/test/golden_trace/layer0/IFMAP_SRAM_TRACE.csv)
+DIFF8=$(diff $path/test_runs/scale_example_run_32x32_ws/layer0/OFMAP_DRAM_TRACE.csv $path/test/golden_trace/layer0/OFMAP_DRAM_TRACE.csv)
+DIFF9=$(diff $path/test_runs/scale_example_run_32x32_ws/layer0/OFMAP_SRAM_TRACE.csv $path/test/golden_trace/layer0/OFMAP_SRAM_TRACE.csv)
 
 
-if [ "$CMP1" != "" ]; then
+if [ "$DIFF1" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP1"
+    echo "$DIFF1"
     exit 1
-elif [ "$CMP2" != "" ]; then
+elif [ "$DIFF2" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP2"
+    echo "$DIFF2"
     exit 1
-elif [ "$CMP3" != "" ]; then
+elif [ "$DIFF3" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP3"    
+    echo "$DIFF3"    
     exit 1
-elif [ "$CMP4" != "" ]; then
+elif [ "$DIFF4" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP4"
+    echo "$DIFF4"
     exit 1
-elif [ "$CMP5" != "" ]; then
+elif [ "$DIFF5" != "" ]; then
     echo "Output does not match!"
-    echo "$CMP5" 
+    echo "$DIFF5" 
     exit 1
-elif [ "$CMP6" != "" ]; then
+elif [ "$DIFF6" != "" ]; then
     echo "Output does not match!"
-    echo "$CMP6" 
+    echo "$DIFF6" 
     exit 1
-elif [ "$CMP7" != "" ]; then
+elif [ "$DIFF7" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP7"
+    echo "$DIFF7"
     exit 1
-elif [ "$CMP8" != "" ]; then
+elif [ "$DIFF8" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP8"
+    echo "$DIFF8"
     exit 1
-elif [ "$CMP9" != "" ]; then
+elif [ "$DIFF9" != "" ]; then
     echo "Output does not match!" 
-    echo "$CMP9"
+    echo "$DIFF9"
     exit 1
 fi
