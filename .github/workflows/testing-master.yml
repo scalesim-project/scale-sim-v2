@@ -26,6 +26,7 @@ jobs:
       # to test the functionality of weight stationary dataflow
     - name: Run script file
       run: |
+         python3 -m venv venv2 && source venv2/bin/activate && pip install -r requirements.txt
          chmod +x ./test/scripts/function_test.sh
          export PYTHONPATH=. && ./test/scripts/function_test.sh
       shell: bash

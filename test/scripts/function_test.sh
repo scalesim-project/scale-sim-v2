@@ -6,7 +6,7 @@ sed -i "s/run_name = scale_example_run_32x32_os/run_name = scale_example_run_32x
 sed -i "s/Dataflow : os/Dataflow : ws/" $path/configs/scale.cfg
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 
-source $path/venv/bin/activate
+source $path/venv2/bin/activate
 
 python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/conv_nets/alexnet_part.csv -p $path/test_runs
 
