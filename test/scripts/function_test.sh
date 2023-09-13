@@ -6,10 +6,8 @@ sed -i "s/run_name = scale_example_run_32x32_os/run_name = scale_example_run_32x
 sed -i "s/Dataflow : os/Dataflow : ws/" $path/configs/scale.cfg
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 
-echo $VIRTUAL_ENV
-source $path/venv2/bin/activate
+source venv2/bin/activate
 export PYTHONPATH=.
-
 python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/conv_nets/alexnet_part.csv -p $path/test_runs
 
 DIFF1=$(diff $path/test_runs/scale_example_run_32x32_ws/BANDWIDTH_REPORT.csv $path/test/golden_trace/BANDWIDTH_REPORT.csv)
@@ -49,14 +47,14 @@ elif [ "$DIFF6" != "" ]; then
     exit 1
 elif [ "$DIFF7" != "" ]; then
     echo "Output does not match!" 
-    echo "$DIFF7"
+    echo "$DIFF7" 
     exit 1
 elif [ "$DIFF8" != "" ]; then
     echo "Output does not match!" 
-    echo "$DIFF8"
+    echo "$DIFF8" 
     exit 1
 elif [ "$DIFF9" != "" ]; then
     echo "Output does not match!" 
-    echo "$DIFF9"
+    echo "$DIFF9" 
     exit 1
 fi
