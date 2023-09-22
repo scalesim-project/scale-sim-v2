@@ -182,7 +182,7 @@ class systolic_compute_ws:
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_row)) * -1
 
         inter_fold_gap_suffix = self.arr_col - 1
-        
+
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_row)) * -1
 
         ifmap_demand_matrix_list = []
