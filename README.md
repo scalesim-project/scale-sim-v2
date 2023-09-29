@@ -145,6 +145,9 @@ Main devs:
 * Ananda Samajdar (@AnandS09)
 * Jan Moritz Joseph (@jmjos)
 
+Contributers:
+* Ritik Raj (@ritikraj7)
+
 Maintainers and Advisors
 * Yuhao Zhu
 * Paul Whatmough
