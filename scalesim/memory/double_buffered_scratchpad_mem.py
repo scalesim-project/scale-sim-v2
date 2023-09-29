@@ -158,7 +158,7 @@ class double_buffered_scratchpad:
         self.stall_cycles = 0
 
         ifmap_hit_latency = self.ifmap_buf.get_hit_latency()
-        filter_hit_latency = self.ifmap_buf.get_hit_latency()
+        filter_hit_latency = self.filter_buf.get_hit_latency()
 
         ifmap_serviced_cycles = []
         filter_serviced_cycles = []
