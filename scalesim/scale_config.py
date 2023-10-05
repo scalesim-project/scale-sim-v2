@@ -2,8 +2,6 @@ import configparser as cp
 import os
 import sys
 
-from scalesim.memory_map import memory_map
-
 
 class scale_config:
     def __init__(self):
@@ -22,9 +20,6 @@ class scale_config:
         self.ofmap_offset = 20000000
         self.topofile = ""
         self.bandwidths = []
-        self.memory_banks = 1
-        self.memory_map = memory_map()
-
         self.valid_conf_flag = False
 
         self.valid_df_list = ['os', 'ws', 'is']
@@ -62,47 +57,14 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
-        self.memory_banks = int(config.get(section, 'MemoryBanks').strip())
 
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
             self.bandwidths = [int(x.strip())
                                for x in config.get(section, 'Bandwidth').strip().split(',')]
 
-            # Anand: ISSUE #12. Fix
-            assert self.memory_banks == len(self.bandwidths), \
-                'In USER mode bandwidths for each memory bank is a required input'
-
         if self.df not in self.valid_df_list:
             print("WARNING: Invalid dataflow")
-
-        # Anand: Added the memory bank check to avoid stray errors
-        if self.memory_banks > 1:
-            section = 'memory_map_files'
-            if not os.path.exists(config.get(section, 'MemoryMapIfmap')):
-                print("Ifmap file does not exist")
-                sys.exit(-1)
-            ifmap_mem_map_file = config.get(section, 'MemoryMapIfmap')
-
-            if not os.path.exists(config.get(section, 'MemoryMapFilter')):
-                print("Filter file does not exist")
-                sys.exit(-1)
-            filter_mem_map_file = config.get(section, 'MemoryMapFilter')
-
-            if not os.path.exists(config.get(section, 'MemoryMapOfmap')):
-                print("Ofmap file does not exist")
-                sys.exit(-1)
-
-            ofmap_mem_map_file = config.get(section, 'MemoryMapOfmap')
-
-            self.memory_map.set_params(num_banks=self.memory_banks,
-                                       ifmap_map_file=ifmap_mem_map_file,
-                                       filter_map_file=filter_mem_map_file,
-                                       ofmap_map_file=ofmap_mem_map_file
-                                       )
-        elif self.memory_banks == 1:
-            self.memory_map.set_single_bank_params( filter_offset=self.filter_offset,
-                                                    ofmap_offset=self.ofmap_offset)
 
         if config.has_section('network_presets'):  # Read network_presets
             self.topofile = config.get(section, 'TopologyCsvLoc').split('"')[1]
@@ -134,20 +96,6 @@ class scale_config:
             self.use_user_bandwidth = True
         elif bw_mode_string == 'CALC':
             self.use_user_bandwidth = False
-
-        if len(conf_list) > 12:
-            self.memory_banks = conf_list[12]
-        else:
-            self.memory_banks = 1
-
-        if bw_mode_string == "USER":
-            assert len(self.bandwidths) == self.memory_banks, 'Bandwidths and num banks dont match'
-
-        if self.memory_banks > 1:
-            assert not len(conf_list) < 14, 'Memory maps should be provided'
-            self.memory_map = conf_list[13]
-
-            assert len(self.memory_map) == self.memory_banks, 'Each bank should have an unique map'
 
         if len(conf_list) == 15:
             self.topofile = conf_list[14]
@@ -181,7 +129,6 @@ class scale_config:
 
         config.set(section, 'Dataflow', str(self.df))
         config.set(section, 'Bandwidth', ','.join([str(x) for x in self.bandwidths]))
-        config.set(section, 'MemoryBanks', str(self.memory_banks))
 
         section = 'network_presets'
         config.add_section(section)
@@ -191,20 +138,6 @@ class scale_config:
         with open(conf_file_out, 'w') as configfile:
             config.write(configfile)
 
-    #
-    def scale_memory_maps(self, num_layers=1):
-        me = 'scale_config.' + 'scale_memory_maps'
-
-        if not self.valid_conf_flag:
-            message = 'ERROR: ' + me
-            message += ': Config needs to be read/set first'
-            print(message)
-            return
-
-        if self.memory_banks == 1:
-            self.memory_map.scale_single_bank_params(num_layers=num_layers)
-
-    #
     def set_arr_dims(self, rows=1, cols=1):
         self.array_rows = rows
         self.array_cols = cols
@@ -275,12 +208,7 @@ class scale_config:
 
         out_list.append(str(self.df))
         out_list.append(str(self.topofile))
-        out_list.append(str(self.memory_banks))
-
-        # Note: This will just show the memory location of the object.
-        #       Making this visible to the user is necessary so that no errors are committed
-        out_list.append(str(self.memory_map))
-
+       
         return out_list
 
     def get_run_name(self):
@@ -331,14 +259,6 @@ class scale_config:
     def get_bandwidths_as_string(self):
         if self.valid_conf_flag:
             return ','.join([str(x) for x in self.bandwidths])
-
-    def get_mem_banks(self):
-        if self.valid_conf_flag:
-            return self.memory_banks
-
-    def get_mem_map_obj(self):
-        if self.valid_conf_flag:
-            return self.memory_map
 
     def get_bandwidths_as_list(self):
         if self.valid_conf_flag:
