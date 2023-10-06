@@ -1,7 +1,6 @@
 import math
 import numpy as np
 from tqdm import tqdm
-from time import time
 
 from scalesim.topology_utils import topologies as topoutil
 from scalesim.scale_config import scale_config as cfg
@@ -139,8 +138,6 @@ class operand_matrix(object):
             print(message)
             return -1
 
-        print("Creating ifmap matrix")
-        pre_time = time()
         row_indices = np.arange(self.batch_size * self.ofmap_px_per_filt)
         col_indices = np.arange(self.conv_window_size)
         # Create 2D index arrays using meshgrid
@@ -148,7 +145,6 @@ class operand_matrix(object):
 
         # Call calc_ifmap_elem_addr_numpy with 2D index arrays
         self.ifmap_addr_matrix = self.calc_ifmap_elem_addr(i, j)
-        print("Done", time() - pre_time)
         return 0
 
     # logic to translate ifmap into matrix fed into systolic array MACs
@@ -185,12 +181,11 @@ class operand_matrix(object):
             message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
             print(message)
             return -1
-        print("Creating ofmap matrix")
-        pre_time = time()
+
         row_indices = np.expand_dims(np.arange(self.ofmap_px_per_filt), axis=1)
         col_indices = np.arange(self.num_filters)
         self.ofmap_addr_matrix = self.calc_ofmap_elem_addr(row_indices, col_indices)
-        print("Done", time() - pre_time)
+
         return 0
 
     # logic to translate ofmap into matrix resulting systolic array MACs
@@ -209,12 +204,10 @@ class operand_matrix(object):
             message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
             print(message)
             return -1
-        print("Creating filter matrix")
-        pre_time = time()
+
         row_indices = np.expand_dims(np.arange(self.conv_window_size), axis=1)
         col_indices = np.arange(self.num_filters)
         self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
-        print("Done", time() - pre_time)
 
         return 0
 
