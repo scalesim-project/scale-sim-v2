@@ -138,15 +138,19 @@ class operand_matrix(object):
             print(message)
             return -1
 
-        # for row_idx in tqdm(range(self.batch_size*self.ofmap_px_per_filt)):
-        for row_idx in range(self.batch_size*self.ofmap_px_per_filt):
-            for col_idx in range(self.conv_window_size):
-                self.ifmap_addr_matrix[row_idx][col_idx] = self.calc_ifmap_elem_addr(i=row_idx, j=col_idx)
+        row_indices = np.arange(self.batch_size * self.ofmap_px_per_filt)
+        col_indices = np.arange(self.conv_window_size)
+        # Create 2D index arrays using meshgrid
+        i, j = np.meshgrid(row_indices, col_indices, indexing='ij')
+
+        # Call calc_ifmap_elem_addr_numpy with 2D index arrays
+        self.ifmap_addr_matrix = self.calc_ifmap_elem_addr(i, j)
         return 0
 
     # logic to translate ifmap into matrix fed into systolic array MACs
     def calc_ifmap_elem_addr(self, i, j):
         offset = self.ifmap_offset
+        ifmap_rows = self.ifmap_rows
         ifmap_cols = self.ifmap_cols
         filter_col = self.filter_cols
         r_stride = self.row_stride
@@ -154,27 +158,19 @@ class operand_matrix(object):
         Ew = self.ofmap_cols
         channel = self.num_input_channels
 
-        # Calculate the row and col in the Eh X Ew mat
-        ofmap_row = int(math.floor(i / Ew))
-        ofmap_col = int(i % Ew)
+        ofmap_row, ofmap_col = np.divmod(i, Ew)
+        i_row, i_col = ofmap_row * r_stride, ofmap_col * c_stride
+        window_addr = (i_row * ifmap_cols + i_col) * channel
 
-        # Change this to corresponding ifmap row col for the start of the conv window
-        i_row = ofmap_row * r_stride
-        i_col = ofmap_col * c_stride
+        c_row, k = np.divmod(j, filter_col * channel)
+        c_col, c_ch = np.divmod(k, channel)
 
-        # Starting address of the convolution window
-        window_addr = i_row * ifmap_cols * channel + i_col * channel
+        valid_indices = np.logical_and(c_row + i_row < ifmap_rows, c_col + i_col < ifmap_cols)
+        ifmap_px_addr = np.full(i.shape, -1)
+        if valid_indices.any():
+            internal_address = (c_row[valid_indices] * ifmap_cols + c_col[valid_indices]) * channel + c_ch[valid_indices]
+            ifmap_px_addr[valid_indices] = internal_address + window_addr[valid_indices] + offset
 
-        # Calculate the row and col in the conv window
-        c_row = int(math.floor(j / (filter_col * channel)))
-        k = int(j % (filter_col * channel))
-        c_col = int(math.floor(k / channel))
-        c_ch = int(k % channel)
-        if c_row + i_row >= self.ifmap_rows or c_col + i_col >= self.ifmap_cols:  # for padded address
-            ifmap_px_addr = -1
-        else:
-            internal_address = c_row * (ifmap_cols * channel) + c_col * channel + c_ch  # Address inside conv window
-            ifmap_px_addr = internal_address + window_addr + offset  # Global address
         return ifmap_px_addr
 
     # creates the ofmap operand
@@ -185,10 +181,11 @@ class operand_matrix(object):
             message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
             print(message)
             return -1
-        # for row_idx in tqdm(range(self.ofmap_px_per_filt)):
-        for row_idx in range(self.ofmap_px_per_filt):
-            for col_idx in range(self.num_filters):
-                self.ofmap_addr_matrix[row_idx][col_idx] = self.calc_ofmap_elem_addr(i=row_idx, j=col_idx)
+
+        row_indices = np.expand_dims(np.arange(self.ofmap_px_per_filt), axis=1)
+        col_indices = np.arange(self.num_filters)
+        self.ofmap_addr_matrix = self.calc_ofmap_elem_addr(row_indices, col_indices)
+
         return 0
 
     # logic to translate ofmap into matrix resulting systolic array MACs
@@ -207,10 +204,10 @@ class operand_matrix(object):
             message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
             print(message)
             return -1
-        # for row_idx in tqdm(range(self.conv_window_size)):
-        for row_idx in range(self.conv_window_size):
-            for col_idx in range(self.num_filters):
-                self.filter_addr_matrix[row_idx][col_idx] = self.calc_filter_elem_addr(i=row_idx, j=col_idx)
+
+        row_indices = np.expand_dims(np.arange(self.conv_window_size), axis=1)
+        col_indices = np.arange(self.num_filters)
+        self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
 
         return 0
 
