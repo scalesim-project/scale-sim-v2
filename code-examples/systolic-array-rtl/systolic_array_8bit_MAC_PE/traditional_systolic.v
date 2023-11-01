@@ -1,6 +1,6 @@
 //`include "./traditional_mac.v"
 
-module traditional_systolic_array
+module traditional_systolic
 #(
     parameter ROWS = 32,
     parameter COLS = 32,
@@ -44,7 +44,7 @@ end
 
 for (c  = 0; c < COLS; c = c + 1)
 begin
-    assign bottom_out_bus[(c+1) * WORD_SIZE - 1 -: WORD_SIZE] = ver_interconnect[(ROWS - 1) * COLS * WORD_SIZE + (c+1) * WORD_SIZE - 1 -: WORD_SIZE];
+    assign bottom_out_bus[(c+1) * WORD_SIZE - 1 -: WORD_SIZE] = ver_interconnect[(ROWS * c + ROWS) * WORD_SIZE - 1 -: WORD_SIZE];
 end
 
 for(r = 0; r < ROWS; r = r+1)
@@ -68,14 +68,14 @@ begin
                 .stat_bit_in(ctl_stat_bit_in),
                 .left_in(left_in_bus[(r+1) * WORD_SIZE -1 -: WORD_SIZE]),
                 .top_in(top_in_bus[(c+1) * WORD_SIZE - 1 -: WORD_SIZE]),
-                .right_out(hor_interconnect[VERTICAL_SIGNAL_OFFSET - 1 -: WORD_SIZE]),
-                .bottom_out(ver_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
+                .right_out(hor_interconnect[HORIZONTAL_SIGNAL_OFFSET - 1 -: WORD_SIZE]),
+                .bottom_out(ver_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
             );
         end
         else if (c==0)
         begin
 
-            localparam TOP_PEER_OFFSET = ((r - 1) * COLS + (c+1)) * WORD_SIZE;
+            localparam TOP_PEER_OFFSET = (c * ROWS + r) * WORD_SIZE;
 
             traditional_mac #(
                 .WORD_SIZE(WORD_SIZE)
@@ -87,8 +87,8 @@ begin
                 .stat_bit_in(ctl_stat_bit_in),
                 .left_in(left_in_bus[(r+1) * WORD_SIZE -1 -: WORD_SIZE]),
                 .top_in(ver_interconnect[TOP_PEER_OFFSET -1 -: WORD_SIZE]),
-                .right_out(hor_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE]),
-                .bottom_out(ver_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
+                .right_out(hor_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE]),
+                .bottom_out(ver_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
             );
         end
         else if (r==0)
@@ -106,14 +106,14 @@ begin
                 .stat_bit_in(ctl_stat_bit_in),
                 .left_in(hor_interconnect[LEFT_PEER_OFFSET - 1 -: WORD_SIZE]),
                 .top_in(top_in_bus[(c+1) * WORD_SIZE - 1 -: WORD_SIZE]),
-                .right_out(hor_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE]),
-                .bottom_out(ver_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
+                .right_out(hor_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE]),
+                .bottom_out(ver_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
             );
         end
         else
         begin
 
-            localparam TOP_PEER_OFFSET = ((r - 1) * COLS + (c+1)) * WORD_SIZE;
+            localparam TOP_PEER_OFFSET =  (c * ROWS + r)  * WORD_SIZE;
             localparam LEFT_PEER_OFFSET = (r * COLS + c) * WORD_SIZE;
             
             traditional_mac #(
@@ -126,8 +126,8 @@ begin
                 .stat_bit_in(ctl_stat_bit_in),
                 .left_in(hor_interconnect[LEFT_PEER_OFFSET - 1 -: WORD_SIZE]),
                 .top_in(ver_interconnect[TOP_PEER_OFFSET -1 -: WORD_SIZE]),
-                .right_out(hor_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE]),
-                .bottom_out(ver_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
+                .right_out(hor_interconnect[HORIZONTAL_SIGNAL_OFFSET -1 -: WORD_SIZE]),
+                .bottom_out(ver_interconnect[VERTICAL_SIGNAL_OFFSET -1 -: WORD_SIZE])
             );
         end
     end
