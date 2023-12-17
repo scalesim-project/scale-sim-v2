@@ -57,14 +57,12 @@ class simulator:
             self.single_layer_sim_object_list.append(this_layer_sim)
 
         if not os.path.isdir(self.top_path):
-            cmd = 'mkdir ' + self.top_path
-            os.system(cmd)
+            os.mkdir(self.top_path)
 
         report_path = self.top_path + '/' + self.conf.get_run_name()
 
         if not os.path.isdir(report_path):
-            cmd = 'mkdir ' + report_path
-            os.system(cmd)
+            os.mkdir(report_path)
 
         self.top_path = report_path
 
