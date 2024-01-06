@@ -6,7 +6,13 @@ from scalesim.scale_config import scale_config as cfg
 
 
 class systolic_compute_os:
+    """
+    Class which runs the compute simulation in output stationary dataflow
+    """
     def __init__(self):
+        """
+        The constructor method for the class
+        """
         # Params set by user
         self.config = cfg()
 
@@ -54,7 +60,17 @@ class systolic_compute_os:
                    ofmap_op_mat = np.zeros((1,1)),
                    filter_op_mat = np.zeros((1,1))
                 ):
+        """
+        Method to set the output stationary run parameters for housekeeping.
 
+        :param config_obj: Object of scalesim.scale_config which is used to lookup the architecture and \
+        run parameters set by the user
+        :param ifmap_op_mat: Ifmap operand matrix
+        :param filter_op_mat: Filter operand matrix
+        :param ofmap_op_mat: Ofmap operand matrix
+
+        :return: None
+        """
         self.config = config_obj
         self.ifmap_op_mat = ifmap_op_mat
         self.filter_op_mat = filter_op_mat
@@ -79,6 +95,12 @@ class systolic_compute_os:
 
     #
     def create_prefetch_matrices(self):
+        """
+        Method to create ifmap and filter prefetch matrices. These matrices are prefetched in the SRAM before \
+        running memory simulation.
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         self.create_ifmap_prefetch_mat()
@@ -88,6 +110,10 @@ class systolic_compute_os:
 
     #
     def create_ifmap_prefetch_mat(self):
+        """
+        Method to create ifmap prefetch matrix. 
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         for fr in range(self.row_fold):
@@ -147,6 +173,11 @@ class systolic_compute_os:
 
     #
     def create_filter_prefetch_mat(self):
+        """
+        Method to create filter prefetch matrix. 
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         for fc in range(self.col_fold):
@@ -202,6 +233,13 @@ class systolic_compute_os:
 
     #
     def create_demand_matrices(self):
+        """
+        Method to create ifmap, filter and ofmap demand matrices from the operand matrices.
+        They contain several folds of ifmap, filter and ofmap demands. 
+        The folding happens because operand matrices are generally larger than systolic array dimensions.
+        
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         self.create_ifmap_demand_mat()
@@ -218,6 +256,11 @@ class systolic_compute_os:
 
     #
     def create_ifmap_demand_mat(self):
+        """
+        Method to create ifmap demand matrix.
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         # Anand: Concatenation issue fix
@@ -266,6 +309,11 @@ class systolic_compute_os:
 
     #
     def create_filter_demand_mat(self):
+        """
+        Method to create filter demand matrix.
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         inter_fold_gap_suffix = self.arr_row - 1
@@ -311,6 +359,11 @@ class systolic_compute_os:
 
     #
     def create_ofmap_demand_mat(self):
+        """
+        Method to create ofmap demand matrix.
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         inter_fold_gap_prefix = self.T  - 1
@@ -383,6 +436,11 @@ class systolic_compute_os:
 
     #
     def get_ifmap_prefetch_mat(self):
+        """
+        Method to get ifmap prefetch matrix.
+
+        :return: Ifmap prefetch matrix
+        """
         if not self.prefetch_mat_ready_flag:
             self.create_prefetch_matrices()
 
@@ -390,6 +448,11 @@ class systolic_compute_os:
 
     #
     def get_filter_prefetch_mat(self):
+        """
+        Method to get filter prefetch matrix.
+
+        :return: Filter prefetch matrix
+        """
         if not self.prefetch_mat_ready_flag:
             self.create_prefetch_matrices()
 
@@ -397,6 +460,11 @@ class systolic_compute_os:
 
     #
     def get_prefetch_matrices(self):
+        """
+        Method to get ifmap and filter prefetch matrices.
+
+        :return: Ifmap and filter prefetch matrices
+        """
         if not self.prefetch_mat_ready_flag:
             self.create_prefetch_matrices()
 
@@ -404,6 +472,11 @@ class systolic_compute_os:
 
     #
     def get_ifmap_demand_mat(self):
+        """
+        Method to get ifmap demand matrix.
+
+        :return: Ifmap demand matrix
+        """
         if not self.demand_mat_ready_flag:
             self.create_demand_matrices()
 
@@ -411,6 +484,11 @@ class systolic_compute_os:
 
     #
     def get_filter_demand_mat(self):
+        """
+        Method to get filter demand matrix.
+
+        :return: Filter demand matrix
+        """
         if not self.demand_mat_ready_flag:
             self.create_demand_matrices()
 
@@ -418,6 +496,11 @@ class systolic_compute_os:
 
     #
     def get_ofmap_demand_mat(self):
+        """
+        Method to get ofmap demand matrix.
+
+        :return: Ofmap demand matrix
+        """
         if not self.demand_mat_ready_flag:
             self.create_demand_matrices()
 
@@ -425,6 +508,11 @@ class systolic_compute_os:
 
     #
     def get_demand_matrices(self):
+        """
+        Method to get ifmap, filter and ofmap demand matrices.
+
+        :return: Ifmap, filter and ofmap demand matrices
+        """
         if not self.demand_mat_ready_flag:
             self.create_demand_matrices()
 
@@ -432,6 +520,11 @@ class systolic_compute_os:
 
     #
     def get_avg_mapping_efficiency(self):
+        """
+        Method to get average mapping efficincy on the systolic array.
+
+        :return: Average mapping efficincy
+        """
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
 
         agg = sum(self.mapping_efficiency_per_fold)
@@ -443,6 +536,11 @@ class systolic_compute_os:
 
     #
     def get_avg_compute_utilization(self):
+        """
+        Method to get average compute utilization on the systolic array.
+
+        :return: Average compute utilization
+        """
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
 
         agg = sum(self.compute_utility_per_fold)
@@ -454,21 +552,54 @@ class systolic_compute_os:
 
     #
     def get_ifmap_requests(self):
+        """
+        Method to get ifmap read requests.
+
+        :return: Number of ifmap read requests
+        """
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ifmap_reads
 
     #
     def get_filter_requests(self):
+        """
+        Method to get filter read requests.
+
+        :return: Number of filter read requests
+        """
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.filter_reads
 
     #
     def get_ofmap_requests(self):
+        """
+        Method to get ofmap write requests.
+
+        :return: Number of ofmap write requests
+        """
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ofmap_writes
 
+
 #
 def skew_matrix(input_matrix_np):
+    """
+    Method to add skew to the input matix to maintain systolic array flow.
+    Example:
+        Input matrix
+        1 1 1
+        1 1 1
+        1 1 1
+
+        Output matrix
+            1 1 1
+          1 1 1
+        1 1 1 
+
+    :param input_matrix_np: input matrix to be skewed
+
+    :return: None
+    """
     rows = input_matrix_np.shape[0]
     cols = input_matrix_np.shape[1]
 
