@@ -6,7 +6,13 @@ from scalesim.memory_map import memory_map
 
 
 class scale_config:
+    """
+    Class which contains the methods to preprocess the data from config file before doing compute simulation.
+    """
     def __init__(self):
+        """
+        The constructor method for the class
+        """
         self.run_name = "scale_run"
         # Anand: ISSUE #2. Patch
         self.use_user_bandwidth = False
@@ -31,6 +37,14 @@ class scale_config:
 
     #
     def read_conf_file(self, conf_file_in):
+        """
+        Method to read the configuration file and set the associated parameters.
+        This method also checks for invalid configuration parameters.
+
+        :param conf_file_in: Name of the configuration file
+
+        :return : None
+        """
 
         me = 'scale_config.' + 'read_conf_file()'
 
@@ -111,6 +125,14 @@ class scale_config:
 
     #
     def update_from_list(self, conf_list):
+        """
+        Method to set the configuration parameters (in int format) from the given list.
+        This method also checks for correct bandwidth mode in the given list.
+        
+        :param conf_list: list of configuration parameters
+
+        :return: None
+        """
         if not len(conf_list) > 11:
             print("ERROR: scale_config.update_from_list: "
                   "Incompatible number of elements in the list")
@@ -156,6 +178,13 @@ class scale_config:
 
     #
     def write_conf_file(self, conf_file_out):
+        """
+        Method to write the configuration parameters in a file.
+        
+        :param conf_file_out: Name of the output configuration file
+
+        :return: None
+        """
         if not self.valid_conf_flag:
             print('ERROR: scale_config.write_conf_file: No valid config loaded')
             return
@@ -192,35 +221,53 @@ class scale_config:
             config.write(configfile)
 
     #
-    def scale_memory_maps(self, num_layers=1):
-        me = 'scale_config.' + 'scale_memory_maps'
-
-        if not self.valid_conf_flag:
-            message = 'ERROR: ' + me
-            message += ': Config needs to be read/set first'
-            print(message)
-            return
-
-        if self.memory_banks == 1:
-            self.memory_map.scale_single_bank_params(num_layers=num_layers)
-
-    #
     def set_arr_dims(self, rows=1, cols=1):
+        """
+        Method to set the systolic array dimensions.
+
+        :param rows: Number of rows in the systolic array
+        :param cols: Number of columns in the systolic array
+
+        :return: None
+        """
         self.array_rows = rows
         self.array_cols = cols
 
     #
     def set_dataflow(self, dataflow='os'):
+        """
+        Method to set the dataflow.
+
+        :param df: Dataflow - is(input stationary), os(output stationary) or ws(weight stationary)
+
+        :return: None
+        """ 
         self.df = dataflow
 
     #
     def set_buffer_sizes_kb(self, ifmap_size_kb=1, filter_size_kb=1, ofmap_size_kb=1):
+        """
+        Method to set the scratchpad buffer sizes in kilobytes.
+
+        :param ifmap_size_kb: Ifmap buffer size in kilobytes
+        :param filter_size_kb: Filter buffer size in kilobytes
+        :param ofmap_size_kb: Ofmap buffer size in kilobytes
+
+        :return: None
+        """ 
         self.ifmap_sz_kb = ifmap_size_kb
         self.filter_sz_kb = filter_size_kb
         self.ofmap_sz_kb = ofmap_size_kb
 
     #
     def set_topology_file(self, topofile=''):
+        """
+        Method to set the name of the topology file.
+
+        :param topofile: Name of the topology file
+
+        :return: None
+        """ 
         self.topofile = topofile
 
     #
@@ -229,6 +276,15 @@ class scale_config:
                     filter_offset=10000000,
                     ofmap_offset=20000000
                     ):
+        """
+        Method to set the ifmap, filter and ofmap address offsets.
+
+        :param ifmap_offset: Address offset for the ifmap elements
+        :param filter_offset: Address offset for the filter elements
+        :param ofmap_offset: Address offset for the ofmap elements
+
+        :return: None
+        """ 
         self.ifmap_offset = ifmap_offset
         self.filter_offset = filter_offset
         self.ifmap_offset = ofmap_offset
@@ -236,14 +292,29 @@ class scale_config:
 
     #
     def force_valid(self):
+        """
+        Method to forcely validate the valid_conf_flag.
+
+        :return: None
+        """ 
         self.valid_conf_flag = True
 
     #
     def set_bw_mode_to_calc(self):
+        """
+        Method to set the bandwidth mode (USER/CALC) to CALC.
+
+        :return: None
+        """ 
         self.use_user_bandwidth = False
 
     #
     def use_user_dram_bandwidth(self):
+        """
+        Method to check if the simulator can use dram bandwidth provided by the user.
+
+        :return: None
+        """ 
         if not self.valid_conf_flag:
             me = 'scale_config.' + 'use_user_dram_bandwidth()'
             message = 'ERROR: ' + me + ': Configuration is not valid'
@@ -254,6 +325,12 @@ class scale_config:
 
     #
     def get_conf_as_list(self):
+        """
+        Method to get the configuration parameters (in str format) in a list if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Configuration parameters (in str format) in a list
+        """
         out_list = []
 
         if not self.valid_conf_flag:
@@ -284,6 +361,12 @@ class scale_config:
         return out_list
 
     def get_run_name(self):
+        """
+        Method to get the run name of the simulation if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Run name of the simulation
+        """ 
         if not self.valid_conf_flag:
             print("ERROR: scale_config.get_run_name() : Config data is not valid")
             return
@@ -291,12 +374,24 @@ class scale_config:
         return self.run_name
 
     def get_topology_path(self):
+        """
+        Method to get the topology path if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Name of the topology path
+        """ 
         if not self.valid_conf_flag:
             print("ERROR: scale_config.get_topology_path() : Config data is not valid")
             return
         return self.topofile
 
     def get_topology_name(self):
+        """
+        Method to get the topology name if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Name of the topology 
+        """ 
         if not self.valid_conf_flag:
             print("ERROR: scale_config.get_topology_name() : Config data is not valid")
             return
@@ -307,14 +402,32 @@ class scale_config:
         return name
 
     def get_dataflow(self):
+        """
+        Method to get the dataflow if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Dataflow - is(input stationary), os(output stationary) or ws(weight stationary)
+        """ 
         if self.valid_conf_flag:
             return self.df
 
     def get_array_dims(self):
+        """
+        Method to get the systolic array dimensions if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Systolic array rows and columns
+        """ 
         if self.valid_conf_flag:
             return self.array_rows, self.array_cols
 
     def get_mem_sizes(self):
+        """
+        Method to get the SRAM memory sizes if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Ifmap, filter and ofmap SRAM sizes in kilobytes
+        """ 
         me = 'scale_config.' + 'get_mem_sizes()'
 
         if not self.valid_conf_flag:
@@ -325,26 +438,41 @@ class scale_config:
         return self.ifmap_sz_kb, self.filter_sz_kb, self.ofmap_sz_kb
 
     def get_offsets(self):
+        """
+        Method to get the address offsets if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Ifmap, filter and ofmap address offsets
+        """ 
         if self.valid_conf_flag:
             return self.ifmap_offset, self.filter_offset, self.ofmap_offset
 
     def get_bandwidths_as_string(self):
+        """
+        Method to get the bandwidths if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: Bandwidths in str format
+        """ 
         if self.valid_conf_flag:
             return ','.join([str(x) for x in self.bandwidths])
 
-    def get_mem_banks(self):
-        if self.valid_conf_flag:
-            return self.memory_banks
-
-    def get_mem_map_obj(self):
-        if self.valid_conf_flag:
-            return self.memory_map
-
     def get_bandwidths_as_list(self):
+        """
+        Method to get the bandwidths if valid_conf_flag is set. If not, \
+        it prints an error message.        
+
+        :return: List of bandwidths 
+        """ 
         if self.valid_conf_flag:
             return self.bandwidths
 
     def get_min_dram_bandwidth(self):
+        """
+        Method to get the minimum dram bandwidth if use_user_dram_bandwidth method returns true.  
+
+        :return: Minimum DRAM Bandwidth
+        """ 
         if not self.use_user_dram_bandwidth():
             me = 'scale_config.' + 'get_min_dram_bandwidth()'
             message = 'ERROR: ' + me + ': No user bandwidth provided'
@@ -355,6 +483,11 @@ class scale_config:
     # FIX ISSUE #14
     @staticmethod
     def get_default_conf_as_list():
+        """
+        Method to forcibly validate dummy configuration parameters and return them as a list.
+
+        :return: list of configuration parameters
+        """ 
         dummy_obj = scale_config()
         dummy_obj.force_valid()
         out_list = dummy_obj.get_conf_as_list()

@@ -9,7 +9,13 @@ from scalesim.memory.write_port import write_port
 
 
 class write_buffer:
+    """
+    Class which runs the memory simulation of the ofmap SRAM.
+    """
     def __init__(self):
+        """
+        The constructor method for the class
+        """
         # Buffer properties: User specified
         self.total_size_bytes = 128
         self.word_size = 1
@@ -59,6 +65,18 @@ class write_buffer:
                    total_size_bytes=128, word_size=1, active_buf_frac=0.9,
                    backing_buf_bw=100
                    ):
+        """
+        Method to set the ofmap memory simulation parameters for housekeeping.
+
+        :param backing_buf_obj: Backing buffer object, by default is write_port
+        :param total_size_bytes: Write buffer (SRAM) total size in bytes
+        :param word_size: The word size of individual elements
+        :param active_buf_frac: The active fraction of the double duffered ofmap (serving the systolic array memory requests)
+        :param hit_latency: Hit latency of the ofmap memory
+        :param backing_buf_bw: Bandwidth of the backing buffer for ofmap SRAM. The default backing buffer is a dummy one (write port).
+
+        :return: None
+        """
         self.total_size_bytes = total_size_bytes
         self.word_size = word_size
 
@@ -75,6 +93,11 @@ class write_buffer:
 
     #
     def reset(self):
+        """
+        Method to reset the write buffer parameters.
+
+        :return: None
+        """
         self.total_size_bytes = 128
         self.word_size = 1
         self.active_buf_frac = 0.9
@@ -99,6 +122,13 @@ class write_buffer:
 
     #
     def store_to_trace_mat_cache(self, elem):
+        """
+        Method to add the incoming element to the trace matrix cache 
+
+        :param elem: Element requested by the systolic array
+
+        :return: None
+        """
         if elem == -1:
             return
 
@@ -127,6 +157,13 @@ class write_buffer:
 
     #
     def append_to_trace_mat(self, force=False):
+        """
+        Method to append to the trace matrix cache 
+
+        :param force: This flag forces the contents for self.current_line and self.trace_matrix cache to be dumped
+
+        :return: None
+        """
         if force:   # This forces the contents for self.current_line and self.trace_matrix cache to be dumped
             if not self.line_idx == 0:
                 #if self.trace_matrix_cache.shape == (1,1):
@@ -157,6 +194,16 @@ class write_buffer:
 
     #
     def service_writes(self, incoming_requests_arr_np, incoming_cycles_arr_np):
+        """
+        Method to service write requests coming from systolic array.
+        Logic: Assuming no miss, keep adding to the active buffer.
+        Once the active buffer is full, drain a part of it to the DRAM
+
+        :param incoming_requests_arr_np: matrix containg address of the memory requsts made from systolic array
+        :param incoming_cycles_arr: list containg cycles at which the memory requsts are made from systolic array
+
+        :return: A list of out cycles when the requests are serviced
+        """
         assert incoming_cycles_arr_np.shape[0] == incoming_requests_arr_np.shape[0], 'Cycles and requests do not match'
         out_cycles_arr = []
         offset = 0
@@ -199,7 +246,13 @@ class write_buffer:
 
     #
     def empty_drain_buf(self, empty_start_cycle=0):
+        """
+        Method to drain the drain buffer once the active buffer is full.
 
+        :param incoming_cycles_arr: Cycle at which the drain starts
+
+        :return: Cycle when the drain is completed
+        """
         lines_to_fill_dbuf = int(math.ceil(self.drain_buf_size / self.req_gen_bandwidth))
         self.drain_buf_end_line_id = self.drain_buf_start_line_id + lines_to_fill_dbuf
         self.drain_buf_end_line_id = min(self.drain_buf_end_line_id, self.trace_matrix.shape[0])
@@ -233,6 +286,13 @@ class write_buffer:
 
     #
     def empty_all_buffers(self, cycle):
+        """
+        Method to drain all of the active buffer.
+
+        :param incoming_cycles_arr: Cycle at which the drain starts
+
+        :return: None
+        """
         self.append_to_trace_mat(force=True)
 
         if self.trace_matrix_empty:
@@ -244,6 +304,12 @@ class write_buffer:
 
     #
     def get_trace_matrix(self):
+        """
+        Method to get the write buffer trace matrix. It contains addresses requsted by the systolic array and \
+        the cycles (first column) at which the requests are made.
+
+        :return: Write buffer trace matrix
+        """
         if not self.trace_valid:
             print('No trace has been generated yet')
             return
@@ -254,15 +320,30 @@ class write_buffer:
 
     #
     def get_free_space(self):
+        """
+        Method to get free space of the write buffer.
+
+        :return: Free space of the write buffer
+        """
         return self.free_space
 
     #
     def get_num_accesses(self):
+        """
+        Method to get number of accesses of the write buffer if trace_valid flag is set.
+
+        :return: Number of accesses of the write buffer
+        """
         assert self.trace_valid, 'Traces not ready yet'
         return self.num_access
 
     #
     def get_external_access_start_stop_cycles(self):
+        """
+        Method to get start and stop cycles of the write buffer if trace_valid flag is set.
+
+        :return: Start and stop cycles of the write buffer
+        """
         assert self.trace_valid, 'Traces not ready yet'
         start_cycle = self.cycles_vec[0][0]
         end_cycle = self.cycles_vec[-1][0]
@@ -271,6 +352,13 @@ class write_buffer:
 
     #
     def print_trace(self, filename):
+        """
+        Method to write the write buffer trace matrix to a file.
+
+        :param filename: Name of the trace file 
+
+        :return: None
+        """
         if not self.trace_valid:
             print('No trace has been generated yet')
             return

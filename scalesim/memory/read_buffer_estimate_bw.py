@@ -5,7 +5,13 @@ from scalesim.memory.read_port import read_port
 
 
 class ReadBufferEstimateBw:
+    """
+    Class which service the estimate bandwidth mode in the read buffer 
+    """
     def __init__(self):
+        """
+        The constructor method for the class
+        """
         # Buffer parameters
         self.word_size = 1
         self.active_buf_frac = 0.5
@@ -55,7 +61,18 @@ class ReadBufferEstimateBw:
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
                    hit_latency=1, backing_buf_default_bw=1):
+        """
+        Method to set the ifmap/filter double buffered memory simulation parameters for estimate bandwidth mode.
 
+        :param backing_buf_obj: Backing buffer object, by default is read_port
+        :param total_size_bytes: Read buffer (SRAM) total size in bytes
+        :param word_size: The word size of individual elements
+        :param active_buf_frac: The active fraction of the double duffered ifmap/filter memory (serving the systolic array memory requests)
+        :param hit_latency: Hit latency of the double duffered ifmap/filter memory
+        :param backing_buf_bw: Bandwidth of the backing buffer for ifmap SRAM. The default backing buffer is a dummy one (read port).
+
+        :return: None
+        """
         self.total_size_bytes = total_size_bytes
         self.word_size = word_size
 
@@ -90,6 +107,14 @@ class ReadBufferEstimateBw:
 
     #
     def service_reads(self, incoming_requests_arr_np, incoming_cycles_arr):
+        """
+        Method to service read requests coming from systolic array in estimate bandwidth mode
+        
+        :param incoming_requests_arr_np: matrix containg address of the memory requsts made from systolic array
+        :param incoming_cycles_arr: list containg cycles at which the memory requsts are made from systolic array
+
+        :return: A list of out cycles when the requests are serviced
+        """
         assert self.params_set_flag, 'Parameters are not set yet'
         assert incoming_cycles_arr.shape[0] == incoming_requests_arr_np.shape[0], 'Incoming cycles and requests dont match'
 
@@ -114,7 +139,14 @@ class ReadBufferEstimateBw:
 
     #
     def manage_prefetches(self, cycle, addr):
+        """
+        Method to manage prefetches in estimate bandwidth mode
 
+        :param addr: address of the memory requst made from systolic array
+        :param cycle: cycle at which the memory requst is made from systolic array
+
+        :return: None
+        """
         # If this is a new address, otherwise its a hit
         if self.check_hit(addr):
             return
@@ -161,6 +193,13 @@ class ReadBufferEstimateBw:
 
     #
     def check_hit(self, addr):
+        """
+        Method to check if the address is hit or miss in the active read buffer 
+
+        :param addr: Address of the incoming memory request
+
+        :return: True if address is hit and false if miss
+        """
         assert self.params_set_flag, 'Parameters are not set yet'
 
         start_set_idx = self.read_buffer_set_start_id
@@ -177,6 +216,12 @@ class ReadBufferEstimateBw:
 
     #
     def complete_all_prefetches(self):
+        """
+        Method to complete all the prefetches in estimate bandwidth mode.
+        Prefetch first the active buffer if not done before and then keep prefetching prefetch buffers.
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set yet'
 
         current_set_elems = list(self.current_set)
@@ -210,6 +255,14 @@ class ReadBufferEstimateBw:
 
     #
     def prefetch(self):
+        """
+        Method to do a new prefetch. In a new prefetch, some portion of the original data needs to be  \
+        deleted to accomodate the prefetched data
+        In this case we overwrite some data in the active buffer with the prefetched data \
+        and then create a new prefetch request
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set yet'
 
         if not self.active_buffer_prefetch_done:
@@ -266,11 +319,22 @@ class ReadBufferEstimateBw:
 
     #
     def get_latency(self):
+        """
+        Method to get hit latency of the read estimate buffer.
+
+        :return: Hit latency of the read estimate buffer
+        """
         assert self.params_set_flag, 'Parameters are not valid'
         return self.hit_latency
 
     #
     def get_trace_matrix(self):
+        """
+        Method to get the read estimate buffer trace matrix. It contains addresses requsted by the systolic array and \
+        the cycles (first column) at which the requests are made.
+
+        :return: Read estimate buffer trace matrix
+        """
         if not self.trace_valid:
             print('No trace has been generated yet')
             return
@@ -279,15 +343,30 @@ class ReadBufferEstimateBw:
 
     #
     def get_hit_latency(self):
+        """
+        Method to get hit latency of the read estimate buffer.
+
+        :return: Hit latency of the read estimate buffer
+        """
         return self.hit_latency
 
     #
     def get_num_accesses(self):
+        """
+        Method to get number of accesses of the read estimate buffer if trace_valid flag is set.
+
+        :return: Number of accesses of the read estimate buffer
+        """
         assert self.trace_valid, 'Traces not ready yet'
         return self.num_access
 
     #
     def get_external_access_start_stop_cycles(self):
+        """
+        Method to get start and stop cycles of the read estimate buffer if trace_valid flag is set.
+
+        :return: Start and stop cycles of the read estimate buffer
+        """
         assert self.trace_valid, 'Traces not ready yet'
         start_cycle = self.trace_matrix[0][0]
         end_cycle = self.trace_matrix[-1][0]
@@ -296,6 +375,13 @@ class ReadBufferEstimateBw:
 
     #
     def print_trace(self, filename):
+        """
+        Method to write the read estimate buffer trace matrix to a file.
+
+        :param filename: Name of the trace file 
+
+        :return: None
+        """
         if not self.trace_valid:
             print('No trace has been generated yet')
             return
