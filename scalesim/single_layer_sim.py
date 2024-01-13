@@ -10,7 +10,13 @@ from scalesim.memory.double_buffered_scratchpad_mem import double_buffered_scrat
 
 
 class single_layer_sim:
+    """
+    Class which runs the simulation for a single layer and generates report data
+    """
     def __init__(self):
+        """
+        The constructor method for the class
+        """
         self.layer_id = 0
         self.topo = topo()
         self.config = cfg()
@@ -72,6 +78,17 @@ class single_layer_sim:
                    layer_id=0,
                    config_obj=cfg(), topology_obj=topo(),
                    verbose=True):
+        """
+        Method to set the run parameters for housekeeping.
+
+        :param layer_id: Layer number of the workload
+        :param config_obj: Object of scalesim.scale_config which is used to lookup the architecture and \
+        run parameters set by the user
+        :param topology_obj: Object of scalesim.topologies which is used to obtain the workload dimensions
+        :param verbose: Flag to indicate verbosity of runs. If set to False, no output is generated on console
+
+        :return: None
+        """
 
         self.layer_id = layer_id
         self.config = config_obj
@@ -103,6 +120,13 @@ class single_layer_sim:
         self.memory_system_ready_flag = True
 
     def run(self):
+        """
+        Method to run scalesim simulation for a single layer.
+        This method first runs the compute part to generate operand, prefetch and demand matrices in order.
+        After that, it runs the memory simulation using the demand matrices.
+
+        :return: None
+        """
         assert self.params_set_flag, 'Parameters are not set. Run set_params()'
 
         # 1. Setup and the get the demand from compute system
@@ -183,6 +207,13 @@ class single_layer_sim:
 
     # This will write the traces
     def save_traces(self, top_path):
+        """
+        Method to save SRAM and DRAM traces for ifmap, filter and ofmap matrices.
+
+        :param top_path: Path where the generated traces will be saved
+
+        :return: None        
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         dir_name = top_path + '/layer' + str(self.layer_id)
@@ -207,6 +238,12 @@ class single_layer_sim:
 
     #
     def calc_report_data(self):
+        """
+        Method to generate the report data for a single layer if the run is already completed.
+        This method collects and calculates the data for compute, bandwidth and detail reports.
+
+        :return: None
+        """
         assert self.runs_ready, 'Runs are not done yet'
 
         # Compute report
@@ -252,11 +289,21 @@ class single_layer_sim:
 
     #
     def get_layer_id(self):
+        """
+        Method to return layer id.
+
+        :return: Layer number of the workload        
+        """
         assert self.params_set_flag, 'Parameters are not set yet'
         return self.layer_id
 
     #
     def get_compute_report_items(self):
+        """
+        Method to calculate data for the compute report if not already done.
+
+        :return: List of data items for the compute report
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 
@@ -265,6 +312,11 @@ class single_layer_sim:
 
     #
     def get_bandwidth_report_items(self):
+        """
+        Method to calculate data for the bandwidth report if not already done.
+
+        :return: List of SRAM and DRAM bandwidths for the bandwidth report
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 
@@ -275,6 +327,11 @@ class single_layer_sim:
 
     #
     def get_detail_report_items(self):
+        """
+        Method to calculate data for the detailed report if not already done.
+
+        :return: List of data items for the detailed report
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 

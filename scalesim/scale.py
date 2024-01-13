@@ -3,6 +3,9 @@ import argparse
 from scalesim.scale_sim import scalesim
 
 if __name__ == '__main__':
+    """
+    The main program to parse the input arguments and run scalesim simulation.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', metavar='Topology file', type=str,
                         default="../topologies/conv_nets/test.csv",
