@@ -8,3 +8,4 @@ test_runs
 */*/*/__pycache__
 .DS_Store
 venv
+documentation/build
