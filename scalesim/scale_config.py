@@ -43,7 +43,7 @@ class scale_config:
 
         :param conf_file_in: Name of the configuration file
 
-        :return : None
+        :return: None
         """
 
         me = 'scale_config.' + 'read_conf_file()'

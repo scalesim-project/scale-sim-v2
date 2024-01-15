@@ -14,14 +14,6 @@ Subpackages
 Submodules
 ----------
 
-scalesim.memory\_map module
----------------------------
-
-.. automodule:: scalesim.memory_map
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 scalesim.scale module
 ---------------------
 

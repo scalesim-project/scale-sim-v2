@@ -28,14 +28,6 @@ scalesim.memory.read\_buffer\_estimate\_bw module
    :undoc-members:
    :show-inheritance:
 
-scalesim.memory.read\_buffer\_old module
-----------------------------------------
-
-.. automodule:: scalesim.memory.read_buffer_old
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 scalesim.memory.read\_port module
 ---------------------------------
 
@@ -48,14 +40,6 @@ scalesim.memory.write\_buffer module
 ------------------------------------
 
 .. automodule:: scalesim.memory.write_buffer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-scalesim.memory.write\_buffer\_old module
------------------------------------------
-
-.. automodule:: scalesim.memory.write_buffer_old
    :members:
    :undoc-members:
    :show-inheritance:

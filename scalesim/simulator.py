@@ -6,7 +6,8 @@ from scalesim.single_layer_sim import single_layer_sim as layer_sim
 
 
 class simulator:
-    """Class which runs the simulations and manages generated data across various layers
+    """
+    Class which runs the simulations and manages generated data across various layers
     """
     def __init__(self):
         """
@@ -198,7 +199,7 @@ class simulator:
         Method which aggregates the total cycles (both compute and stall) across all the layers for the given
         workload.
 
-        :return:  Total runtime in cycles across all layers
+        :return: Total runtime in cycles across all layers
         :rtype: int
         """
         assert self.all_layer_run_done, 'Layer runs are not done yet'

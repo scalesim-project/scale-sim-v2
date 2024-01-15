@@ -14,7 +14,7 @@ class read_port:
         """
         Method to set the backing buffer hit latency for housekeeping.
 
-        :param hit_latency: Hit latency of the backing buffer
+        :param latency: Hit latency of the backing buffer
 
         :return: None
         """
@@ -35,6 +35,9 @@ class read_port:
         Method to service read request by the read buffer. 
         As a dummy memory, everything is a hit
 
+        :param incoming_requests_arr_np: matrix containg address of the memory requsts made from systolic array
+        :param incoming_cycles_arr: list containg cycles at which the memory requsts are made from systolic array
+        
         :return: List of out cycles by adding the hit latency to the incoming cycles
         """
         out_cycles_arr = incoming_cycles_arr + self.latency
