@@ -16,6 +16,9 @@ class write_port:
         """
         Method to service read request by the dummy write buffer. 
 
+        :param incoming_requests_arr_np: matrix containg address of the memory requsts made from systolic array
+        :param incoming_cycles_arr_np: list containg cycles at which the memory requsts are made from systolic array
+        
         :return: List of out cycles 
         """
         out_cycles_arr_np = incoming_cycles_arr_np + self.latency

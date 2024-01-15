@@ -212,6 +212,7 @@ class double_buffered_scratchpad:
         :param filter_demand_mat: Filter demand matrix generated during the compute simulation
         :param ofmap_demand_mat: Ofmap demand matrix generated during the compute simulation
 
+        :return: None
         """
         assert self.params_valid_flag, 'Memories not initialized yet'
 
