@@ -12,14 +12,16 @@ class scalesim:
                  save_disk_space=False,
                  verbose=True,
                  config='',
-                 topology=''):
-        """Initilize the class object
+                 topology='',
+                 input_type_gemm=False):
+         """
+         Initilize the class object
         :param save_disk_space: Boolean If set, cycle accurate traces will not be save (default: False)
         :param verbose: Boolean If set verbose output will be generated on the console (default: True)
         :param config: Path to the scalesim config file
         :param topology: Path to the scalesim topology file
-        :return: None
 
+        :return: None
         """
 
         # Data structures
