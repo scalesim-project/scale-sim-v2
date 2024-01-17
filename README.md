@@ -88,7 +88,7 @@ In addition cycle accurate SRAM/DRAM access logs are also dumped and could be ac
 
 ## Detailed Documentation
 
-Detailed documentation about the tool can be found **here (TBD)**
+Detailed documentation about the tool can be found [here](https://scale-sim-project.readthedocs.io/en/latest/).
 
 We also recommend referring to the following papers for insights on SCALE-Sim's potential.
 
