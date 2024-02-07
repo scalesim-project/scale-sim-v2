@@ -9,14 +9,14 @@ README = (HERE / "README.md").read_text()
 
 setup(
     name='scalesim',
-    version='2.0.1',
+    version='2.0.2',
     description='Systolic CNN AcceLerator Simulator',
     long_description=README,
     long_description_content_type="text/markdown",
     author='anands09, jmj, tushar, vnadella',
     author_email='anandsamajdar@gatech.edu',
     maintainer='SynergyLab, GT',
-    maintainer_email='anandsamajdar@gatech.edu',
+    maintainer_email='ritik.raj@gatech.edu',
     url='https://github.com/scalesim-project/scale-sim-v2',
     license="MIT",
     packages=find_packages(),
