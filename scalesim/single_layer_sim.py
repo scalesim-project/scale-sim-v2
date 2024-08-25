@@ -7,6 +7,7 @@ from scalesim.compute.systolic_compute_os import systolic_compute_os
 from scalesim.compute.systolic_compute_ws import systolic_compute_ws
 from scalesim.compute.systolic_compute_is import systolic_compute_is
 from scalesim.memory.double_buffered_scratchpad_mem import double_buffered_scratchpad as mem_dbsp
+from scalesim.energy.accelergy_plugin import energymodel as energymodel
 
 
 class single_layer_sim:
@@ -18,6 +19,9 @@ class single_layer_sim:
         self.op_mat_obj = opmat()
         self.compute_system = systolic_compute_os()
         self.memory_system = mem_dbsp()
+
+        # MARK ADDED
+        self.energy = energymodel()
 
         self.verbose = True
 
@@ -67,6 +71,14 @@ class single_layer_sim:
         self.memory_system_ready_flag = False
         self.runs_ready = False
         self.report_items_ready = False
+
+        # PE action counts
+        self.ifmap_write_action_count = 0
+        self.ifmap_read_action_count = 0
+        self.filter_write_action_count = 0
+        self.filter_read_action_count = 0
+        self.ofmap_write_action_count = 0
+        self.ofmap_read_action_count = 0
 
     def set_params(self,
                    layer_id=0,
@@ -124,6 +136,11 @@ class single_layer_sim:
         # 1.3 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
+
+        # 1.4 Get PE action count
+        self.ifmap_write_action_count, self.ifmap_read_action_count, self.filter_write_action_count, self.filter_read_action_count, \
+            self.ofmap_write_action_count, self.ofmap_read_action_count = self.compute_system.get_pe_action_count()
+        
         #print('DEBUG: Compute operations done')
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
 
@@ -180,6 +197,10 @@ class single_layer_sim:
         self.memory_system.service_memory_requests(ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat)
 
         self.runs_ready = True
+        
+        # MARK ADDED
+    def run_energy_model(self, top_path):
+        self.energy.convert_to_accelergy_params(self.layer_id, self.memory_system, top_path)
 
     # This will write the traces
     def save_traces(self, top_path):
@@ -187,7 +208,8 @@ class single_layer_sim:
 
         dir_name = top_path + '/layer' + str(self.layer_id)
         if not os.path.isdir(dir_name):
-            os.mkdir(dir_name)
+            cmd = 'mkdir ' + dir_name
+            os.system(cmd)
 
         ifmap_sram_filename = dir_name +  '/IFMAP_SRAM_TRACE.csv'
         filter_sram_filename = dir_name + '/FILTER_SRAM_TRACE.csv'
@@ -283,5 +305,8 @@ class single_layer_sim:
         items += [self.ifmap_dram_start_cycle, self.ifmap_dram_stop_cycle, self.ifmap_dram_reads]
         items += [self.filter_dram_start_cycle, self.filter_dram_stop_cycle, self.filter_dram_reads]
         items += [self.ofmap_dram_start_cycle, self.ofmap_dram_stop_cycle, self.ofmap_dram_writes]
+        items += [self.ifmap_write_action_count, self.ifmap_read_action_count, self.filter_write_action_count, self.filter_read_action_count, \
+            self.ofmap_write_action_count, self.ofmap_read_action_count]
 
         return items
+

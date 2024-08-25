@@ -1,4 +1,5 @@
 import math
+from turtle import shape
 import numpy as np
 from tqdm import tqdm
 from scalesim.scale_config import scale_config as cfg
@@ -45,6 +46,10 @@ class systolic_compute_ws:
         self.params_set_flag = False
         self.prefetch_mat_ready_flag = False
         self.demand_mat_ready_flag = False
+
+        # Used PE array
+        self.row_used_fold = []
+        self.col_used_fold = []
 
     #
     def set_params(self,
@@ -182,10 +187,11 @@ class systolic_compute_ws:
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_row)) * -1
 
         inter_fold_gap_suffix = self.arr_col - 1
+        # inter_fold_gap_suffix = self.arr_row + self.arr_col - 2
+        #The last input needs self.arr_row - 1 cycles to reach the last column of PE array and then self.arr_col - 1 cycles to reduce along the last column.
 
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_row)) * -1
 
-        ifmap_demand_matrix_list = []
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 col_start_id = fr * self.arr_row
@@ -211,12 +217,10 @@ class systolic_compute_ws:
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
 
-                ifmap_demand_matrix_list.append(this_fold_demand)
-                #if fr == 0 and fc == 0:
-                #    self.ifmap_demand_matrix = this_fold_demand
-                #else:
-                #    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
-        self.ifmap_demand_matrix = np.concatenate(ifmap_demand_matrix_list)
+                if fr == 0 and fc == 0:
+                    self.ifmap_demand_matrix = this_fold_demand
+                else:
+                    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
     # END of IFMAP demand generation
 
     #
@@ -226,7 +230,6 @@ class systolic_compute_ws:
         inter_fold_gap_suffix = self.arr_row + self.arr_col + self.T - 2
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
 
-        filter_demand_matrix_list = []
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 row_start_id = fr * self.arr_row
@@ -269,12 +272,13 @@ class systolic_compute_ws:
                 self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
                 self.compute_utility_per_fold.append(compute_util_this_fold)
 
-                filter_demand_matrix_list.append(this_fold_demand)
-                #if fr == 0 and fc == 0:
-                #    self.filter_demand_matrix = this_fold_demand
-                #else:
-                #    self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
-        self.filter_demand_matrix = np.concatenate(filter_demand_matrix_list)
+                if fr == 0 and fc == 0:
+                    self.filter_demand_matrix = this_fold_demand
+                else:
+                    self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
+
+                self.row_used_fold.append(row_used)
+                self.col_used_fold.append(col_used)
         # No skew needed in filters for weight stationary
 
     #
@@ -284,7 +288,6 @@ class systolic_compute_ws:
         inter_fold_gap_prefix = 2 * self.arr_row - 1
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_col)) * -1
 
-        ofmap_demand_matrix_list = []
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 col_start_id = fc * self.arr_col
@@ -307,12 +310,10 @@ class systolic_compute_ws:
                 # Add skew to the OFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
 
-                ofmap_demand_matrix_list.append(this_fold_demand)
-                #if fr == 0 and fc == 0:
-                #    self.ofmap_demand_matrix = this_fold_demand
-                #else:
-                #    self.ofmap_demand_matrix = np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
-        self.ofmap_demand_matrix = np.concatenate(ofmap_demand_matrix_list)
+                if fr == 0 and fc == 0:
+                    self.ofmap_demand_matrix = this_fold_demand
+                else:
+                    self.ofmap_demand_matrix = np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
     # END of OFMAP demand generation
 
     #
@@ -400,15 +401,92 @@ class systolic_compute_ws:
     def get_ofmap_requests(self):
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ofmap_writes
+    
+    # get pe action counts
+    def get_pe_action_count(self):
+        ifmap_write_action_count, ifmap_read_action_count = self.get_ifmap_action_count()
+        filter_write_action_count, filter_read_action_count = self.get_filter_action_count()
+        ofmap_write_action_count, ofmap_read_action_count = self.get_ofmap_action_count()
+        return ifmap_write_action_count, ifmap_read_action_count, filter_write_action_count, filter_read_action_count, ofmap_write_action_count, ofmap_read_action_count
 
+    def get_ifmap_action_count(self):
+        ifmap_write_action_count = 0
+        ifmap_read_action_count = 0
+        for fc in range(self.col_fold):
+            for fr in range(self.row_fold):
+                row_used = self.row_used_fold[fc * self.row_fold + fr]
+                col_used = self.col_used_fold[fc * self.row_fold + fr]
+                ifmap_write_prefill_action_count = row_used * col_used * self.T
+                ifmap_write_compute_action_count = 0
+                ifmap_write_action_count_fold = ifmap_write_prefill_action_count + ifmap_write_compute_action_count
+                ifmap_read_prefill_action_count = row_used * (col_used - 1) * self.T
+                ifmap_read_compute_action_count = row_used * col_used * self.T
+                ifmap_read_action_count_fold = ifmap_read_prefill_action_count + ifmap_read_compute_action_count
+                ifmap_write_action_count += ifmap_write_action_count_fold
+                ifmap_read_action_count += ifmap_read_action_count_fold
+        return ifmap_write_action_count, ifmap_read_action_count
+    
+    def get_filter_action_count(self):
+        filter_write_action_count = 0
+        filter_read_action_count = 0
+        for fc in range(self.col_fold):
+            for fr in range(self.row_fold):
+                row_used = self.row_used_fold[fc * self.row_fold + fr]
+                col_used = self.col_used_fold[fc * self.row_fold + fr]
+                filter_write_prefill_action_count = (1 + row_used) * row_used *0.5 * col_used
+                filter_write_compute_action_count = 0
+                filter_write_action_count_fold = filter_write_prefill_action_count + filter_write_compute_action_count
+                filter_read_prefill_action_count = (1 + row_used) * row_used *0.5 * col_used - row_used * col_used
+                filter_read_compute_action_count = row_used * col_used * self.T
+                filter_read_action_count_fold = filter_read_prefill_action_count + filter_read_compute_action_count
+                filter_write_action_count += filter_write_action_count_fold
+                filter_read_action_count += filter_read_action_count_fold
+        return filter_write_action_count, filter_read_action_count
 
+    def get_ofmap_action_count(self):
+        ofmap_write_action_count = 0
+        ofmap_read_action_count = 0
+        for fc in range(self.col_fold):
+            for fr in range(self.row_fold):
+                row_used = self.row_used_fold[fc * self.row_fold + fr]
+                col_used = self.col_used_fold[fc * self.row_fold + fr]
+                ofmap_write_compute_action_count = row_used * col_used * self.T
+                ofmap_write_postfill_action_count = (self.arr_row - row_used) * col_used * self.T
+                ofmap_write_action_count_fold = ofmap_write_compute_action_count + ofmap_write_postfill_action_count
+                ofmap_read_compute_action_count = (row_used - 1) * col_used * self.T
+                ofmap_read_postfill_action_count = (self.arr_row - row_used) * col_used * self.T
+                ofmap_read_action_count_fold = ofmap_read_compute_action_count + ofmap_read_postfill_action_count
+                ofmap_write_action_count += ofmap_write_action_count_fold 
+                ofmap_read_action_count += ofmap_read_action_count_fold
+        return ofmap_write_action_count, ofmap_read_action_count
+
+    
 #
 def skew_matrix(input_matrix_np):
-    rows, cols = input_matrix_np.shape
+    rows = input_matrix_np.shape[0]
+    cols = input_matrix_np.shape[1]
 
-    out_matrix_np = np.full((rows + cols - 1, cols), -1, dtype=input_matrix_np.dtype)
-
+    out_matrix_np = np.zeros((1,1))
     for c in range(cols):
-        out_matrix_np[c:c + rows, c] = input_matrix_np[:, c]
+        if c == 0:
+            down_padding = -1 * np.ones((cols-1, 1))
+            mat_col = input_matrix_np[:,c].reshape((rows,1))
+            out_matrix_np = np.concatenate((mat_col, down_padding), axis=0)
+
+        else:
+            if c == cols -1:
+                up_padding = -1 * np.ones((cols-1, 1))
+                mat_col = input_matrix_np[:, c].reshape((rows, 1))
+
+                this_col = np.concatenate((up_padding, mat_col), axis=0)
+                out_matrix_np = np.concatenate((out_matrix_np, this_col), axis=1)
+
+            else:
+                up_padding = -1 * np.ones((c, 1))
+                mat_col = input_matrix_np[:, c].reshape((rows, 1))
+                down_padding = -1 * np.ones((cols - c-1, 1))
+
+                this_col = np.concatenate((up_padding, mat_col, down_padding), axis=0)
+                out_matrix_np = np.concatenate((out_matrix_np, this_col), axis=1)
 
     return out_matrix_np

@@ -31,9 +31,9 @@ if __name__ == '__main__':
     if inp_type == 'gemm':
         gemm_input = True
 
-    s = scalesim(save_disk_space=True, verbose=True,
+    s = scalesim(save_disk_space=False, verbose=True,
                  config=config,
-                 topology=topology,
-                 input_type_gemm=gemm_input
+                 topology=topology
+                #  input_type_gemm=gemm_input
                  )
     s.run_scale(top_path=logpath)

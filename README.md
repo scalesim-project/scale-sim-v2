@@ -147,6 +147,7 @@ Main devs:
 
 Contributers:
 * Ritik Raj (@ritikraj7)
+* Zishen Wan (@zishenwan)
 
 Maintainers and Advisors
 * Yuhao Zhu

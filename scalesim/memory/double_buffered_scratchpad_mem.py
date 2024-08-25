@@ -21,9 +21,9 @@ class double_buffered_scratchpad:
 
         self.verbose = True
 
-        self.ifmap_trace_matrix = np.zeros((1,1), dtype=int)
-        self.filter_trace_matrix = np.zeros((1,1), dtype=int)
-        self.ofmap_trace_matrix = np.zeros((1,1), dtype=int)
+        self.ifmap_trace_matrix = np.zeros((1,1), dtype=np.int)
+        self.filter_trace_matrix = np.zeros((1,1), dtype=np.int)
+        self.ofmap_trace_matrix = np.zeros((1,1), dtype=np.int)
 
         # Metrics to gather for generating run reports
         self.total_cycles = 0
@@ -158,7 +158,7 @@ class double_buffered_scratchpad:
         self.stall_cycles = 0
 
         ifmap_hit_latency = self.ifmap_buf.get_hit_latency()
-        filter_hit_latency = self.filter_buf.get_hit_latency()
+        filter_hit_latency = self.ifmap_buf.get_hit_latency()
 
         ifmap_serviced_cycles = []
         filter_serviced_cycles = []

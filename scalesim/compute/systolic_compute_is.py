@@ -46,6 +46,10 @@ class systolic_compute_is:
         self.prefetch_mat_ready_flag = False
         self.demand_mat_ready_flag = False
 
+        # Used PE array
+        self.row_used_fold = []
+        self.col_used_fold = []
+
     #
     def set_params(self,
                    config_obj=cfg(),
@@ -233,6 +237,8 @@ class systolic_compute_is:
                 else:
                     self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
 
+                self.row_used_fold.append(row_used)
+                self.col_used_fold.append(col_used)
         # Skew is not needed in IFMAP for IS
 
     #
@@ -399,15 +405,90 @@ class systolic_compute_is:
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ofmap_writes
 
+    # get pe action counts
+    def get_pe_action_count(self):
+        ifmap_write_action_count, ifmap_read_action_count = self.get_ifmap_action_count()
+        filter_write_action_count, filter_read_action_count = self.get_filter_action_count()
+        ofmap_write_action_count, ofmap_read_action_count = self.get_ofmap_action_count()
+        return ifmap_write_action_count, ifmap_read_action_count, filter_write_action_count, filter_read_action_count, ofmap_write_action_count, ofmap_read_action_count
+
+    def get_ifmap_action_count(self):
+        ifmap_write_action_count = 0
+        ifmap_read_action_count = 0
+        for fc in range(self.col_fold):
+            for fr in range(self.row_fold):
+                row_used = self.row_used_fold[fc * self.row_fold + fr]
+                col_used = self.col_used_fold[fc * self.row_fold + fr]
+                ifmap_write_prefill_action_count = (1 + row_used) * row_used *0.5 * col_used
+                ifmap_write_compute_action_count = 0
+                ifmap_write_action_count_fold = ifmap_write_prefill_action_count + ifmap_write_compute_action_count
+                ifmap_read_prefill_action_count = (1 + row_used) * row_used *0.5 * col_used - row_used * col_used
+                ifmap_read_compute_action_count = row_used * col_used * self.T
+                ifmap_read_action_count_fold = ifmap_read_prefill_action_count + ifmap_read_compute_action_count
+                ifmap_write_action_count += ifmap_write_action_count_fold
+                ifmap_read_action_count += ifmap_read_action_count_fold
+        return ifmap_write_action_count, ifmap_read_action_count
+    
+    def get_filter_action_count(self):
+        filter_write_action_count = 0
+        filter_read_action_count = 0
+        for fc in range(self.col_fold):
+            for fr in range(self.row_fold):
+                row_used = self.row_used_fold[fc * self.row_fold + fr]
+                col_used = self.col_used_fold[fc * self.row_fold + fr]
+                filter_write_prefill_action_count = row_used * col_used * self.T
+                filter_write_compute_action_count = 0
+                filter_write_action_count_fold = filter_write_prefill_action_count + filter_write_compute_action_count
+                filter_read_prefill_action_count = row_used * (col_used - 1) * self.T
+                filter_read_compute_action_count = row_used * col_used * self.T
+                filter_read_action_count_fold = filter_read_prefill_action_count + filter_read_compute_action_count
+                filter_write_action_count += filter_write_action_count_fold
+                filter_read_action_count += filter_read_action_count_fold
+        return filter_write_action_count, filter_read_action_count
+
+    def get_ofmap_action_count(self):
+        ofmap_write_action_count = 0
+        ofmap_read_action_count = 0
+        for fc in range(self.col_fold):
+            for fr in range(self.row_fold):
+                row_used = self.row_used_fold[fc * self.row_fold + fr]
+                col_used = self.col_used_fold[fc * self.row_fold + fr]
+                ofmap_write_compute_action_count = row_used * col_used * self.T
+                ofmap_write_postfill_action_count = (self.arr_row - row_used) * col_used * self.T
+                ofmap_write_action_count_fold = ofmap_write_compute_action_count + ofmap_write_postfill_action_count
+                ofmap_read_compute_action_count = (row_used - 1) * col_used * self.T
+                ofmap_read_postfill_action_count = (self.arr_row - row_used) * col_used * self.T
+                ofmap_read_action_count_fold = ofmap_read_compute_action_count + ofmap_read_postfill_action_count
+                ofmap_write_action_count += ofmap_write_action_count_fold 
+                ofmap_read_action_count += ofmap_read_action_count_fold
+        return ofmap_write_action_count, ofmap_read_action_count
 
 #
 def skew_matrix(input_matrix_np):
-    rows, cols = input_matrix_np.shape
+    rows = input_matrix_np.shape[0]
+    cols = input_matrix_np.shape[1]
 
-    out_matrix_np = np.full((rows + cols - 1, cols), -1, dtype=input_matrix_np.dtype)
-
+    out_matrix_np = np.zeros((1,1))
     for c in range(cols):
-        out_matrix_np[c:c + rows, c] = input_matrix_np[:, c]
+        if c == 0:
+            down_padding = -1 * np.ones((cols-1, 1))
+            mat_col = input_matrix_np[:,c].reshape((rows,1))
+            out_matrix_np = np.concatenate((mat_col, down_padding), axis=0)
+
+        else:
+            if c == cols -1:
+                up_padding = -1 * np.ones((cols-1, 1))
+                mat_col = input_matrix_np[:, c].reshape((rows, 1))
+
+                this_col = np.concatenate((up_padding, mat_col), axis=0)
+                out_matrix_np = np.concatenate((out_matrix_np, this_col), axis=1)
+
+            else:
+                up_padding = -1 * np.ones((c, 1))
+                mat_col = input_matrix_np[:, c].reshape((rows, 1))
+                down_padding = -1 * np.ones((cols - c-1, 1))
+
+                this_col = np.concatenate((up_padding, mat_col, down_padding), axis=0)
+                out_matrix_np = np.concatenate((out_matrix_np, this_col), axis=1)
 
     return out_matrix_np
-
