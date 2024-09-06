@@ -20,7 +20,6 @@ class single_layer_sim:
         self.compute_system = systolic_compute_os()
         self.memory_system = mem_dbsp()
 
-        # MARK ADDED
         self.energy = energymodel()
 
         self.verbose = True
@@ -137,6 +136,7 @@ class single_layer_sim:
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
 
+
         # 1.4 Get PE action count
         self.ifmap_write_action_count, self.ifmap_read_action_count, self.filter_write_action_count, self.filter_read_action_count, \
             self.ofmap_write_action_count, self.ofmap_read_action_count = self.compute_system.get_pe_action_count()
@@ -202,6 +202,7 @@ class single_layer_sim:
     def run_energy_model(self, top_path):
         self.energy.convert_to_accelergy_params(self.layer_id, self.memory_system, top_path)
 
+
     # This will write the traces
     def save_traces(self, top_path):
         assert self.params_set_flag, 'Parameters are not set'
@@ -210,6 +211,7 @@ class single_layer_sim:
         if not os.path.isdir(dir_name):
             cmd = 'mkdir ' + dir_name
             os.system(cmd)
+            os.mkdir(dir_name)
 
         ifmap_sram_filename = dir_name +  '/IFMAP_SRAM_TRACE.csv'
         filter_sram_filename = dir_name + '/FILTER_SRAM_TRACE.csv'
@@ -309,4 +311,3 @@ class single_layer_sim:
             self.ofmap_write_action_count, self.ofmap_read_action_count]
 
         return items
-

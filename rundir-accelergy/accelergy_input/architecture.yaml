@@ -1,0 +1,70 @@
+architecture:
+  subtree:
+  - attributes:
+      technology: 40nm
+    local:
+    - attributes:
+        bank_depth: 65536
+        memory_depth: bank_depth * n_banks
+        memory_width: 32
+        n_banks: 1
+        n_buffets: 1
+      class: smartbuffer_SRAM
+      name: weights_glb
+    - attributes:
+        bank_depth: 65536
+        memory_depth: bank_depth * n_banks
+        memory_width: 32
+        n_banks: 1
+        n_buffets: 1
+      class: smartbuffer_SRAM
+      name: ifmap_glb
+    - attributes:
+        bank_depth: 65536
+        memory_depth: bank_depth * n_banks
+        memory_width: 32
+        n_banks: 1
+        n_buffets: 1
+      class: smartbuffer_SRAM
+      name: psum_glb
+    - attributes:
+        width: 32
+      class: DRAM
+      name: weights_dram
+    - attributes:
+        width: 32
+      class: DRAM
+      name: ifmap_dram
+    - attributes:
+        width: 32
+      class: DRAM
+      name: psum_dram
+    name: systolic_array
+    subtree:
+    - attributes:
+        memory_width: 16
+      local:
+      - attributes:
+          datawidth: 8
+        class: intmac
+        name: mac
+      - attributes:
+          depth: 1
+          n_rdwr_ports: 1
+          width: 1
+        class: regfile
+        name: ifmap_spad
+      - attributes:
+          depth: 1
+          n_rdwr_ports: 1
+          width: 1
+        class: regfile
+        name: weights_spad
+      - attributes:
+          depth: 1
+          n_rdwr_ports: 1
+          width: 1
+        class: regfile
+        name: psum_spad
+      name: PE[0..1023]
+  version: 0.3

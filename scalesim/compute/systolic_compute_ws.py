@@ -50,7 +50,6 @@ class systolic_compute_ws:
         # Used PE array
         self.row_used_fold = []
         self.col_used_fold = []
-
     #
     def set_params(self,
                    config_obj=cfg(),
@@ -187,11 +186,10 @@ class systolic_compute_ws:
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_row)) * -1
 
         inter_fold_gap_suffix = self.arr_col - 1
-        # inter_fold_gap_suffix = self.arr_row + self.arr_col - 2
-        #The last input needs self.arr_row - 1 cycles to reach the last column of PE array and then self.arr_col - 1 cycles to reduce along the last column.
 
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_row)) * -1
 
+        ifmap_demand_matrix_list = []
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 col_start_id = fr * self.arr_row
@@ -217,10 +215,12 @@ class systolic_compute_ws:
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
 
-                if fr == 0 and fc == 0:
-                    self.ifmap_demand_matrix = this_fold_demand
-                else:
-                    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
+                ifmap_demand_matrix_list.append(this_fold_demand)
+                #if fr == 0 and fc == 0:
+                #    self.ifmap_demand_matrix = this_fold_demand
+                #else:
+                #    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
+        self.ifmap_demand_matrix = np.concatenate(ifmap_demand_matrix_list)
     # END of IFMAP demand generation
 
     #
@@ -230,6 +230,7 @@ class systolic_compute_ws:
         inter_fold_gap_suffix = self.arr_row + self.arr_col + self.T - 2
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
 
+        filter_demand_matrix_list = []
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 row_start_id = fr * self.arr_row
@@ -272,13 +273,12 @@ class systolic_compute_ws:
                 self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
                 self.compute_utility_per_fold.append(compute_util_this_fold)
 
-                if fr == 0 and fc == 0:
-                    self.filter_demand_matrix = this_fold_demand
-                else:
-                    self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
-
-                self.row_used_fold.append(row_used)
-                self.col_used_fold.append(col_used)
+                filter_demand_matrix_list.append(this_fold_demand)
+                #if fr == 0 and fc == 0:
+                #    self.filter_demand_matrix = this_fold_demand
+                #else:
+                #    self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
+        self.filter_demand_matrix = np.concatenate(filter_demand_matrix_list)
         # No skew needed in filters for weight stationary
 
     #
@@ -287,7 +287,8 @@ class systolic_compute_ws:
 
         inter_fold_gap_prefix = 2 * self.arr_row - 1
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_col)) * -1
-
+        ofmap_demand_matrix_list = []
+        
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 col_start_id = fc * self.arr_col
@@ -310,10 +311,12 @@ class systolic_compute_ws:
                 # Add skew to the OFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
 
-                if fr == 0 and fc == 0:
-                    self.ofmap_demand_matrix = this_fold_demand
-                else:
-                    self.ofmap_demand_matrix = np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
+                ofmap_demand_matrix_list.append(this_fold_demand)
+                #if fr == 0 and fc == 0:
+                #    self.ofmap_demand_matrix = this_fold_demand
+                #else:
+                #    self.ofmap_demand_matrix = np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
+        self.ofmap_demand_matrix = np.concatenate(ofmap_demand_matrix_list)
     # END of OFMAP demand generation
 
     #
@@ -401,6 +404,7 @@ class systolic_compute_ws:
     def get_ofmap_requests(self):
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ofmap_writes
+
     
     # get pe action counts
     def get_pe_action_count(self):
@@ -460,33 +464,13 @@ class systolic_compute_ws:
                 ofmap_read_action_count += ofmap_read_action_count_fold
         return ofmap_write_action_count, ofmap_read_action_count
 
-    
 #
 def skew_matrix(input_matrix_np):
-    rows = input_matrix_np.shape[0]
-    cols = input_matrix_np.shape[1]
+    rows, cols = input_matrix_np.shape
 
-    out_matrix_np = np.zeros((1,1))
+    out_matrix_np = np.full((rows + cols - 1, cols), -1, dtype=input_matrix_np.dtype)
+
     for c in range(cols):
-        if c == 0:
-            down_padding = -1 * np.ones((cols-1, 1))
-            mat_col = input_matrix_np[:,c].reshape((rows,1))
-            out_matrix_np = np.concatenate((mat_col, down_padding), axis=0)
-
-        else:
-            if c == cols -1:
-                up_padding = -1 * np.ones((cols-1, 1))
-                mat_col = input_matrix_np[:, c].reshape((rows, 1))
-
-                this_col = np.concatenate((up_padding, mat_col), axis=0)
-                out_matrix_np = np.concatenate((out_matrix_np, this_col), axis=1)
-
-            else:
-                up_padding = -1 * np.ones((c, 1))
-                mat_col = input_matrix_np[:, c].reshape((rows, 1))
-                down_padding = -1 * np.ones((cols - c-1, 1))
-
-                this_col = np.concatenate((up_padding, mat_col, down_padding), axis=0)
-                out_matrix_np = np.concatenate((out_matrix_np, this_col), axis=1)
+        out_matrix_np[c:c + rows, c] = input_matrix_np[:, c]
 
     return out_matrix_np

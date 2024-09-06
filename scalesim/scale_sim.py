@@ -134,7 +134,6 @@ class scalesim:
         print("SRAM OFMAP (kB): \t" + str(ofmap_kb))
         print("Dataflow: \t" + df_string)
         print("CSV file path: \t" + self.config.get_topology_path())
-        print("Number of Remote Memory Banks: \t" + str(self.config.get_mem_banks()))
 
         if self.config.use_user_dram_bandwidth():
             print("Bandwidth: \t" + self.config.get_bandwidths_as_string())
