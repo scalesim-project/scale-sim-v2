@@ -11,8 +11,10 @@ from scalesim.memory.write_port import write_port as wrport
 
 class double_buffered_scratchpad:
     def __init__(self):
-        self.ifmap_buf = rdbuf()
-        self.filter_buf = rdbuf()
+        self.ifmap_L1_buf = rdbuf()
+        self.filter_L1_buf = rdbuf()
+        self.ifmap_L2_buf = rdbuf()
+        self.filter_L2_buf = rdbuf()
         self.ofmap_buf =wrbuf()
 
         self.ifmap_port = rdport()
@@ -66,36 +68,68 @@ class double_buffered_scratchpad:
 
         self.estimate_bandwidth_mode = estimate_bandwidth_mode
 
+        # The following 2 variables have been added for Lab2B1 DSE3
+        rd_buf_active_frac_L1 = 0.8
+        rd_buf_active_frac_L2 = 0.8
+
         if self.estimate_bandwidth_mode:
-            self.ifmap_buf = rdbuf_est()
-            self.filter_buf = rdbuf_est()
+            self.ifmap_L1_buf = rdbuf_est()
+            self.ifmap_L2_buf = rdbuf_est()
+            self.filter_L1_buf = rdbuf_est()
+            self.filter_L2_buf = rdbuf_est()
 
-            self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
-                                      total_size_bytes=ifmap_buf_size_bytes,
-                                      word_size=word_size,
-                                      active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=ifmap_backing_buf_bw)
+            self.ifmap_L1_buf.set_params(backing_buf_obj=self.ifmap_L2_buf,
+                                         total_size_bytes=ifmap_buf_size_bytes, # My configuration is 5kB for both IfmapSramSzkB and FilterSramSzkB
+                                         word_size=word_size,
+                                         active_buf_frac=rd_buf_active_frac_L1,
+                                         backing_buf_default_bw=ifmap_backing_buf_bw)
 
-            self.filter_buf.set_params(backing_buf_obj=self.filter_port,
-                                       total_size_bytes=filter_buf_size_bytes,
-                                       word_size=word_size,
-                                       active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_default_bw=filter_backing_buf_bw)
+            self.ifmap_L2_buf.set_params(backing_buf_obj=self.ifmap_port,
+                                         total_size_bytes=5*1024 - ifmap_buf_size_bytes, # ifmap_buf_size_bytes * 2
+                                         word_size=word_size,
+                                         active_buf_frac=rd_buf_active_frac_L2,
+                                         backing_buf_default_bw=ifmap_backing_buf_bw)
+
+            self.filter_L1_buf.set_params(backing_buf_obj=self.filter_L2_buf,
+                                          total_size_bytes=filter_buf_size_bytes,
+                                          word_size=word_size,
+                                          active_buf_frac=rd_buf_active_frac_L1,
+                                          backing_buf_default_bw=filter_backing_buf_bw)
+
+            self.filter_L2_buf.set_params(backing_buf_obj=self.filter_port,
+                                          total_size_bytes=5*1024 - filter_buf_size_bytes, # filter_buf_size_bytes * 2
+                                          word_size=word_size,
+                                          active_buf_frac=rd_buf_active_frac_L2,
+                                          backing_buf_default_bw=filter_backing_buf_bw)
         else:
-            self.ifmap_buf = rdbuf()
-            self.filter_buf = rdbuf()
+            self.ifmap_L1_buf = rdbuf()
+            self.ifmap_L2_buf = rdbuf()
+            self.filter_L1_buf = rdbuf()
+            self.filter_L2_buf = rdbuf()
 
-            self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
-                                      total_size_bytes=ifmap_buf_size_bytes,
-                                      word_size=word_size,
-                                      active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_bw=ifmap_backing_buf_bw)
+            self.ifmap_L1_buf.set_params(backing_buf_obj=self.ifmap_L2_buf,
+                                         total_size_bytes=ifmap_buf_size_bytes,
+                                         word_size=word_size,
+                                         active_buf_frac=rd_buf_active_frac_L1,
+                                         backing_buf_bw=ifmap_backing_buf_bw)
 
-            self.filter_buf.set_params(backing_buf_obj=self.filter_port,
-                                       total_size_bytes=filter_buf_size_bytes,
-                                       word_size=word_size,
-                                       active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_bw=filter_backing_buf_bw)
+            self.ifmap_L2_buf.set_params(backing_buf_obj=self.ifmap_port,
+                                         total_size_bytes=5*1024 - ifmap_buf_size_bytes, # ifmap_buf_size_bytes * 2
+                                         word_size=word_size,
+                                         active_buf_frac=rd_buf_active_frac_L2,
+                                         backing_buf_bw=ifmap_backing_buf_bw)
+
+            self.filter_L1_buf.set_params(backing_buf_obj=self.filter_L2_buf,
+                                          total_size_bytes=filter_buf_size_bytes,
+                                          word_size=word_size,
+                                          active_buf_frac=rd_buf_active_frac_L1,
+                                          backing_buf_bw=filter_backing_buf_bw)
+
+            self.filter_L2_buf.set_params(backing_buf_obj=self.filter_port,
+                                          total_size_bytes=5*1024 - filter_buf_size_bytes, # filter_buf_size_bytes * 2
+                                          word_size=word_size,
+                                          active_buf_frac=rd_buf_active_frac_L2,
+                                          backing_buf_bw=filter_backing_buf_bw)
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
                                   total_size_bytes=ofmap_buf_size_bytes,
@@ -113,21 +147,25 @@ class double_buffered_scratchpad:
                                        filter_prefetch_mat=np.zeros((1,1))
                                        ):
 
-        self.ifmap_buf.set_fetch_matrix(ifmap_prefetch_mat)
-        self.filter_buf.set_fetch_matrix(filter_prefetch_mat)
+        self.ifmap_L1_buf.set_fetch_matrix(ifmap_prefetch_mat)
+        self.ifmap_L2_buf.set_fetch_matrix(ifmap_prefetch_mat)
+        self.filter_L1_buf.set_fetch_matrix(filter_prefetch_mat)
+        self.filter_L2_buf.set_fetch_matrix(filter_prefetch_mat)
 
     #
     def reset_buffer_states(self):
 
-        self.ifmap_buf.reset()
-        self.filter_buf.reset()
+        self.ifmap_L1_buf.reset()
+        self.ifmap_L2_buf.reset()
+        self.filter_L1_buf.reset()
+        self.filter_L2_buf.reset()
         self.ofmap_buf.reset()
 
     # The following are just shell methods for users to control each mem individually
     def service_ifmap_reads(self,
                             incoming_requests_arr_np,   # 2D array with the requests
                             incoming_cycles_arr):
-        out_cycles_arr_np = self.ifmap_buf.service_reads(incoming_requests_arr_np, incoming_cycles_arr)
+        out_cycles_arr_np = self.ifmap_L1_buf.service_reads(incoming_requests_arr_np, incoming_cycles_arr)
 
         return out_cycles_arr_np
 
@@ -135,7 +173,7 @@ class double_buffered_scratchpad:
     def service_filter_reads(self,
                             incoming_requests_arr_np,   # 2D array with the requests
                             incoming_cycles_arr):
-        out_cycles_arr_np = self.filter_buf.service_reads(incoming_requests_arr_np, incoming_cycles_arr)
+        out_cycles_arr_np = self.filter_L1_buf.service_reads(incoming_requests_arr_np, incoming_cycles_arr)
 
         return out_cycles_arr_np
 
@@ -157,8 +195,8 @@ class double_buffered_scratchpad:
         self.total_cycles = 0
         self.stall_cycles = 0
 
-        ifmap_hit_latency = self.ifmap_buf.get_hit_latency()
-        filter_hit_latency = self.filter_buf.get_hit_latency()
+        ifmap_hit_latency = self.ifmap_L1_buf.get_hit_latency()
+        filter_hit_latency = self.ifmap_L2_buf.get_hit_latency()
 
         ifmap_serviced_cycles = []
         filter_serviced_cycles = []
@@ -169,24 +207,17 @@ class double_buffered_scratchpad:
 
             cycle_arr = np.zeros((1,1)) + i + self.stall_cycles
 
-            # print("cycle_arr:", cycle_arr)
-
             ifmap_demand_line = ifmap_demand_mat[i, :].reshape((1,ifmap_demand_mat.shape[1]))
-            ifmap_cycle_out = self.ifmap_buf.service_reads(incoming_requests_arr_np=ifmap_demand_line,
+            ifmap_cycle_out = self.ifmap_L1_buf.service_reads(incoming_requests_arr_np=ifmap_demand_line,
                                                             incoming_cycles_arr=cycle_arr)
             ifmap_serviced_cycles += [ifmap_cycle_out[0]]
             ifmap_stalls = ifmap_cycle_out[0] - cycle_arr[0] - ifmap_hit_latency
 
             filter_demand_line = filter_demand_mat[i, :].reshape((1, filter_demand_mat.shape[1]))
-
-            # print("filter_demand_line       :", filter_demand_line)
-            filter_cycle_out = self.filter_buf.service_reads(incoming_requests_arr_np=filter_demand_line,
+            filter_cycle_out = self.filter_L1_buf.service_reads(incoming_requests_arr_np=filter_demand_line,
                                                            incoming_cycles_arr=cycle_arr)
-            # print("filter_cycle_out         :", filter_cycle_out)
             filter_serviced_cycles += [filter_cycle_out[0]]
-            # print("filter_serviced_cycles   :", filter_serviced_cycles)
             filter_stalls = filter_cycle_out[0] - cycle_arr[0] - filter_hit_latency
-            # print("filter_stalls            :", filter_stalls)
 
             ofmap_demand_line = ofmap_demand_mat[i, :].reshape((1, ofmap_demand_mat.shape[1]))
             ofmap_cycle_out = self.ofmap_buf.service_writes(incoming_requests_arr_np=ofmap_demand_line,
@@ -199,8 +230,10 @@ class double_buffered_scratchpad:
         if self.estimate_bandwidth_mode:
             # IDE shows warning as complete_all_prefetches is not implemented in read_buffer class
             # It is harmless since, in estimate bandwidth mode, read_buffer_estimate_bw is instantiated
-            self.ifmap_buf.complete_all_prefetches()
-            self.filter_buf.complete_all_prefetches()
+            self.ifmap_L1_buf.complete_all_prefetches()
+            self.filter_L1_buf.complete_all_prefetches()
+            self.ifmap_L2_buf.complete_all_prefetches()
+            self.filter_L2_buf.complete_all_prefetches()
 
         self.ofmap_buf.empty_all_buffers(ofmap_serviced_cycles[-1])
 
@@ -209,12 +242,6 @@ class double_buffered_scratchpad:
         self.ifmap_trace_matrix = np.concatenate((ifmap_services_cycles_np, ifmap_demand_mat), axis=1)
 
         filter_services_cycles_np = np.asarray(filter_serviced_cycles).reshape((len(filter_serviced_cycles), 1))
-
-        # print("filter_serviced_cycles")
-        # print(filter_serviced_cycles)
-        # print("filter_services_cycles_np")
-        # print(filter_services_cycles_np)
-
         self.filter_trace_matrix = np.concatenate((filter_services_cycles_np, filter_demand_mat), axis=1)
 
         ofmap_services_cycles_np = np.asarray(ofmap_serviced_cycles).reshape((len(ofmap_serviced_cycles), 1))
@@ -406,13 +433,8 @@ class double_buffered_scratchpad:
     def get_filter_sram_start_stop_cycles(self):
         assert self.traces_valid, 'Traces not generated yet'
 
-        # print("get_filter_sram_start_stop_cycles:filter_trace_matrix")
-        # print(self.filter_trace_matrix)
-
         done = False
         for ridx in range(self.filter_trace_matrix.shape[0]):
-            # print(ridx)
-
             if done:
                 break
             row = self.filter_trace_matrix[ridx, 1:]
@@ -422,23 +444,17 @@ class double_buffered_scratchpad:
                     done = True
                     break
 
-        # print("self.filter_sram_start_cycle", self.filter_sram_start_cycle)
-
         done = False
         for ridx in range(self.filter_trace_matrix.shape[0]):
             if done:
                 break
             ridx = -1 * (ridx + 1)
-
-            # print(ridx)
             row = self.filter_trace_matrix[ridx, 1:]
             for addr in row:
                 if not addr == -1:
                     self.filter_sram_stop_cycle = self.filter_trace_matrix[ridx][0]
                     done = True
                     break
-
-        # print("self.filter_sram_stop_cycle", self.filter_sram_stop_cycle)
 
         return self.filter_sram_start_cycle, self.filter_sram_stop_cycle
 
@@ -475,9 +491,9 @@ class double_buffered_scratchpad:
     def get_ifmap_dram_details(self):
         assert self.traces_valid, 'Traces not generated yet'
 
-        self.ifmap_dram_reads = self.ifmap_buf.get_num_accesses()
+        self.ifmap_dram_reads = self.ifmap_L2_buf.get_num_accesses()
         self.ifmap_dram_start_cycle, self.ifmap_dram_stop_cycle \
-            = self.ifmap_buf.get_external_access_start_stop_cycles()
+            = self.ifmap_L2_buf.get_external_access_start_stop_cycles()
 
         return self.ifmap_dram_start_cycle, self.ifmap_dram_stop_cycle, self.ifmap_dram_reads
 
@@ -485,9 +501,9 @@ class double_buffered_scratchpad:
     def get_filter_dram_details(self):
         assert self.traces_valid, 'Traces not generated yet'
 
-        self.filter_dram_reads = self.filter_buf.get_num_accesses()
+        self.filter_dram_reads = self.filter_L2_buf.get_num_accesses()
         self.filter_dram_start_cycle, self.filter_dram_stop_cycle \
-            = self.filter_buf.get_external_access_start_stop_cycles()
+            = self.filter_L2_buf.get_external_access_start_stop_cycles()
 
         return self.filter_dram_start_cycle, self.filter_dram_stop_cycle, self.filter_dram_reads
 
@@ -523,11 +539,11 @@ class double_buffered_scratchpad:
 
     #
     def get_ifmap_dram_trace_matrix(self):
-        return self.ifmap_buf.get_trace_matrix()
+        return self.ifmap_L2_buf.get_trace_matrix()
 
     #
     def get_filter_dram_trace_matrix(self):
-        return self.filter_buf.get_trace_matrix()
+        return self.filter_L2_buf.get_trace_matrix()
 
     #
     def get_ofmap_dram_trace_matrix(self):
@@ -535,8 +551,8 @@ class double_buffered_scratchpad:
 
     #
     def get_dram_trace_matrices(self):
-        dram_ifmap_trace = self.ifmap_buf.get_trace_matrix()
-        dram_filter_trace = self.filter_buf.get_trace_matrix()
+        dram_ifmap_trace = self.ifmap_L2_buf.get_trace_matrix()
+        dram_filter_trace = self.filter_L2_buf.get_trace_matrix()
         dram_ofmap_trace = self.ofmap_buf.get_trace_matrix()
 
         return dram_ifmap_trace, dram_filter_trace, dram_ofmap_trace
@@ -558,11 +574,11 @@ class double_buffered_scratchpad:
 
     #
     def print_ifmap_dram_trace(self, filename):
-        self.ifmap_buf.print_trace(filename)
+        self.ifmap_L2_buf.print_trace(filename)
 
     #
     def print_filter_dram_trace(self, filename):
-        self.filter_buf.print_trace(filename)
+        self.filter_L2_buf.print_trace(filename)
 
     #
     def print_ofmap_dram_trace(self, filename):
