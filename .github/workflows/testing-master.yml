@@ -18,6 +18,8 @@ jobs:
       run: python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && pip install pylint
     - name: Install SCALE-Sim
       run: source venv/bin/activate && python setup.py install
+    - name: Install tkinter
+      run: sudo apt-get install python3-tk
     - name: Linting
       run: source venv/bin/activate && python -m pylint --fail-under=7.5 scalesim/
     - name: Test 1

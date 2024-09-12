@@ -88,12 +88,20 @@ class simulator:
                 print('Mapping efficiency: ' + "{:.2f}".format(mapping_eff) +'%')
 
                 avg_bw_items = single_layer_obj.get_bandwidth_report_items()
-                avg_ifmap_bw = avg_bw_items[3]
-                avg_filter_bw = avg_bw_items[4]
-                avg_ofmap_bw = avg_bw_items[5]
-                print('Average IFMAP DRAM BW: ' + "{:.3f}".format(avg_ifmap_bw) + ' words/cycle')
-                print('Average Filter DRAM BW: ' + "{:.3f}".format(avg_filter_bw) + ' words/cycle')
-                print('Average OFMAP DRAM BW: ' + "{:.3f}".format(avg_ofmap_bw) + ' words/cycle')
+                avg_ifmap_sram_bw = avg_bw_items[0]
+                avg_filter_sram_bw = avg_bw_items[1]
+                avg_filter_metadata_sram_bw = avg_bw_items[2]
+                avg_ofmap_sram_bw = avg_bw_items[3]                
+                avg_ifmap_dram_bw = avg_bw_items[4]
+                avg_filter_dram_bw = avg_bw_items[5]
+                avg_ofmap_dram_bw = avg_bw_items[6]
+                print('Average IFMAP SRAM BW: ' + "{:.3f}".format(avg_ifmap_sram_bw) + ' words/cycle')
+                print('Average Filter SRAM BW: ' + "{:.3f}".format(avg_filter_sram_bw) + ' words/cycle')
+                print('Average Filter Metadata SRAM BW: ' + "{:.3f}".format(avg_filter_metadata_sram_bw) + ' words/cycle')
+                print('Average OFMAP SRAM BW: ' + "{:.3f}".format(avg_ofmap_sram_bw) + ' words/cycle')
+                print('Average IFMAP DRAM BW: ' + "{:.3f}".format(avg_ifmap_dram_bw) + ' words/cycle')
+                print('Average Filter DRAM BW: ' + "{:.3f}".format(avg_filter_dram_bw) + ' words/cycle')
+                print('Average OFMAP DRAM BW: ' + "{:.3f}".format(avg_ofmap_dram_bw) + ' words/cycle')
 
             if self.save_trace:
                 if self.verbose:
@@ -117,7 +125,8 @@ class simulator:
 
         bandwidth_report_name = self.top_path + '/BANDWIDTH_REPORT.csv'
         bandwidth_report = open(bandwidth_report_name, 'w')
-        header = 'LayerID, Avg IFMAP SRAM BW, Avg FILTER SRAM BW, Avg OFMAP SRAM BW, '
+
+        header = 'LayerID, Avg IFMAP SRAM BW, Avg FILTER SRAM BW, Avg FILTER Metadata SRAM BW, Avg OFMAP SRAM BW, '
         header += 'Avg IFMAP DRAM BW, Avg FILTER DRAM BW, Avg OFMAP DRAM BW,\n'
         bandwidth_report.write(header)
 
@@ -131,6 +140,15 @@ class simulator:
         header += 'DRAM Filter Start Cycle, DRAM Filter Stop Cycle, DRAM Filter Reads, '
         header += 'DRAM OFMAP Start Cycle, DRAM OFMAP Stop Cycle, DRAM OFMAP Writes,\n'
         detail_report.write(header)
+
+        sparse_report_name = self.top_path + '/SPARSE_REPORT.csv'
+        sparse_report = open(sparse_report_name, 'w')
+        header = 'LayerID, '
+        header += 'Sparsity Representation, '
+        header += 'Original Filter Storage, New Storage (Filter+Metadata), Filter Metadata Storage, '
+        header += 'Avg FILTER Metadata SRAM BW, '
+        header += '\n'
+        sparse_report.write(header)
 
         for lid in range(len(self.single_layer_sim_object_list)):
             single_layer_obj = self.single_layer_sim_object_list[lid]
@@ -152,9 +170,16 @@ class simulator:
             log += ',\n'
             detail_report.write(log)
 
+            sparse_report_items_this_layer = single_layer_obj.get_sparse_report_items()
+            log = str(lid) + ', ' + self.conf.sparsity_representation + ', '
+            log += ', '.join([str(x) for x in sparse_report_items_this_layer])
+            log += ',\n'
+            sparse_report.write(log)
+
         compute_report.close()
         bandwidth_report.close()
         detail_report.close()
+        sparse_report.close()
 
     #
     def get_total_cycles(self):
