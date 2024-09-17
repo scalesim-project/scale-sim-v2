@@ -11,7 +11,7 @@ class scalesim:
                  config='',
                  topology='',
                  input_type_gemm=False,
-                #  sparsity_input=False
+                 sparsity_dir=''
                  ):
 
         # Data structures
@@ -21,6 +21,7 @@ class scalesim:
         # File paths
         self.config_file = ''
         self.topology_file = ''
+        self.sparsity_dir = ''
 
         # Member objects
         #self.runner = r.run_nets()
@@ -32,14 +33,14 @@ class scalesim:
         self.verbose_flag = verbose
         self.run_done_flag = False
         self.logs_generated_flag = False
-        # self.sparsity_input = sparsity_input
 
-        self.set_params(config_filename=config, topology_filename=topology)
+        self.set_params(config_filename=config, topology_filename=topology, sparsity_directory=sparsity_dir)
 
     #
     def set_params(self,
                    config_filename='',
-                   topology_filename='' ):
+                   topology_filename='',
+                   sparsity_directory=''):
         # First check if the user provided a valid topology file
         if not topology_filename == '':
             if not os.path.exists(topology_filename):
@@ -57,6 +58,14 @@ class scalesim:
             exit()
         else: 
             self.config_file = config_filename
+        
+        if not os.path.exists(sparsity_directory):
+            print("ERROR: scalesim.scale.py: Sparsity directory not found") 
+            print("Input path:" + sparsity_directory)
+            print('Exiting')
+            exit()
+        else:
+            self.sparsity_dir = sparsity_directory
 
         # Parse config first
         self.config.read_conf_file(self.config_file)
@@ -69,7 +78,7 @@ class scalesim:
             self.config.set_topology_file(self.topology_file)
 
         # Parse the topology
-        self.topo.load_arrays(topofile=self.topology_file, mnk_inputs=self.read_gemm_inputs)
+        self.topo.load_arrays(topofile=self.topology_file, mnk_inputs=self.read_gemm_inputs, sparsity_dir=self.sparsity_dir)
 
         #num_layers = self.topo.get_num_layers()
         #self.config.scale_memory_maps(num_layers=num_layers)

@@ -1,7 +1,7 @@
 import math
 import ast
 import numpy as np
-
+import os
 
 
 class topologies(object):
@@ -28,7 +28,7 @@ class topologies(object):
         self.topo_calc_hyper_param_flag = False
         self.layers_calculated_hyperparams = []
 
-    #
+    # Redundant function
     def load_layer_params_from_list(self, layer_name, elems_list=[]):
         self.topo_file_name = ''
         self.current_toponame = ''
@@ -39,14 +39,14 @@ class topologies(object):
         self.topo_load_flag = True
 
     #
-    def load_arrays(self, topofile='', mnk_inputs=False):
+    def load_arrays(self, topofile='', mnk_inputs=False, sparsity_dir=''):
         if mnk_inputs:
-            self.load_arrays_gemm(topofile)
+            self.load_arrays_gemm(topofile, sparsity_dir)
         else:
-            self.load_arrays_conv(topofile)
+            self.load_arrays_conv(topofile, sparsity_dir)
 
     #
-    def load_arrays_gemm(self, topofile=''):
+    def load_arrays_gemm(self, topofile='', sparsity_dir=''):
 
         self.topo_file_name = topofile.split('/')[-1]
         name_arr = self.topo_file_name.split('.')
@@ -80,13 +80,13 @@ class topologies(object):
                 entries = [layer_name, m, k, 1, k, 1, n, 1, 1]
                 # entries = [layer_name, m, k, 1, k, 1, n, 1, sparse_array]
                 #entries are later iterated from index 1. Index 0 is used to store layer name in convolution mode. So, to rectify assignment of M, N and K in GEMM mode, layer name has been added at index 0 of entries. 
-                self.append_topo_arrays(layer_name=layer_name, elems=entries)
+                self.append_topo_arrays(layer_name=layer_name, elems=entries, sparsity_dir=sparsity_dir)
 
         self.num_layers = len(self.topo_arrays)
         self.topo_load_flag = True
 
     # Load the topology data from the file
-    def load_arrays_conv(self, topofile=""):
+    def load_arrays_conv(self, topofile='', sparsity_dir=''):
         first = True
         self.topo_file_name = topofile.split('/')[-1]
         name_arr = self.topo_file_name.split('.')
@@ -106,10 +106,10 @@ class topologies(object):
                     for dp_layer in range(int(elems[5].strip())):
                         layer_name = elems[0].strip() + "Channel_" + str(dp_layer)
                         elems[5] = str(1)
-                        self.append_topo_arrays(layer_name, elems)
+                        self.append_topo_arrays(layer_name, elems, sparsity_dir)
                 else:
                     layer_name = elems[0].strip()
-                    self.append_topo_arrays(layer_name, elems)
+                    self.append_topo_arrays(layer_name, elems, sparsity_dir)
 
         self.num_layers = len(self.topo_arrays)
         self.topo_load_flag = True
@@ -158,7 +158,7 @@ class topologies(object):
         f.close()
 
     # LEGACY
-    def append_topo_arrays(self, layer_name, elems):
+    def append_topo_arrays(self, layer_name, elems, sparsity_dir):
         entry = [layer_name]
 
         for i in range(1, len(elems)):
@@ -168,7 +168,8 @@ class topologies(object):
                 if i == 7 and len(elems) < (9+1):
                     entry.append(val) 
             if i == 8:
-                file_path = f'sparsesim\layers\{layer_name}.txt'
+                # file_path = f'sparsesim\layers\{layer_name}.txt'
+                file_path = os.path.join(sparsity_dir, f'{layer_name}.txt')
                 with open(file_path, 'r') as file:
                     content = file.read()
                     sparse_array = ast.literal_eval(content)
