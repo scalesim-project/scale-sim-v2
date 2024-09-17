@@ -20,12 +20,17 @@ if __name__ == '__main__':
                         default="conv",
                         help="Type of input topology, gemm: MNK, conv: conv"
                         )
+    parser.add_argument('-s', metavar='sparsity dir', type=str,
+                        default="../sparsity_layers",
+                        help="Path to sparsity dir"
+                        )
 
     args = parser.parse_args()
     topology = args.t
     config = args.c
     logpath = args.p
     inp_type = args.i
+    sparsity_dir = args.s
 
     gemm_input = False
     if inp_type == 'gemm':
@@ -34,6 +39,7 @@ if __name__ == '__main__':
     s = scalesim(save_disk_space=True, verbose=True,
                  config=config,
                  topology=topology,
-                 input_type_gemm=gemm_input
+                 input_type_gemm=gemm_input,
+                 sparsity_dir=sparsity_dir
                  )
     s.run_scale(top_path=logpath)
