@@ -24,6 +24,10 @@ class scale_config:
 
         self.valid_df_list = ['os', 'ws', 'is']
 
+        self.sparsity_support = False
+        self.sparsity_representation = ""
+        self.sparse_accelerator = ""
+
     #
     def read_conf_file(self, conf_file_in):
 
@@ -68,6 +72,16 @@ class scale_config:
 
         if config.has_section('network_presets'):  # Read network_presets
             self.topofile = config.get(section, 'TopologyCsvLoc').split('"')[1]
+
+        # Sparsity
+        if config.get(section, 'SparsitySupport').lower() in ['True', 'true']:
+            self.sparsity_support = True
+        else:
+            self.sparsity_support = False
+
+        if self.sparsity_support:
+            self.sparsity_representation = config.get(section, 'SparseRep')
+            self.sparse_accelerator = config.get(section, 'SparseAcc')
 
         self.valid_conf_flag = True
 

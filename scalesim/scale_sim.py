@@ -1,7 +1,7 @@
 import os
 from scalesim.scale_config import scale_config
 from scalesim.topology_utils import topologies
-from scalesim.simulator import simulator as sim
+from scalesim.simulator import simulator
 
 
 class scalesim:
@@ -10,7 +10,9 @@ class scalesim:
                  verbose=True,
                  config='',
                  topology='',
-                 input_type_gemm=False):
+                 input_type_gemm=False,
+                #  sparsity_input=False
+                 ):
 
         # Data structures
         self.config = scale_config()
@@ -22,7 +24,7 @@ class scalesim:
 
         # Member objects
         #self.runner = r.run_nets()
-        self.runner = sim()
+        self.runner = simulator()
 
         # Flags
         self.read_gemm_inputs = input_type_gemm
@@ -30,6 +32,7 @@ class scalesim:
         self.verbose_flag = verbose
         self.run_done_flag = False
         self.logs_generated_flag = False
+        # self.sparsity_input = sparsity_input
 
         self.set_params(config_filename=config, topology_filename=topology)
 
