@@ -1,0 +1,23 @@
+ART:
+  version: 0.3
+  tables:
+  - name: systolic_array.PE[0..1023].mac
+    area: 1
+  - name: systolic_array.PE[0..1023].ifmap_spad
+    area: 1
+  - name: systolic_array.PE[0..1023].weights_spad
+    area: 1
+  - name: systolic_array.PE[0..1023].psum_spad
+    area: 1
+  - name: systolic_array.weights_dram
+    area: 1
+  - name: systolic_array.ifmap_dram
+    area: 1
+  - name: systolic_array.psum_dram
+    area: 1
+  - name: systolic_array.weights_glb
+    area: 11
+  - name: systolic_array.ifmap_glb
+    area: 11
+  - name: systolic_array.psum_glb
+    area: 11
