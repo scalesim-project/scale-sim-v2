@@ -114,10 +114,7 @@ class single_layer_sim:
         self.memory_system_ready_flag = True
 
     # Filter Metadata Calculation
-    def calculate_metadata_reads(self, filter_op_mat):
-        # self.filter_op_mat
-        # print("inside calculate_metadata_reads function")
-        
+    def calculate_metadata_reads(self, filter_op_mat):        
         if self.config.sparsity_support == True:
             sparse_array_np = self.op_mat_obj.sparse_filter_array
             original_storage = 0
@@ -128,7 +125,7 @@ class single_layer_sim:
             elif self.config.sparsity_representation == 'csc':
                 original_storage, new_storage, metadata_storage = self.compression.get_csc_storage(sparse_array_np)
             elif self.config.sparsity_representation == 'ellpack_block':
-                original_storage, new_storage, metadata_storage = self.compression.get_ellpack_block_storage(sparse_array_np, filter_op_mat)
+                original_storage, new_storage, metadata_storage = self.compression.get_ellpack_block_storage(sparse_array_np, filter_op_mat, self.config.sparsity_M)
 
             self.original_filter_size += original_storage
             self.new_filter_size += new_storage
@@ -146,10 +143,7 @@ class single_layer_sim:
         _, ofmap_op_mat = self.op_mat_obj.get_ofmap_matrix()
 
         # 1.2 Get the metadata for the filter matrix
-        self.calculate_metadata_reads(filter_op_mat)
-        # print("Metadata: ", self.metadata_reads)
-        # assert 1 == 0, "I AM STOPPING THE CODE"        
-
+        self.calculate_metadata_reads(filter_op_mat)     
         self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id) \
                            * self.topo.get_layer_window_size(self.layer_id)
 
@@ -162,7 +156,7 @@ class single_layer_sim:
         # 1.4 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
-        #print('DEBUG: Compute operations done')
+
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
 
         # 2.1 Setup the memory system if it was not setup externally
@@ -257,7 +251,6 @@ class single_layer_sim:
         self.ofmap_sram_writes = self.compute_system.get_ofmap_requests()
         self.avg_ifmap_sram_bw = self.ifmap_sram_reads / self.total_cycles
 
-        # self.avg_filter_sram_bw = (self.filter_sram_reads + self.metadata_reads) / self.total_cycles
         self.avg_filter_sram_bw = self.filter_sram_reads / self.total_cycles
         self.avg_filter_metadata_sram_bw = self.metadata_reads / self.total_cycles
 
@@ -334,9 +327,5 @@ class single_layer_sim:
 
         items = [self.original_filter_size, self.new_filter_size, self.metadata_reads]
         items += [self.avg_filter_metadata_sram_bw]
-
-        # self.original_filter_size += original_storage
-        # self.new_filter_size += new_storage
-        # self.metadata_reads += metadata_storage
 
         return items

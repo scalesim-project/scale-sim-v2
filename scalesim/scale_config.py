@@ -26,7 +26,9 @@ class scale_config:
 
         self.sparsity_support = False
         self.sparsity_representation = ""
-        self.sparse_accelerator = ""
+        self.sparsity_N = 4
+        self.sparsity_M = 4
+        self.sparsity_optimized_mapping = False
 
     #
     def read_conf_file(self, conf_file_in):
@@ -74,14 +76,20 @@ class scale_config:
             self.topofile = config.get(section, 'TopologyCsvLoc').split('"')[1]
 
         # Sparsity
-        if config.get(section, 'SparsitySupport').lower() in ['True', 'true']:
+        section = 'sparsity'        
+        if config.get(section, 'SparsitySupport').lower() == 'true':
             self.sparsity_support = True
         else:
             self.sparsity_support = False
 
         if self.sparsity_support:
             self.sparsity_representation = config.get(section, 'SparseRep')
-            self.sparse_accelerator = config.get(section, 'SparseAcc')
+            self.sparsity_N = int(config.get(section, 'NonZeroElems'))
+            self.sparsity_M = int(config.get(section, 'BlockSize'))
+            if config.get(section, 'OptimizedMapping').lower() == 'true':
+                self.sparsity_optimized_mapping = True
+            else:
+                self.sparsity_optimized_mapping = False
 
         self.valid_conf_flag = True
 

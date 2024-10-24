@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from tqdm import tqdm
+import os
 
 from scalesim.memory.read_buffer import read_buffer as rdbuf
 from scalesim.memory.read_buffer_estimate_bw import ReadBufferEstimateBw as rdbuf_est
@@ -169,8 +170,6 @@ class double_buffered_scratchpad:
 
             cycle_arr = np.zeros((1,1)) + i + self.stall_cycles
 
-            # print("cycle_arr:", cycle_arr)
-
             ifmap_demand_line = ifmap_demand_mat[i, :].reshape((1,ifmap_demand_mat.shape[1]))
             ifmap_cycle_out = self.ifmap_buf.service_reads(incoming_requests_arr_np=ifmap_demand_line,
                                                             incoming_cycles_arr=cycle_arr)
@@ -178,15 +177,10 @@ class double_buffered_scratchpad:
             ifmap_stalls = ifmap_cycle_out[0] - cycle_arr[0] - ifmap_hit_latency
 
             filter_demand_line = filter_demand_mat[i, :].reshape((1, filter_demand_mat.shape[1]))
-
-            # print("filter_demand_line       :", filter_demand_line)
             filter_cycle_out = self.filter_buf.service_reads(incoming_requests_arr_np=filter_demand_line,
                                                            incoming_cycles_arr=cycle_arr)
-            # print("filter_cycle_out         :", filter_cycle_out)
             filter_serviced_cycles += [filter_cycle_out[0]]
-            # print("filter_serviced_cycles   :", filter_serviced_cycles)
             filter_stalls = filter_cycle_out[0] - cycle_arr[0] - filter_hit_latency
-            # print("filter_stalls            :", filter_stalls)
 
             ofmap_demand_line = ofmap_demand_mat[i, :].reshape((1, ofmap_demand_mat.shape[1]))
             ofmap_cycle_out = self.ofmap_buf.service_writes(incoming_requests_arr_np=ofmap_demand_line,
@@ -209,12 +203,6 @@ class double_buffered_scratchpad:
         self.ifmap_trace_matrix = np.concatenate((ifmap_services_cycles_np, ifmap_demand_mat), axis=1)
 
         filter_services_cycles_np = np.asarray(filter_serviced_cycles).reshape((len(filter_serviced_cycles), 1))
-
-        # print("filter_serviced_cycles")
-        # print(filter_serviced_cycles)
-        # print("filter_services_cycles_np")
-        # print(filter_services_cycles_np)
-
         self.filter_trace_matrix = np.concatenate((filter_services_cycles_np, filter_demand_mat), axis=1)
 
         ofmap_services_cycles_np = np.asarray(ofmap_serviced_cycles).reshape((len(ofmap_serviced_cycles), 1))
@@ -406,12 +394,8 @@ class double_buffered_scratchpad:
     def get_filter_sram_start_stop_cycles(self):
         assert self.traces_valid, 'Traces not generated yet'
 
-        # print("get_filter_sram_start_stop_cycles:filter_trace_matrix")
-        # print(self.filter_trace_matrix)
-
         done = False
         for ridx in range(self.filter_trace_matrix.shape[0]):
-            # print(ridx)
 
             if done:
                 break
@@ -422,23 +406,18 @@ class double_buffered_scratchpad:
                     done = True
                     break
 
-        # print("self.filter_sram_start_cycle", self.filter_sram_start_cycle)
-
         done = False
         for ridx in range(self.filter_trace_matrix.shape[0]):
             if done:
                 break
             ridx = -1 * (ridx + 1)
 
-            # print(ridx)
             row = self.filter_trace_matrix[ridx, 1:]
             for addr in row:
                 if not addr == -1:
                     self.filter_sram_stop_cycle = self.filter_trace_matrix[ridx][0]
                     done = True
                     break
-
-        # print("self.filter_sram_stop_cycle", self.filter_sram_stop_cycle)
 
         return self.filter_sram_start_cycle, self.filter_sram_stop_cycle
 
@@ -541,9 +520,10 @@ class double_buffered_scratchpad:
 
         return dram_ifmap_trace, dram_filter_trace, dram_ofmap_trace
 
-        #
+    #
     def print_ifmap_sram_trace(self, filename):
         assert self.traces_valid, 'Traces not generated yet'
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         np.savetxt(filename, self.ifmap_trace_matrix, fmt='%i', delimiter=",")
 
     #
