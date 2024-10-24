@@ -186,7 +186,7 @@ class double_buffered_scratchpad:
             ofmap_cycle_out = self.ofmap_buf.service_writes(incoming_requests_arr_np=ofmap_demand_line,
                                                              incoming_cycles_arr_np=cycle_arr)
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
-            ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0] - 1
+            ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
 
             self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
 
