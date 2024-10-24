@@ -1,7 +1,7 @@
 import os
 from scalesim.scale_config import scale_config
 from scalesim.topology_utils import topologies
-from scalesim.simulator import simulator as sim
+from scalesim.simulator import simulator
 
 
 class scalesim:
@@ -10,7 +10,8 @@ class scalesim:
                  verbose=True,
                  config='',
                  topology='',
-                 input_type_gemm=False):
+                 input_type_gemm=False
+                 ):
 
         # Data structures
         self.config = scale_config()
@@ -22,7 +23,7 @@ class scalesim:
 
         # Member objects
         #self.runner = r.run_nets()
-        self.runner = sim()
+        self.runner = simulator()
 
         # Flags
         self.read_gemm_inputs = input_type_gemm
@@ -36,7 +37,7 @@ class scalesim:
     #
     def set_params(self,
                    config_filename='',
-                   topology_filename='' ):
+                   topology_filename=''):
         # First check if the user provided a valid topology file
         if not topology_filename == '':
             if not os.path.exists(topology_filename):

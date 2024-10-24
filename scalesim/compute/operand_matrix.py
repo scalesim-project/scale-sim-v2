@@ -34,6 +34,9 @@ class operand_matrix(object):
         self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype=int)
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=int)
 
+        # Sparsity matrices
+        self.sparse_filter_array = np.ones((self.conv_window_size, self.num_filters), dtype=int)
+
         # Flags
         self.params_set_flag = False
         self.matrices_ready_flag = False
@@ -118,8 +121,8 @@ class operand_matrix(object):
             print(message)
             return -1
 
-        retcode_1 = self.create_ifmap_matrix()
-        retcode_2 = self.create_filter_matrix()
+        retcode_1 = self.create_filter_matrix()
+        retcode_2 = self.create_ifmap_matrix()
         retcode_3 = self.create_ofmap_matrix()
 
         retcode = retcode_1 + retcode_2 + retcode_3
@@ -140,11 +143,21 @@ class operand_matrix(object):
 
         row_indices = np.arange(self.batch_size * self.ofmap_px_per_filt)
         col_indices = np.arange(self.conv_window_size)
+
         # Create 2D index arrays using meshgrid
         i, j = np.meshgrid(row_indices, col_indices, indexing='ij')
 
         # Call calc_ifmap_elem_addr_numpy with 2D index arrays
         self.ifmap_addr_matrix = self.calc_ifmap_elem_addr(i, j)
+
+        if self.config.sparsity_support:
+            sparse_row = self.sparse_filter_array[:, 0].T
+            self.ifmap_addr_matrix *= sparse_row
+            non_zero_columns = np.any(self.ifmap_addr_matrix != 0, axis=0)
+            if self.ifmap_addr_matrix.shape[0] == 1 and self.config.ifmap_offset == 0:
+                non_zero_columns[0] = True # Always keep the first column
+            self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
+
         return 0
 
     # logic to translate ifmap into matrix fed into systolic array MACs
@@ -181,9 +194,13 @@ class operand_matrix(object):
             message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
             print(message)
             return -1
-
+        
         row_indices = np.expand_dims(np.arange(self.ofmap_px_per_filt), axis=1)
+        # if self.config.sparsity_support:
+        #     _, col_indices = np.unique(np.array(self.filter_addr_matrix[0]), return_inverse=True)
+        # else:
         col_indices = np.arange(self.num_filters)
+
         self.ofmap_addr_matrix = self.calc_ofmap_elem_addr(row_indices, col_indices)
 
         return 0
@@ -207,8 +224,44 @@ class operand_matrix(object):
 
         row_indices = np.expand_dims(np.arange(self.conv_window_size), axis=1)
         col_indices = np.arange(self.num_filters)
+
         self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
 
+        if self.config.sparsity_support == True:
+
+            pattern = np.concatenate([np.ones(self.config.sparsity_N, dtype=int), np.zeros(self.config.sparsity_M - self.config.sparsity_N, dtype=int)])
+            num_repeats = (self.filter_addr_matrix.shape[0] + self.config.sparsity_M - 1) // self.config.sparsity_M
+            column_values = np.tile(pattern, num_repeats)[:self.filter_addr_matrix.shape[0]]
+            sparse_array = np.tile(column_values[:, np.newaxis], (1, self.filter_addr_matrix.shape[1]))
+
+            self.sparse_filter_array = sparse_array
+            self.filter_addr_matrix = np.multiply(self.filter_addr_matrix, sparse_array)
+
+            sparse_filter_matrix = []
+            for col_num in range(self.filter_addr_matrix.shape[1]):
+                col_data = self.filter_addr_matrix[:, col_num]
+                condensed_col = []
+
+                for i in range(0, self.filter_addr_matrix.shape[0], self.config.sparsity_M):
+                    block = col_data[i : i+self.config.sparsity_M]
+                    block_nonzero = block[block != 0]
+
+                    if len(block_nonzero) < self.config.sparsity_N:
+                        padding_num = self.config.sparsity_N - len(block_nonzero)
+                        block_nonzero = np.pad(block_nonzero, (0, padding_num), constant_values=0)
+                    elif len(block_nonzero) > self.config.sparsity_N:
+                        assert False, f'There are excess non-zero entries ({len(block_nonzero)}) as the sparsity ratio is set to {self.config.sparsity_N}:{self.config.sparsity_M}'
+                    
+                    condensed_col.extend(block_nonzero)
+
+                sparse_filter_matrix.append(condensed_col)
+            
+            sparse_filter_matrix = np.array(sparse_filter_matrix).T
+            while sparse_filter_matrix.shape[0] > 0 and np.all(sparse_filter_matrix[-1] == 0):
+                sparse_filter_matrix = sparse_filter_matrix[:-1]
+                
+            self.filter_addr_matrix = sparse_filter_matrix
+            
         return 0
 
     # logic to translate filter into matrix fed into systolic array MACs
@@ -262,6 +315,7 @@ class operand_matrix(object):
             num_rows = self.conv_window_size
         if num_cols == -1:
             num_cols = self.num_filters
+
         my_name = 'operand_matrix.get_filter_matrix_part(): '
         err_prefix = 'Error: ' + my_name
         if not self.matrices_ready_flag:
@@ -284,7 +338,12 @@ class operand_matrix(object):
 
         # Anand: ISSUE #3. FIX
         #ret_mat = self.filter_addr_matrix[start_row: end_row][start_col: end_col]
-        ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
+        # ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
+        if self.config.sparsity_support == True:
+            ret_mat = self.filter_addr_matrix
+        else:
+            ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
+
         return 0, ret_mat
 
     def get_filter_matrix(self):
@@ -322,7 +381,10 @@ class operand_matrix(object):
         end_col = start_col + num_cols
         # Anand: ISSUE #7. Patch
         #ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
-        ret_mat = self.ofmap_addr_matrix[start_row: end_row, start_col: end_col]
+        if self.config.sparsity_support == True:
+            ret_mat =self.ofmap_addr_matrix
+        else:
+            ret_mat = self.ofmap_addr_matrix[start_row: end_row, start_col: end_col]
 
         return 0, ret_mat
 

@@ -1,4 +1,7 @@
 import math
+import ast
+import numpy as np
+import os
 
 
 class topologies(object):
@@ -71,7 +74,7 @@ class topologies(object):
                 k = elems[3].strip()
 
                 # Entries: layer name, Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt, stride h, stride w
-                entries = [layer_name, m, k, 1, k, 1, n, 1, 1]
+                entries = [layer_name, m,       k,       1,        k,        1,      n,        1,        1]
                 #entries are later iterated from index 1. Index 0 is used to store layer name in convolution mode. So, to rectify assignment of M, N and K in GEMM mode, layer name has been added at index 0 of entries. 
                 self.append_topo_arrays(layer_name=layer_name, elems=entries)
 
@@ -79,7 +82,7 @@ class topologies(object):
         self.topo_load_flag = True
 
     # Load the topology data from the file
-    def load_arrays_conv(self, topofile=""):
+    def load_arrays_conv(self, topofile=''):
         first = True
         self.topo_file_name = topofile.split('/')[-1]
         name_arr = self.topo_file_name.split('.')
@@ -332,7 +335,7 @@ class topologies(object):
             self.topo_calc_hyperparams()
         layer_calc_params = self.layers_calculated_hyperparams[layer_id]
         num_filters = self.get_layer_num_filters(layer_id)
-        num_ofmap_px = layer_calc_params[0] * layer_calc_params[1] * num_filters 
+        num_ofmap_px = layer_calc_params[0] * layer_calc_params[1] * num_filters
         return num_ofmap_px
 
     def get_layer_ofmap_dims(self, layer_id=0):

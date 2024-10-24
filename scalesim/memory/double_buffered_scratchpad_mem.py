@@ -1,6 +1,7 @@
 import time
 import numpy as np
 from tqdm import tqdm
+import os
 
 from scalesim.memory.read_buffer import read_buffer as rdbuf
 from scalesim.memory.read_buffer_estimate_bw import ReadBufferEstimateBw as rdbuf_est
@@ -395,6 +396,7 @@ class double_buffered_scratchpad:
 
         done = False
         for ridx in range(self.filter_trace_matrix.shape[0]):
+
             if done:
                 break
             row = self.filter_trace_matrix[ridx, 1:]
@@ -409,6 +411,7 @@ class double_buffered_scratchpad:
             if done:
                 break
             ridx = -1 * (ridx + 1)
+
             row = self.filter_trace_matrix[ridx, 1:]
             for addr in row:
                 if not addr == -1:
@@ -517,9 +520,10 @@ class double_buffered_scratchpad:
 
         return dram_ifmap_trace, dram_filter_trace, dram_ofmap_trace
 
-        #
+    #
     def print_ifmap_sram_trace(self, filename):
         assert self.traces_valid, 'Traces not generated yet'
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
         np.savetxt(filename, self.ifmap_trace_matrix, fmt='%i', delimiter=",")
 
     #
@@ -543,8 +547,3 @@ class double_buffered_scratchpad:
     #
     def print_ofmap_dram_trace(self, filename):
         self.ofmap_buf.print_trace(filename)
-
-
-
-
-
