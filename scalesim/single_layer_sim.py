@@ -246,7 +246,7 @@ class single_layer_sim:
         self.compute_util = self.compute_system.get_avg_compute_utilization() * 100
 
         # BW report
-        self.ifmap_sram_reads = self.compute_system.get_ifmap_requests()  * self.topo.topo_arrays[self.layer_id][3]
+        self.ifmap_sram_reads = self.compute_system.get_ifmap_requests()
         self.filter_sram_reads = self.compute_system.get_filter_requests()
         self.ofmap_sram_writes = self.compute_system.get_ofmap_requests()
         self.avg_ifmap_sram_bw = self.ifmap_sram_reads / self.total_cycles
@@ -301,7 +301,10 @@ class single_layer_sim:
             self.calc_report_data()
 
 
-        items = [self.avg_ifmap_sram_bw, self.avg_filter_sram_bw, self.avg_filter_metadata_sram_bw, self.avg_ofmap_sram_bw]
+        if self.config.sparsity_support == True:
+            items = [self.avg_ifmap_sram_bw, self.avg_filter_sram_bw, self.avg_filter_metadata_sram_bw, self.avg_ofmap_sram_bw]
+        else:
+            items = [self.avg_ifmap_sram_bw, self.avg_filter_sram_bw, self.avg_ofmap_sram_bw]
         items += [self.avg_ifmap_dram_bw, self.avg_filter_dram_bw, self.avg_ofmap_dram_bw]
 
         return items
