@@ -10,8 +10,7 @@ class scalesim:
                  verbose=True,
                  config='',
                  topology='',
-                 input_type_gemm=False,
-                #  sparsity_input=False
+                 input_type_gemm=False
                  ):
 
         # Data structures
@@ -32,14 +31,13 @@ class scalesim:
         self.verbose_flag = verbose
         self.run_done_flag = False
         self.logs_generated_flag = False
-        # self.sparsity_input = sparsity_input
 
         self.set_params(config_filename=config, topology_filename=topology)
 
     #
     def set_params(self,
                    config_filename='',
-                   topology_filename='' ):
+                   topology_filename=''):
         # First check if the user provided a valid topology file
         if not topology_filename == '':
             if not os.path.exists(topology_filename):

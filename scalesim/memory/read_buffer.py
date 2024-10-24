@@ -239,6 +239,9 @@ class read_buffer:
                     self.new_prefetch()
                     potential_stall_cycles = self.last_prefect_cycle - (cycle + offset)
                     offset += potential_stall_cycles        # Offset increments if there were potential stalls
+                    if potential_stall_cycles > 0:
+                        offset += potential_stall_cycles
+                   
 
             out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
@@ -382,7 +385,7 @@ class read_buffer:
         if requested_data_size > self.active_buf_size:
             self.next_line_prefetch_idx = num_lines % self.fetch_matrix.shape[0]
         else:
-            self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[1]
+            self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
 
         # This does not need to return anything
 

@@ -65,8 +65,6 @@ class systolic_compute_ws:
         ifmap_col = self.ifmap_op_mat.shape[1]
         filter_row= self.filter_op_mat.shape[0]
 
-        # print("ifmap_col", ifmap_col, "filter_row", filter_row)
-
         assert ifmap_col == filter_row, "Dimension mismatch between operands"
 
         self.Sr = self.ifmap_op_mat.shape[1]
@@ -171,10 +169,6 @@ class systolic_compute_ws:
         self.create_filter_demand_mat()
         self.create_ofmap_demand_mat()
 
-        # print("IFMAP: ", self.ifmap_demand_matrix.shape[0], "x", self.ifmap_demand_matrix.shape[1])
-        # print("Filter: ", self.filter_demand_matrix.shape[0], "x", self.filter_demand_matrix.shape[1])
-        # print("OFMAP: ", self.ofmap_demand_matrix.shape[0], "x", self.ofmap_demand_matrix.shape[1])
-
         assert self.ifmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], 'IFMAP and Filter demands out of sync'
         assert self.ofmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], 'OFMAP and Filter demands out of sync'
         assert self.ifmap_demand_matrix.shape[1] == self.arr_row, 'IFMAP demands exceed the rows'
@@ -194,13 +188,14 @@ class systolic_compute_ws:
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_row)) * -1
 
         metadata_conversion_mat = [ [ ] ]
-        if self.config.sparsity_support == True:
-            if self.config.sparsity_representation == 'csr':
-                metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
-            elif self.config.sparsity_representation == 'csc':
-                metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
-            elif self.config.sparsity_representation == 'ellpack_block':
-                metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
+        if False:
+            if self.config.sparsity_support == True:
+                if self.config.sparsity_representation == 'csr':
+                    metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
+                elif self.config.sparsity_representation == 'csc':
+                    metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
+                elif self.config.sparsity_representation == 'ellpack_block':
+                    metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
 
         ifmap_demand_matrix_list = []
         for fc in range(self.col_fold):
@@ -212,8 +207,10 @@ class systolic_compute_ws:
                 # Indexing the cols with row start and row end idx are correct
                 # See the comment on ifmap_prefetch generation
                 this_fold_demand = self.ifmap_op_mat[:,col_start_id: col_end_idx]
+                
                 if self.config.sparsity_support:
-                    self.ifmap_reads += self.arr_col * 2
+                    # A single block of input is shared among M/N rows, hence a row needs to be read M/N times (assume absence of any broadcast)
+                    self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1] * (self.config.sparsity_M / self.config.sparsity_N)
                 else:
                     self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 
@@ -232,14 +229,12 @@ class systolic_compute_ws:
                 this_fold_demand = skew_matrix(this_fold_demand)
 
                 ifmap_demand_matrix_list.append(this_fold_demand)
-                #if fr == 0 and fc == 0:
-                #    self.ifmap_demand_matrix = this_fold_demand
-                #else:
-                #    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
+
         self.ifmap_demand_matrix = np.concatenate(ifmap_demand_matrix_list)
 
-        if self.config.sparsity_support == True:
-            self.ifmap_demand_matrix = np.concatenate((metadata_conversion_mat, self.ifmap_demand_matrix), axis=0)
+        if False:
+            if self.config.sparsity_support == True:
+                self.ifmap_demand_matrix = np.concatenate((metadata_conversion_mat, self.ifmap_demand_matrix), axis=0)
 
     # END of IFMAP demand generation
 
@@ -251,15 +246,14 @@ class systolic_compute_ws:
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
 
         metadata_conversion_mat = [ [ ] ]
-        if self.config.sparsity_support == True:
-            if self.config.sparsity_representation == 'csr':
-                metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
-            elif self.config.sparsity_representation == 'csc':
-                metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
-            elif self.config.sparsity_representation == 'ellpack_block':
-                metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
-        # print("inter_fold_gap_suffix_mat")
-        # print(inter_fold_gap_suffix_mat)
+        if False:
+            if self.config.sparsity_support == True:
+                if self.config.sparsity_representation == 'csr':
+                    metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
+                elif self.config.sparsity_representation == 'csc':
+                    metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
+                elif self.config.sparsity_representation == 'ellpack_block':
+                    metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
 
         filter_demand_matrix_list = []
         for fc in range(self.col_fold):
@@ -316,8 +310,9 @@ class systolic_compute_ws:
 
         self.filter_demand_matrix = np.concatenate(filter_demand_matrix_list)
         
-        if self.config.sparsity_support == True:
-            self.filter_demand_matrix = np.concatenate((metadata_conversion_mat, self.filter_demand_matrix), axis=0)
+        if False:
+            if self.config.sparsity_support == True:
+                self.filter_demand_matrix = np.concatenate((metadata_conversion_mat, self.filter_demand_matrix), axis=0)
 
         # No skew needed in filters for weight stationary
 
@@ -329,13 +324,14 @@ class systolic_compute_ws:
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_col)) * -1
 
         metadata_conversion_mat = [ [ ] ]
-        if self.config.sparsity_support == True:
-            if self.config.sparsity_representation == 'csr':
-                metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
-            elif self.config.sparsity_representation == 'csc':
-                metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
-            elif self.config.sparsity_representation == 'ellpack_block':
-                metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
+        if False:
+            if self.config.sparsity_support == True:
+                if self.config.sparsity_representation == 'csr':
+                    metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
+                elif self.config.sparsity_representation == 'csc':
+                    metadata_conversion_mat = np.ones((1, self.arr_col)) * -1
+                elif self.config.sparsity_representation == 'ellpack_block':
+                    metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
 
         ofmap_demand_matrix_list = []
 
@@ -368,8 +364,10 @@ class systolic_compute_ws:
                 #    self.ofmap_demand_matrix = np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
 
         self.ofmap_demand_matrix = np.concatenate(ofmap_demand_matrix_list)
-        if self.config.sparsity_support == True:
-            self.ofmap_demand_matrix = np.concatenate((metadata_conversion_mat, self.ofmap_demand_matrix), axis=0)
+
+        if False:
+            if self.config.sparsity_support == True:
+                self.ofmap_demand_matrix = np.concatenate((metadata_conversion_mat, self.ofmap_demand_matrix), axis=0)
 
     # END of OFMAP demand generation
 
