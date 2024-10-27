@@ -1,6 +1,9 @@
+"""
+This file contains the 'single_layer_sim' class that handles the simulation for a single layer of
+the model and generates the data that goes inside the reports.
+"""
+
 import os
-import ast
-import numpy as np
 from scalesim.compute.compression import compression as cp
 
 from scalesim.scale_config import scale_config as cfg
@@ -12,8 +15,16 @@ from scalesim.compute.systolic_compute_is import systolic_compute_is
 from scalesim.memory.double_buffered_scratchpad_mem import double_buffered_scratchpad as mem_dbsp
 
 class single_layer_sim:
+    """
+    Class which runs the simulation for a single layer and generates report data
+    """
+    #
     def __init__(self):
+        """
+        __init__ method
+        """
         self.layer_id = 0
+        self.dataflow = ''
         self.topo = topo()
         self.config = cfg()
 
@@ -79,10 +90,14 @@ class single_layer_sim:
         self.runs_ready = False
         self.report_items_ready = False
 
+    #
     def set_params(self,
                    layer_id=0,
                    config_obj=cfg(), topology_obj=topo(),
                    verbose=True):
+        """
+        Method to set the run parameters for housekeeping.
+        """
 
         self.layer_id = layer_id
         self.config = config_obj
@@ -110,29 +125,47 @@ class single_layer_sim:
     # This communicates that the memory is being managed externally
     # And the class will not interfere with setting it up
     def set_memory_system(self, mem_sys_obj=mem_dbsp()):
+        """
+        Method to explicitely set the memory system.
+        """
         self.memory_system = mem_sys_obj
         self.memory_system_ready_flag = True
 
-    # Filter Metadata Calculation
-    def calculate_metadata_reads(self, filter_op_mat):        
-        if self.config.sparsity_support == True:
+    #
+    def calculate_filter_metadata_storage(self, filter_op_mat):
+        """
+        Method to calculate the storage occupied by the filter matrix and filter metadata when
+        sparsity is enabled.
+        """
+        if self.config.sparsity_support is True:
             sparse_array_np = self.op_mat_obj.sparse_filter_array
             original_storage = 0
             new_storage = 0
 
             if self.config.sparsity_representation == 'csr':
-                original_storage, new_storage, metadata_storage = self.compression.get_csr_storage(sparse_array_np)
+                original_storage, new_storage, metadata_storage = \
+                                                self.compression.get_csr_storage(sparse_array_np)
             elif self.config.sparsity_representation == 'csc':
-                original_storage, new_storage, metadata_storage = self.compression.get_csc_storage(sparse_array_np)
+                original_storage, new_storage, metadata_storage = \
+                                                self.compression.get_csc_storage(sparse_array_np)
             elif self.config.sparsity_representation == 'ellpack_block':
-                original_storage, new_storage, metadata_storage = self.compression.get_ellpack_block_storage(sparse_array_np, filter_op_mat, self.config.sparsity_M)
+                original_storage, new_storage, metadata_storage = \
+                                self.compression.get_ellpack_block_storage(sparse_array_np,
+                                                                           filter_op_mat,
+                                                                           self.config.sparsity_M)
 
             self.original_filter_size += original_storage
             self.new_filter_size += new_storage
             self.metadata_reads += metadata_storage
     # END of metadata calculation
 
+    #
     def run(self):
+        """
+        Method to run scalesim simulation for a single layer. This method first runs the compute
+        part to generate operand, prefetch and demand matrices in order. After that, it runs the
+        memory simulation using the demand matrices.
+        """
         assert self.params_set_flag, 'Parameters are not set. Run set_params()'
 
         # 1. Setup and the get the demand from compute system
@@ -142,8 +175,8 @@ class single_layer_sim:
         _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
         _, ofmap_op_mat = self.op_mat_obj.get_ofmap_matrix()
 
-        # 1.2 Get the metadata for the filter matrix
-        self.calculate_metadata_reads(filter_op_mat)     
+        # 1.2 Calculate the storage occupied by filter and its metadata
+        self.calculate_filter_metadata_storage(filter_op_mat)
         self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id) \
                            * self.topo.get_layer_window_size(self.layer_id)
 
@@ -155,9 +188,11 @@ class single_layer_sim:
 
         # 1.4 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
-        ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
+        ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = \
+                                                    self.compute_system.get_demand_matrices()
 
-        # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
+        # 2. Setup the memory system and run the demands through it to find any memory bottleneck
+        #    and generate traces
 
         # 2.1 Setup the memory system if it was not setup externally
         if not self.memory_system_ready_flag:
@@ -180,7 +215,6 @@ class single_layer_sim:
                 ofmap_backing_bw = bws[0]
 
             else:
-                dataflow = self.config.get_dataflow()
                 arr_row, arr_col = self.config.get_array_dims()
                 estimate_bandwidth_mode = True
 
@@ -204,14 +238,21 @@ class single_layer_sim:
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup
         if self.config.use_user_dram_bandwidth() :
-            self.memory_system.set_read_buf_prefetch_matrices(ifmap_prefetch_mat=ifmap_prefetch_mat,
-                                                              filter_prefetch_mat=filter_prefetch_mat)
-        self.memory_system.service_memory_requests(ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat)
+            self.memory_system.set_read_buf_prefetch_matrices(
+                                                        ifmap_prefetch_mat=ifmap_prefetch_mat,
+                                                        filter_prefetch_mat=filter_prefetch_mat
+                                                             )
+        self.memory_system.service_memory_requests(ifmap_demand_mat,
+                                                    filter_demand_mat,
+                                                    ofmap_demand_mat)
 
         self.runs_ready = True
 
     # This will write the traces
     def save_traces(self, top_path):
+        """
+        Method to save SRAM and DRAM traces for ifmap, filter and ofmap matrices.
+        """
         assert self.params_set_flag, 'Parameters are not set'
 
         dir_name = top_path + '/layer' + str(self.layer_id)
@@ -236,6 +277,10 @@ class single_layer_sim:
 
     #
     def calc_report_data(self):
+        """
+        Method to generate the report data for a single layer if the run is already completed. This
+        method collects and calculates the data for compute, bandwidth and detail reports.
+        """
         assert self.runs_ready, 'Runs are not done yet'
 
         # Compute report
@@ -276,33 +321,52 @@ class single_layer_sim:
             = self.memory_system.get_ofmap_dram_details()
 
         # BW calc for DRAM access
-        self.avg_ifmap_dram_bw = self.ifmap_dram_reads / (self.ifmap_dram_stop_cycle - self.ifmap_dram_start_cycle + 1)
-        self.avg_filter_dram_bw = self.filter_dram_reads / (self.filter_dram_stop_cycle - self.filter_dram_start_cycle + 1)
-        self.avg_ofmap_dram_bw = self.ofmap_dram_writes / (self.ofmap_dram_stop_cycle - self.ofmap_dram_start_cycle + 1)
+        self.avg_ifmap_dram_bw = self.ifmap_dram_reads / \
+                                (self.ifmap_dram_stop_cycle - self.ifmap_dram_start_cycle + 1)
+        self.avg_filter_dram_bw = self.filter_dram_reads / \
+                                (self.filter_dram_stop_cycle - self.filter_dram_start_cycle + 1)
+        self.avg_ofmap_dram_bw = self.ofmap_dram_writes / \
+                                (self.ofmap_dram_stop_cycle - self.ofmap_dram_start_cycle + 1)
 
         self.report_items_ready = True
 
     #
     def get_layer_id(self):
+        """
+        Method to return layer id.
+        """
         assert self.params_set_flag, 'Parameters are not set yet'
         return self.layer_id
 
     #
     def get_compute_report_items(self):
+        """
+        Method to calculate data for the compute report if not already done.
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 
-        items = [self.total_cycles, self.stall_cycles, self.overall_util, self.mapping_eff, self.compute_util]
+        items = [self.total_cycles,
+                 self.stall_cycles,
+                 self.overall_util,
+                 self.mapping_eff,
+                 self.compute_util]
         return items
 
     #
     def get_bandwidth_report_items(self):
+        """
+        Method to calculate data for the bandwidth report if not already done.
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 
 
-        if self.config.sparsity_support == True:
-            items = [self.avg_ifmap_sram_bw, self.avg_filter_sram_bw, self.avg_filter_metadata_sram_bw, self.avg_ofmap_sram_bw]
+        if self.config.sparsity_support is True:
+            items = [self.avg_ifmap_sram_bw,
+                     self.avg_filter_sram_bw,
+                     self.avg_filter_metadata_sram_bw,
+                     self.avg_ofmap_sram_bw]
         else:
             items = [self.avg_ifmap_sram_bw, self.avg_filter_sram_bw, self.avg_ofmap_sram_bw]
         items += [self.avg_ifmap_dram_bw, self.avg_filter_dram_bw, self.avg_ofmap_dram_bw]
@@ -311,6 +375,9 @@ class single_layer_sim:
 
     #
     def get_detail_report_items(self):
+        """
+        Method to calculate data for the detailed report if not already done.
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 
@@ -325,6 +392,9 @@ class single_layer_sim:
 
     #
     def get_sparse_report_items(self):
+        """
+        Method to calculate data for the sparse report if not already done.
+        """
         if not self.report_items_ready:
             self.calc_report_data()
 

@@ -1,14 +1,24 @@
-import math
+"""
+This file contains the 'operand_matrix' class responsible for creating the IFMAP, Filter and OFMAP
+operand matrices.
+"""
+
 import numpy as np
-from tqdm import tqdm
 
 from scalesim.topology_utils import topologies as topoutil
 from scalesim.scale_config import scale_config as cfg
 
 
-# This class defines data types for operand matrices
 class operand_matrix(object):
+    """
+    Class which creates the IFMAP, filter and OFMAP operand matrices to be used in compute
+    simulation.
+    """
+    #
     def __init__(self):
+        """
+        __init__ method.
+        """
         # Objects from outer container classes
         self.config = cfg()
         self.topoutil = topoutil()
@@ -47,6 +57,9 @@ class operand_matrix(object):
                    topoutil_obj,
                    layer_id=0,
                    ):
+        """
+        Method to set the operand matrix parameters for housekeeping.
+        """
 
         self.config = config_obj
         self.topoutil = topoutil_obj
@@ -56,8 +69,8 @@ class operand_matrix(object):
         #my_name = 'operand_matrix.set_params(): '
         #err_prefix = 'Error: ' + my_name
         #
-        #if (not len(layer_hyper_param_arr) == 7 and not len(layer_hyper_param_arr) == 8
-        #        and not len(layer_hyper_param_arr) == 9) or (not len(layer_calc_hyper_param_arr) == 4) \
+        # if (not len(layer_hyper_param_arr) == 7 and not len(layer_hyper_param_arr) == 8
+        #        and not len(layer_hyper_param_arr)==9) or (not len(layer_calc_hyper_param_arr)==4)\
         #        or (not len(self.matrix_offset_arr) == 3):
         #    message = err_prefix + 'Invalid arguments. Exiting.'
         #    print(message)
@@ -94,7 +107,8 @@ class operand_matrix(object):
             = self.config.get_offsets()
 
         # Address matrices: This is needed to take into account the updated dimensions
-        self.ifmap_addr_matrix = np.ones((self.ofmap_px_per_filt * self.batch_size, self.conv_window_size), dtype='>i4')
+        self.ifmap_addr_matrix = \
+            np.ones((self.ofmap_px_per_filt * self.batch_size, self.conv_window_size), dtype='>i4')
         self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype='>i4')
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype='>i4')
         self.params_set_flag = True
@@ -113,6 +127,9 @@ class operand_matrix(object):
 
     # top level function to create the operand matrices
     def create_operand_matrices(self):
+        """
+        Method to create IFMAP, Filter and OFMAP operand matrices.
+        """
         my_name = 'operand_matrix.create_operand_matrices(): '
         err_prefix = 'Error: ' + my_name
 
@@ -133,6 +150,9 @@ class operand_matrix(object):
 
     # creates the ifmap operand
     def create_ifmap_matrix(self):
+        """
+        Method to create IFMAP operand matrix.
+        """
         my_name = 'operand_matrix.create_ifmap_matrix(): '
         err_prefix = 'Error: ' + my_name
 
@@ -162,6 +182,9 @@ class operand_matrix(object):
 
     # logic to translate ifmap into matrix fed into systolic array MACs
     def calc_ifmap_elem_addr(self, i, j):
+        """
+        Method to calculate the address of an IFMAP element.
+        """
         offset = self.ifmap_offset
         ifmap_rows = self.ifmap_rows
         ifmap_cols = self.ifmap_cols
@@ -181,20 +204,24 @@ class operand_matrix(object):
         valid_indices = np.logical_and(c_row + i_row < ifmap_rows, c_col + i_col < ifmap_cols)
         ifmap_px_addr = np.full(i.shape, -1)
         if valid_indices.any():
-            internal_address = (c_row[valid_indices] * ifmap_cols + c_col[valid_indices]) * channel + c_ch[valid_indices]
+            internal_address = (c_row[valid_indices] * ifmap_cols + c_col[valid_indices]) * \
+                               channel + c_ch[valid_indices]
             ifmap_px_addr[valid_indices] = internal_address + window_addr[valid_indices] + offset
 
         return ifmap_px_addr
 
     # creates the ofmap operand
     def create_ofmap_matrix(self):
+        """
+        Method to create OFMAP operand matrix.
+        """
         my_name = 'operand_matrix.create_ofmap_matrix(): '
         err_prefix = 'Error: ' + my_name
         if not self.params_set_flag:
             message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
             print(message)
             return -1
-        
+
         row_indices = np.expand_dims(np.arange(self.ofmap_px_per_filt), axis=1)
         # if self.config.sparsity_support:
         #     _, col_indices = np.unique(np.array(self.filter_addr_matrix[0]), return_inverse=True)
@@ -207,6 +234,9 @@ class operand_matrix(object):
 
     # logic to translate ofmap into matrix resulting systolic array MACs
     def calc_ofmap_elem_addr(self, i, j):
+        """
+        Method to calculate the address of an OFMAP element.
+        """
         offset = self.ofmap_offset
         num_filt = self.num_filters
         internal_address = num_filt * i + j
@@ -215,6 +245,9 @@ class operand_matrix(object):
 
     # creates the filter operand
     def create_filter_matrix(self):
+        """
+        Method to create filter operand matrix.
+        """
         my_name = 'operand_matrix.create_filter_matrix(): '
         err_prefix = 'Error: ' + my_name
         if not self.params_set_flag:
@@ -227,12 +260,15 @@ class operand_matrix(object):
 
         self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
 
-        if self.config.sparsity_support == True:
-
-            pattern = np.concatenate([np.ones(self.config.sparsity_N, dtype=int), np.zeros(self.config.sparsity_M - self.config.sparsity_N, dtype=int)])
-            num_repeats = (self.filter_addr_matrix.shape[0] + self.config.sparsity_M - 1) // self.config.sparsity_M
+        if self.config.sparsity_support is True:
+            pattern = np.concatenate([np.ones(self.config.sparsity_N, dtype=int),
+                                      np.zeros(self.config.sparsity_M - self.config.sparsity_N,
+                                               dtype=int)])
+            num_repeats = (self.filter_addr_matrix.shape[0] + \
+                           self.config.sparsity_M - 1) // self.config.sparsity_M
             column_values = np.tile(pattern, num_repeats)[:self.filter_addr_matrix.shape[0]]
-            sparse_array = np.tile(column_values[:, np.newaxis], (1, self.filter_addr_matrix.shape[1]))
+            sparse_array = \
+                np.tile(column_values[:, np.newaxis], (1, self.filter_addr_matrix.shape[1]))
 
             self.sparse_filter_array = sparse_array
             self.filter_addr_matrix = np.multiply(self.filter_addr_matrix, sparse_array)
@@ -250,22 +286,28 @@ class operand_matrix(object):
                         padding_num = self.config.sparsity_N - len(block_nonzero)
                         block_nonzero = np.pad(block_nonzero, (0, padding_num), constant_values=0)
                     elif len(block_nonzero) > self.config.sparsity_N:
-                        assert False, f'There are excess non-zero entries ({len(block_nonzero)}) as the sparsity ratio is set to {self.config.sparsity_N}:{self.config.sparsity_M}'
-                    
+                        assert len(block_nonzero) <= self.config.sparsity_N, (
+                            f"Excess non-zero entries ({len(block_nonzero)}) with sparsity ratio "
+                            f"set to {self.config.sparsity_N}:{self.config.sparsity_M}"
+                            )
+
                     condensed_col.extend(block_nonzero)
 
                 sparse_filter_matrix.append(condensed_col)
-            
+
             sparse_filter_matrix = np.array(sparse_filter_matrix).T
             while sparse_filter_matrix.shape[0] > 0 and np.all(sparse_filter_matrix[-1] == 0):
                 sparse_filter_matrix = sparse_filter_matrix[:-1]
-                
+
             self.filter_addr_matrix = sparse_filter_matrix
-            
+
         return 0
 
     # logic to translate filter into matrix fed into systolic array MACs
     def calc_filter_elem_addr(self, i, j):
+        """
+        Method to calculate the address of a filter element.
+        """
         offset = self.filter_offset
         filter_row = self.filter_rows
         filter_col = self.filter_cols
@@ -277,6 +319,10 @@ class operand_matrix(object):
     # function to get a part or the full ifmap operand
     def get_ifmap_matrix_part(self, start_row=0, num_rows=-1, start_col=0,
                               num_cols=-1):
+        """
+        Method to get a part or full IFMAP operand matrix if no error. If error, return the error
+        code.
+        """
         if num_rows == -1:
             num_rows = self.ofmap_px_per_filt
         if num_cols == -1:
@@ -290,7 +336,8 @@ class operand_matrix(object):
                 message = err_prefix + ": Parameters not set yet. Run set_params(). Exiting!"
                 print(message)
                 return -1, np.zeros((1, 1))
-        if (start_row + num_rows) > self.ofmap_px_per_filt or (start_col + num_cols) > self.conv_window_size:
+        if (start_row + num_rows) > self.ofmap_px_per_filt or \
+           (start_col + num_cols) > self.conv_window_size:
             message = err_prefix + ": Illegal arguments. Exiting!"
             print(message)
             return -2, np.zeros((1, 1))
@@ -304,12 +351,20 @@ class operand_matrix(object):
         ret_mat = self.ifmap_addr_matrix[start_row: end_row, start_col: end_col]
         return 0, ret_mat
 
+    #
     def get_ifmap_matrix(self):
+        """
+        Method to get IFMAP operand matrix.
+        """
         return self.get_ifmap_matrix_part()
 
     # function to get a part or the full filter operand
     def get_filter_matrix_part(self, start_row=0, num_rows=-1, start_col=0,
                                num_cols=-1):
+        """
+        Method to get a part or full filter operand matrix if no error. If error, return the error
+        code.
+        """
 
         if num_rows == -1:
             num_rows = self.conv_window_size
@@ -325,7 +380,8 @@ class operand_matrix(object):
                 message = err_prefix + ": Parameters not set yet. Run set_params(). Exiting!"
                 print(message)
                 return -1, np.zeros((1, 1))
-        if (start_row + num_rows) > self.conv_window_size or (start_col + num_cols) > self.num_filters:
+        if (start_row + num_rows) > self.conv_window_size or \
+           (start_col + num_cols) > self.num_filters:
             message = err_prefix + ": Illegal arguments. Exiting!"
             print(message)
             return -2, np.zeros((1, 1))
@@ -339,19 +395,27 @@ class operand_matrix(object):
         # Anand: ISSUE #3. FIX
         #ret_mat = self.filter_addr_matrix[start_row: end_row][start_col: end_col]
         # ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
-        if self.config.sparsity_support == True:
+        if self.config.sparsity_support is True:
             ret_mat = self.filter_addr_matrix
         else:
             ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
 
         return 0, ret_mat
 
+    #
     def get_filter_matrix(self):
+        """
+        Method to get filter operand matrix.
+        """
         return self.get_filter_matrix_part()
 
     # function to get a part or the full ofmap operand
     def get_ofmap_matrix_part(self, start_row=0, num_rows=-1, start_col=0,
                                num_cols=-1):
+        """
+        Method to get a part or full OFMAP operand matrix if no error. If error, return the error
+        code.
+        """
 
         # Since we cannot pass self as an argument in the member functions
         # This is an alternate way of making the matrix dimensions as defaults
@@ -368,7 +432,8 @@ class operand_matrix(object):
                 message = err_prefix + ": Parameters not set yet. Run set_params(). Exiting!"
                 print(message)
                 return -1, np.zeros((1, 1))
-        if (start_row + num_rows) > self.ofmap_px_per_filt or (start_col + num_cols) > self.num_filters:
+        if (start_row + num_rows) > self.ofmap_px_per_filt or \
+           (start_col + num_cols) > self.num_filters:
             message = err_prefix + ": Illegal arguments. Exiting!"
             print(message)
             return -2, np.zeros((1, 1))
@@ -381,17 +446,25 @@ class operand_matrix(object):
         end_col = start_col + num_cols
         # Anand: ISSUE #7. Patch
         #ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
-        if self.config.sparsity_support == True:
+        if self.config.sparsity_support is True:
             ret_mat =self.ofmap_addr_matrix
         else:
             ret_mat = self.ofmap_addr_matrix[start_row: end_row, start_col: end_col]
 
         return 0, ret_mat
 
+    #
     def get_ofmap_matrix(self):
+        """
+        Method to get OFMAP operand matrix.
+        """
         return self.get_ofmap_matrix_part()
 
+    #
     def get_all_operand_matrix(self):
+        """
+        Method to get IFMAP, Filter and OFMAP operand matrices.
+        """
         if not self.matrices_ready_flag:
             me = 'operand_matrix.' + 'get_all_operand_matrix()'
             message = 'ERROR:' + me + ': Matrices not ready or matrix gen failed'
@@ -404,16 +477,16 @@ class operand_matrix(object):
 
 
 if __name__ == '__main__':
-    opmat = operand_matrix()
+    # opmat = operand_matrix()
     tutil = topoutil()
-    lid = 3
     topology_file = "../../topologies/mlperf/test.csv"
     tutil.load_arrays(topofile=topology_file)
-    for i in range(tutil.get_num_layers()):
-        layer_param_arr = tutil.get_layer_params(layer_id=i)
-        ofmap_dims = tutil.get_layer_ofmap_dims(layer_id=i)
-        ofmap_px_filt = tutil.get_layer_num_ofmap_px(layer_id=i) / tutil.get_layer_num_filters(layer_id=i)
-        conv_window_size = tutil.get_layer_window_size(layer_id=i)
+    for id in range(tutil.get_num_layers()):
+        layer_param_arr = tutil.get_layer_params(layer_id=id)
+        ofmap_dims = tutil.get_layer_ofmap_dims(layer_id=id)
+        ofmap_px_filt = \
+            tutil.get_layer_num_ofmap_px(layer_id=id) / tutil.get_layer_num_filters(layer_id=id)
+        conv_window_size = tutil.get_layer_window_size(layer_id=id)
         layer_calc_hyper_param_arr = [ofmap_dims[0], ofmap_dims[1], ofmap_px_filt, conv_window_size]
         config_arr = [512, 512, 256, 8, 8]
         #[matrix_set, ifmap_addr_matrix, filter_addr_matrix, ofmap_addr_matrix] \
