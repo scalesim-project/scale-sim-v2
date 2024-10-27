@@ -1,3 +1,8 @@
+"""
+This file is the main script for running SCALE-Sim with the given topology and configuration files.
+It handles argument parsing and execution.
+"""
+
 import argparse
 
 from scalesim.scale_sim import scalesim
@@ -27,13 +32,13 @@ if __name__ == '__main__':
     logpath = args.p
     inp_type = args.i
 
-    gemm_input = False
+    GEMM_INPUT = False
     if inp_type == 'gemm':
-        gemm_input = True
+        GEMM_INPUT = True
 
     s = scalesim(save_disk_space=True, verbose=True,
                  config=config,
                  topology=topology,
-                 input_type_gemm=gemm_input
+                 input_type_gemm=GEMM_INPUT
                  )
     s.run_scale(top_path=logpath)
