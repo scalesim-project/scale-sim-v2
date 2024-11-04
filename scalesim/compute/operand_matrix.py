@@ -29,6 +29,7 @@ class operand_matrix(object):
         self.filter_rows, self.filter_cols = 1, 1
         self.num_input_channels, self.num_filters = 1, 1
         self.row_stride, self.col_stride = 1, 1
+        self.sparsity_ratio_N, self.sparsity_ratio_M = 1, 1
         self.batch_size = 1
 
         #  Derived hyper parameters
@@ -81,6 +82,8 @@ class operand_matrix(object):
         self.num_input_channels = self.topoutil.get_layer_num_channels(self.layer_id)
         self.num_filters = self.topoutil.get_layer_num_filters(self.layer_id)
         self.row_stride, self.col_stride = self.topoutil.get_layer_strides(self.layer_id)
+        self.sparsity_ratio_N, self.sparsity_ratio_M = \
+            self.topoutil.get_layer_sparsity_ratio(self.layer_id)
         # TODO: Marked for cleanup
         #self.row_stride = layer_hyper_param_arr[6]
         #if len(layer_hyper_param_arr) == 8:
@@ -261,11 +264,11 @@ class operand_matrix(object):
         self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
 
         if self.config.sparsity_support is True:
-            pattern = np.concatenate([np.ones(self.config.sparsity_N, dtype=int),
-                                      np.zeros(self.config.sparsity_M - self.config.sparsity_N,
+            pattern = np.concatenate([np.ones(self.sparsity_ratio_N, dtype=int),
+                                      np.zeros(self.sparsity_ratio_M - self.sparsity_ratio_N,
                                                dtype=int)])
             num_repeats = (self.filter_addr_matrix.shape[0] + \
-                           self.config.sparsity_M - 1) // self.config.sparsity_M
+                           self.sparsity_ratio_M - 1) // self.sparsity_ratio_M
             column_values = np.tile(pattern, num_repeats)[:self.filter_addr_matrix.shape[0]]
             sparse_array = \
                 np.tile(column_values[:, np.newaxis], (1, self.filter_addr_matrix.shape[1]))
@@ -278,17 +281,17 @@ class operand_matrix(object):
                 col_data = self.filter_addr_matrix[:, col_num]
                 condensed_col = []
 
-                for i in range(0, self.filter_addr_matrix.shape[0], self.config.sparsity_M):
-                    block = col_data[i : i+self.config.sparsity_M]
+                for i in range(0, self.filter_addr_matrix.shape[0], self.sparsity_ratio_M):
+                    block = col_data[i : i+self.sparsity_ratio_M]
                     block_nonzero = block[block != 0]
 
-                    if len(block_nonzero) < self.config.sparsity_N:
-                        padding_num = self.config.sparsity_N - len(block_nonzero)
+                    if len(block_nonzero) < self.sparsity_ratio_N:
+                        padding_num = self.sparsity_ratio_N - len(block_nonzero)
                         block_nonzero = np.pad(block_nonzero, (0, padding_num), constant_values=0)
-                    elif len(block_nonzero) > self.config.sparsity_N:
-                        assert len(block_nonzero) <= self.config.sparsity_N, (
+                    elif len(block_nonzero) > self.sparsity_ratio_N:
+                        assert len(block_nonzero) <= self.sparsity_ratio_N, (
                             f"Excess non-zero entries ({len(block_nonzero)}) with sparsity ratio "
-                            f"set to {self.config.sparsity_N}:{self.config.sparsity_M}"
+                            f"set to {self.sparsity_ratio_N}:{self.sparsity_ratio_M}"
                             )
 
                     condensed_col.extend(block_nonzero)

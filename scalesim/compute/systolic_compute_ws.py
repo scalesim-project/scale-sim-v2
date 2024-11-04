@@ -22,6 +22,8 @@ class systolic_compute_ws:
         """
         # Params set by user
         self.config = cfg()
+        self.sparsity_ratio_N = 1
+        self.sparsity_ratio_M = 1
 
         self.ifmap_op_mat = np.zeros((1, 1))
         self.ofmap_op_mat = np.zeros((1, 1))
@@ -68,7 +70,9 @@ class systolic_compute_ws:
                    config_obj=cfg(),
                    ifmap_op_mat = np.zeros((1,1)),
                    ofmap_op_mat = np.zeros((1,1)),
-                   filter_op_mat = np.zeros((1,1))
+                   filter_op_mat = np.zeros((1,1)),
+                   sparsity_ratio_N = 1,
+                   sparsity_ratio_M = 1
                 ):
         """
         Method to set the weight stationary run parameters for housekeeping.
@@ -78,6 +82,8 @@ class systolic_compute_ws:
         self.ifmap_op_mat = ifmap_op_mat
         self.filter_op_mat = filter_op_mat
         self.ofmap_op_mat = ofmap_op_mat
+        self.sparsity_ratio_N = sparsity_ratio_N
+        self.sparsity_ratio_M = sparsity_ratio_M
 
         ifmap_col = self.ifmap_op_mat.shape[1]
         filter_row= self.filter_op_mat.shape[0]
@@ -253,7 +259,7 @@ class systolic_compute_ws:
                     # A single block of input is shared among M/N rows, hence a row needs to be read
                     # M/N times (assume absence of any broadcast)
                     self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1] * \
-                                        (self.config.sparsity_M / self.config.sparsity_N)
+                                        (self.sparsity_ratio_M / self.sparsity_ratio_N)
                 else:
                     self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 

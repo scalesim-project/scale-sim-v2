@@ -100,10 +100,11 @@ class topologies(object):
                 m = elems[1].strip()
                 n = elems[2].strip()
                 k = elems[3].strip()
+                sparsity_ratio = elems[4].strip().split(':')
 
                 # Entries: layer name, Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt,
-                #          stride h, stride w
-                entries = [layer_name, m, k, 1, k, 1, n, 1, 1]
+                #          stride h, stride w, N in N:M, M in N:M
+                entries = [layer_name, m, k, 1, k, 1, n, 1, 1, sparsity_ratio[0], sparsity_ratio[1]]
                 # entries are later iterated from index 1. Index 0 is used to store layer name in
                 # convolution mode. So, to rectify assignment of M, N and K in GEMM mode, layer name
                 # has been added at index 0 of entries.
@@ -125,6 +126,7 @@ class topologies(object):
             self.current_topo_name = self.topo_file_name.split('.')[-2]
         else:
             self.current_topo_name = self.topo_file_name
+
         f = open(topofile, 'r')
         for row in f:
             row = row.strip()
@@ -132,6 +134,15 @@ class topologies(object):
                 first = False
             else:
                 elems = row.split(',')[:-1]
+
+                # Add the same stride in the col direction automatically
+                elems = elems[0:8] + [elems[7]] + elems[8:]
+
+                # Parsing sparsity ratio
+                sparsity_ratio = elems.pop().strip().split(':')
+                elems.append(sparsity_ratio[0])
+                elems.append(sparsity_ratio[1])
+
                 # depth-wise convolution
                 if 'DP' in elems[0].strip():
                     for dp_layer in range(int(elems[5].strip())):
@@ -203,12 +214,16 @@ class topologies(object):
         for i in range(1, len(elems)):
             val = int(str(elems[i]).strip())
             entry.append(val)
-            if i == 7 and len(elems) < 9:
-                entry.append(val)  # Add the same stride in the col direction automatically
+            # These 3 lines are taken care in the parent function call
+            # if i == 7 and len(elems) < 9:
+            #     print("Adding extra value")
+            #     entry.append(val)  # Add the same stride in the col direction automatically
 
         # ISSUE #9 Fix
         assert entry[3] <= entry[1], 'Filter height cannot be larger than IFMAP height'
         assert entry[4] <= entry[2], 'Filter width cannot be larger than IFMAP width'
+
+        print(entry)
 
         self.topo_arrays.append(entry)
 
@@ -414,6 +429,17 @@ class topologies(object):
 
         layer_params = self.topo_arrays[layer_id]
         return layer_params[7:9]
+
+    #
+    def get_layer_sparsity_ratio(self, layer_id=0):
+        """
+        Method to get the sparsity ratio of the layer if available. If not, print an error message.
+        """
+        if not (self.topo_load_flag or self.num_layers - 1 < layer_id):
+            print("ERROR: topologies.get_layer_sparsity_ratio: Invalid layer id")
+
+        layer_params = self.topo_arrays[layer_id]
+        return layer_params[9:11]
 
     #
     def get_layer_window_size(self, layer_id=0):

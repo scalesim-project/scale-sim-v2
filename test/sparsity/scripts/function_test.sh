@@ -6,7 +6,7 @@ sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 
 source venv2/bin/activate
 export PYTHONPATH=.
-python3 $path/scalesim/scale.py -c $path/configs/sparsity.cfg -t $path/topologies/conv_nets/alexnet_part.csv -p $path/sparsity_outputs
+python3 $path/scalesim/scale.py -c $path/configs/sparsity.cfg -t $path/topologies/sparsity/alexnet_part.csv -p $path/sparsity_outputs
 
 DIFF1=$(diff $path/sparsity_outputs/scalesim_sparsity/BANDWIDTH_REPORT.csv $path/test/sparsity/golden_trace/BANDWIDTH_REPORT.csv)
 DIFF2=$(diff $path/sparsity_outputs/scalesim_sparsity/COMPUTE_REPORT.csv $path/test/sparsity/golden_trace/COMPUTE_REPORT.csv)
