@@ -198,7 +198,7 @@ class single_layer_sim:
             self.compute_system.set_params(config_obj=self.config,
                                            ifmap_op_mat=ifmap_op_mat,
                                            filter_op_mat=filter_op_mat,
-                                           ofmap_op_mat=ofmap_op_mat)            
+                                           ofmap_op_mat=ofmap_op_mat)
 
         # 1.4 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()

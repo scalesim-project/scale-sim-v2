@@ -100,6 +100,9 @@ class topologies(object):
                 m = elems[1].strip()
                 n = elems[2].strip()
                 k = elems[3].strip()
+                if len(elems) < 5:
+                    # If sparsity ratio is missing in the topology file, consider the default ratio
+                    elems.append("1:1")
                 sparsity_ratio = elems[4].strip().split(':')
 
                 # Entries: layer name, Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt,
@@ -139,6 +142,9 @@ class topologies(object):
                 elems = elems[0:8] + [elems[7]] + elems[8:]
 
                 # Parsing sparsity ratio
+                if len(elems) < 10:
+                    # If sparsity ratio is missing in the topology file, consider the default ratio
+                    elems.append("1:1")
                 sparsity_ratio = elems.pop().strip().split(':')
                 elems.append(sparsity_ratio[0])
                 elems.append(sparsity_ratio[1])
@@ -222,8 +228,6 @@ class topologies(object):
         # ISSUE #9 Fix
         assert entry[3] <= entry[1], 'Filter height cannot be larger than IFMAP height'
         assert entry[4] <= entry[2], 'Filter width cannot be larger than IFMAP width'
-
-        print(entry)
 
         self.topo_arrays.append(entry)
 
