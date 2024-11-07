@@ -34,6 +34,9 @@ class single_layer_sim:
 
         self.verbose = True
 
+        self.sparsity_ratio_N = 1
+        self.sparsity_ratio_M = 1
+
         # Compression
         self.compression = cp()
         self.original_filter_size = 0
@@ -120,6 +123,9 @@ class single_layer_sim:
         self.num_mac_unit = arr_dims[0] * arr_dims[1]
         self.verbose=verbose
 
+        self.sparsity_ratio_N, self.sparsity_ratio_M = \
+            self.topo.get_layer_sparsity_ratio(self.layer_id)
+
         self.params_set_flag = True
 
     # This communicates that the memory is being managed externally
@@ -152,7 +158,7 @@ class single_layer_sim:
                 original_storage, new_storage, metadata_storage = \
                                 self.compression.get_ellpack_block_storage(sparse_array_np,
                                                                            filter_op_mat,
-                                                                           self.config.sparsity_M)
+                                                                           self.sparsity_ratio_M)
 
             self.original_filter_size += original_storage
             self.new_filter_size += new_storage
@@ -181,10 +187,18 @@ class single_layer_sim:
                            * self.topo.get_layer_window_size(self.layer_id)
 
         # 1.3 Get the prefetch matrices for both operands
-        self.compute_system.set_params(config_obj=self.config,
-                                       ifmap_op_mat=ifmap_op_mat,
-                                       filter_op_mat=filter_op_mat,
-                                       ofmap_op_mat=ofmap_op_mat)
+        if self.dataflow == 'ws':
+            self.compute_system.set_params(config_obj=self.config,
+                                           ifmap_op_mat=ifmap_op_mat,
+                                           filter_op_mat=filter_op_mat,
+                                           ofmap_op_mat=ofmap_op_mat,
+                                           sparsity_ratio_N=self.sparsity_ratio_N,
+                                           sparsity_ratio_M=self.sparsity_ratio_M)
+        else:
+            self.compute_system.set_params(config_obj=self.config,
+                                           ifmap_op_mat=ifmap_op_mat,
+                                           filter_op_mat=filter_op_mat,
+                                           ofmap_op_mat=ofmap_op_mat)
 
         # 1.4 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
