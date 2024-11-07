@@ -36,8 +36,8 @@ class scale_config:
 
         self.sparsity_support = False
         self.sparsity_representation = ""
-        self.sparsity_N = 4
-        self.sparsity_M = 4
+        # self.sparsity_N = 4
+        # self.sparsity_M = 4
         self.sparsity_optimized_mapping = False
 
     #
@@ -97,8 +97,8 @@ class scale_config:
 
         if self.sparsity_support:
             self.sparsity_representation = config.get(section, 'SparseRep')
-            self.sparsity_N = int(config.get(section, 'NonZeroElems'))
-            self.sparsity_M = int(config.get(section, 'BlockSize'))
+            # self.sparsity_N = int(config.get(section, 'NonZeroElems'))
+            # self.sparsity_M = int(config.get(section, 'BlockSize'))
             if config.get(section, 'OptimizedMapping').lower() == 'true':
                 self.sparsity_optimized_mapping = True
             else:

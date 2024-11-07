@@ -61,7 +61,7 @@ class compression:
                metadata_storage
 
     #
-    def compress_to_ellpack_block(self, matrix, filter_op_mat, sparsity_M):
+    def compress_to_ellpack_block(self, matrix, filter_op_mat, sparsity_ratio_M):
         """
         Method to compress a given matrix using the Blocked ELLPACK format.
         """
@@ -72,7 +72,7 @@ class compression:
 
         # Units: Words (considering 1 word = 4 bytes = 32 bits)
         original_storage = original_rows * original_cols
-        metadata_storage = ((new_rows * new_cols) * math.ceil(math.log2(sparsity_M))) / 32
+        metadata_storage = ((new_rows * new_cols) * math.ceil(math.log2(sparsity_ratio_M))) / 32
         new_storage = (new_rows * new_cols) + metadata_storage
 
         return original_storage, new_storage, metadata_storage
@@ -98,11 +98,11 @@ class compression:
         return original_storage, new_storage, metadata_storage
 
     #
-    def get_ellpack_block_storage(self, matrix, filter_op_mat, sparsity_M):
+    def get_ellpack_block_storage(self, matrix, filter_op_mat, sparsity_ratio_M):
         """
         Method to get the sizes of original filter, compressed dense filter matrix and its metadata
         when Blocked ELLPACK is used as the comprtession format.
         """
         original_storage, new_storage, metadata_storage = \
-            self.compress_to_ellpack_block(matrix, filter_op_mat, sparsity_M)
+            self.compress_to_ellpack_block(matrix, filter_op_mat, sparsity_ratio_M)
         return original_storage, new_storage, metadata_storage
