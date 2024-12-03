@@ -9,6 +9,9 @@ class scale_config:
         # Anand: ISSUE #2. Patch
         self.use_user_bandwidth = False
 
+        # Sarbartha: Added ramulator based DRAM trace support
+        self.use_ramulator_trace = False
+
         self.array_rows = 4
         self.array_cols = 4
         self.ifmap_sz_kb = 256
@@ -18,6 +21,8 @@ class scale_config:
         self.ifmap_offset = 0
         self.filter_offset = 10000000
         self.ofmap_offset = 20000000
+        self.req_buf_sz_rd = 60
+        self.req_buf_sz_wr = 60
         self.topofile = ""
         self.bandwidths = []
         self.valid_conf_flag = False
@@ -47,6 +52,14 @@ class scale_config:
             message += 'Use either USER or CALC in InterfaceBandwidth feild. Aborting!'
             return
 
+        ramulator_on = config.get(section, 'UseRamulatorTrace')
+        if ramulator_on == 'True':
+            self.use_ramulator_trace = True
+        else:
+            self.use_ramulator_trace = False
+
+        # TODO Sarbartha: Should be bw
+        div_factor = 1
         section = 'architecture_presets'
         self.array_rows = int(config.get(section, 'ArrayHeight'))
         self.array_cols = int(config.get(section, 'ArrayWidth'))
@@ -57,6 +70,8 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
+        self.req_buf_sz_rd = int(config.get(section, 'ReadRequestBuffer')) // div_factor
+        self.req_buf_sz_wr = int(config.get(section, 'WriteRequestBuffer')) // div_factor
 
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
@@ -256,6 +271,18 @@ class scale_config:
         if self.valid_conf_flag:
             return self.ifmap_offset, self.filter_offset, self.ofmap_offset
 
+    def get_ramulator_trace(self):
+        if self.valid_conf_flag:
+            return self.use_ramulator_trace
+    
+    def get_req_buf_sz_rd(self):
+        if self.valid_conf_flag:
+            return self.req_buf_sz_rd
+    
+    def get_req_buf_sz_wr(self):
+        if self.valid_conf_flag:
+            return self.req_buf_sz_wr
+    
     def get_bandwidths_as_string(self):
         if self.valid_conf_flag:
             return ','.join([str(x) for x in self.bandwidths])
