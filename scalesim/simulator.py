@@ -78,10 +78,12 @@ class simulator:
 
             if self.verbose:
                 comp_items = single_layer_obj.get_compute_report_items()
-                comp_cycles = comp_items[0]
-                stall_cycles = comp_items[1]
-                util = comp_items[2]
-                mapping_eff = comp_items[3]
+                total_cycles = comp_items[0]
+                comp_cycles = comp_items[1]
+                stall_cycles = comp_items[2]
+                util = comp_items[3]
+                mapping_eff = comp_items[4]
+                print('Total cycles: ' + str(total_cycles))
                 print('Compute cycles: ' + str(comp_cycles))
                 print('Stall cycles: ' + str(stall_cycles))
                 print('Overall utilization: ' + "{:.2f}".format(util) +'%')
