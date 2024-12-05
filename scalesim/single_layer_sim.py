@@ -193,7 +193,9 @@ class single_layer_sim:
                                            filter_op_mat=filter_op_mat,
                                            ofmap_op_mat=ofmap_op_mat,
                                            sparsity_ratio_N=self.sparsity_ratio_N,
-                                           sparsity_ratio_M=self.sparsity_ratio_M)
+                                           sparsity_ratio_M=self.sparsity_ratio_M,
+                                           ifmap_op_mat_original=self.op_mat_obj.ifmap_addr_matrix_original,
+                                           sparsity_filter_array=self.op_mat_obj.sparse_filter_array)
         else:
             self.compute_system.set_params(config_obj=self.config,
                                            ifmap_op_mat=ifmap_op_mat,

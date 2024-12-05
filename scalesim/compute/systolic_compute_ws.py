@@ -49,6 +49,9 @@ class systolic_compute_ws:
         self.ofmap_demand_matrix = np.zeros((1,1))
         self.filter_demand_matrix = np.zeros((1,1))
 
+        self.ifmap_op_mat_original = np.zeros((1,1))
+        self.sparsity_filter_array = np.zeros((1,1))
+
         # Generated metrics
         self.ifmap_reads = 0
         self.filter_reads = 0
@@ -72,7 +75,9 @@ class systolic_compute_ws:
                    ofmap_op_mat = np.zeros((1,1)),
                    filter_op_mat = np.zeros((1,1)),
                    sparsity_ratio_N = 1,
-                   sparsity_ratio_M = 1
+                   sparsity_ratio_M = 1,
+                   ifmap_op_mat_original = np.zeros((1,1)),
+                   sparsity_filter_array = np.zeros((1,1))
                 ):
         """
         Method to set the weight stationary run parameters for housekeeping.
@@ -84,6 +89,9 @@ class systolic_compute_ws:
         self.ofmap_op_mat = ofmap_op_mat
         self.sparsity_ratio_N = sparsity_ratio_N
         self.sparsity_ratio_M = sparsity_ratio_M
+
+        self.ifmap_op_mat_original = ifmap_op_mat_original
+        self.sparsity_filter_array = sparsity_filter_array
 
         ifmap_col = self.ifmap_op_mat.shape[1]
         filter_row= self.filter_op_mat.shape[0]
@@ -245,8 +253,18 @@ class systolic_compute_ws:
                     metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
 
         ifmap_demand_matrix_list = []
+        print("########## IFMAP demand matrix ##########")
+        print("self.ifmap_op_mat_original")
+        print(self.ifmap_op_mat_original)
+        print(self.ifmap_op_mat_original.shape)
+        print("self.sparsity_filter_array")
+        print(self.sparsity_filter_array.T)
+        print(self.sparsity_filter_array.T.shape)
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
+                # self.ifmap_op_mat_original[]
+
+
                 col_start_id = fr * self.arr_row
                 col_end_idx = min(col_start_id + self.arr_row, self.Sr)
                 delta = self.arr_row - (col_end_idx - col_start_id)
@@ -254,6 +272,8 @@ class systolic_compute_ws:
                 # Indexing the cols with row start and row end idx are correct
                 # See the comment on ifmap_prefetch generation
                 this_fold_demand = self.ifmap_op_mat[:,col_start_id: col_end_idx]
+                print(">one")
+                print(this_fold_demand)
 
                 if self.config.sparsity_support:
                     # A single block of input is shared among M/N rows, hence a row needs to be read
@@ -267,21 +287,32 @@ class systolic_compute_ws:
                 if delta > 0:
                     null_req_mat = np.ones((self.T, delta)) * -1
                     this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
+                print(">two")
+                print(this_fold_demand)
+                
 
                 # Account for the cycles for weights to load
                 this_fold_demand = np.concatenate((inter_fold_gap_prefix_mat, this_fold_demand),
                                                   axis=0)
+                print(">three")
+                print(this_fold_demand)
 
                 # Account for the cycles for final output to drain out
                 this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat),
                                                   axis=0)
+                print(">four")
+                print(this_fold_demand)
 
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
+                print(">five")
+                print(this_fold_demand)
 
                 ifmap_demand_matrix_list.append(this_fold_demand)
 
         self.ifmap_demand_matrix = np.concatenate(ifmap_demand_matrix_list)
+        print("self.ifmap_demand_matrix final")
+        print(self.ifmap_demand_matrix)
 
         if False:
             if self.config.sparsity_support is True:
@@ -333,7 +364,8 @@ class systolic_compute_ws:
                 if row_delta > 0:
                     null_req_mat = np.ones((row_delta, self.arr_col)) * -1
                     this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=0)
-
+                print("this_fold_demand")
+                print(this_fold_demand)
                 # The filters are needed to be filled in reverse order to ensure that
                 # top element is pushed in last to maintain alignment with the input elements
                 this_fold_demand = np.flip(this_fold_demand, 0)
@@ -369,6 +401,8 @@ class systolic_compute_ws:
                 #       np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
 
         self.filter_demand_matrix = np.concatenate(filter_demand_matrix_list)
+        print("self.filter_demand_matrix final")
+        print(self.filter_demand_matrix)
 
         if False:
             if self.config.sparsity_support is True:
