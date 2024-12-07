@@ -138,6 +138,8 @@ class read_buffer:
         num_elems = fetch_matrix_np.shape[0] * fetch_matrix_np.shape[1]
         num_lines = int(math.ceil(num_elems / self.req_gen_bandwidth))
         self.fetch_matrix = np.ones((num_lines, self.req_gen_bandwidth)) * -1
+        print("set_fetch_matrix")
+        print(self.fetch_matrix.shape)
 
         # Put stuff into the fetch matrix
         # This is done to ensure that there is no shape mismatch
@@ -295,6 +297,7 @@ class read_buffer:
         # Also, calculate the cycles arr for requests
 
         # 1. Preparing the requests:
+        print("prefetch_active_buffer")
         num_lines = math.ceil(self.active_buf_size / self.req_gen_bandwidth)
         if not num_lines < self.fetch_matrix.shape[0]:
             num_lines = self.fetch_matrix.shape[0]
@@ -306,6 +309,7 @@ class read_buffer:
         end_idx = num_lines
 
         prefetch_requests = self.fetch_matrix[start_idx:end_idx, :]
+        print(prefetch_requests.shape)
 
         # 1.1 See if extra requests are made, if so nullify them
         self.next_col_prefetch_idx = 0
@@ -315,6 +319,7 @@ class read_buffer:
             self.next_col_prefetch_idx = valid_cols
             for col in range(valid_cols, self.req_gen_bandwidth):
                 prefetch_requests[row][col] = -1
+        print(prefetch_requests.shape)
 
         # TODO: Tally and check if this agrees with the contents of the hashed buffer
 
@@ -330,6 +335,7 @@ class read_buffer:
         response_cycles_arr = \
             self.backing_buffer.service_reads(incoming_cycles_arr=cycles_arr,
                                               incoming_requests_arr_np=prefetch_requests)
+        print(prefetch_requests.shape)
 
         # 4. Update the variables
         self.last_prefect_cycle = int(response_cycles_arr[-1][0])
@@ -371,6 +377,7 @@ class read_buffer:
         # Also return when the prefetched data was made available
 
         # 1. Rewrite the active buffer
+        print("new_prefetch")
         assert self.active_buf_full_flag, 'Active buffer is empty'
         active_start, active_end = self.active_buffer_set_limits
 
@@ -399,6 +406,7 @@ class read_buffer:
                 np.concatenate((prefetch_requests, self.fetch_matrix[:new_end_idx,:]))
         else:
             prefetch_requests = self.fetch_matrix[start_idx:end_idx, :]
+        print(prefetch_requests.shape)
 
         # Modify the prefetch request to drop unwanted addresses
         # a. Chomp the elements in the first line included in previous fetches
@@ -423,6 +431,7 @@ class read_buffer:
         response_cycles_arr = \
             self.backing_buffer.service_reads(incoming_cycles_arr=cycles_arr,
                                               incoming_requests_arr_np=prefetch_requests)
+        print(prefetch_requests.shape)
 
         # 5. Update the variables
         self.last_prefect_cycle = response_cycles_arr[-1][0]
@@ -430,6 +439,11 @@ class read_buffer:
         assert response_cycles_arr.shape == cycles_arr.shape, \
                'The request and response cycles dims do not match'
 
+        print("response_cycles_arr")
+        print(response_cycles_arr)
+        print("prefetch_requests")
+        print(prefetch_requests)
+        print(response_cycles_arr.shape, prefetch_requests.shape)
         this_prefetch_trace = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
         self.trace_matrix = np.concatenate((self.trace_matrix, this_prefetch_trace), axis=0)
 
