@@ -212,6 +212,7 @@ class systolic_compute_ws:
         contain several folds of ifmap, filter and ofmap demands. The folding happens because
         operand matrices are generally larger than systolic array dimensions.
         """
+        # NCBS: check this once, create new assert for row_stationary, if...else
         assert self.params_set_flag, 'Parameters are not set'
 
         self.create_ifmap_demand_mat()
@@ -222,7 +223,8 @@ class systolic_compute_ws:
                'IFMAP and Filter demands out of sync'
         assert self.ofmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], \
                'OFMAP and Filter demands out of sync'
-        assert self.ifmap_demand_matrix.shape[1] == self.arr_row, 'IFMAP demands exceed the rows'
+        if not self.config.sparsity_optimized_mapping:
+            assert self.ifmap_demand_matrix.shape[1] == self.arr_row, 'IFMAP demands exceed the rows'
         assert self.filter_demand_matrix.shape[1] == self.arr_col,'Filter demands exceed the cols'
         assert self.ofmap_demand_matrix.shape[1] == self.arr_col, 'OFMAP demands exceed the cols'
 
@@ -257,39 +259,76 @@ class systolic_compute_ws:
         print("self.ifmap_op_mat_original")
         print(self.ifmap_op_mat_original)
         print(self.ifmap_op_mat_original.shape)
+        print(self.ifmap_op_mat)
+        print(self.ifmap_op_mat.shape)
         print("self.sparsity_filter_array")
         print(self.sparsity_filter_array.T)
         print(self.sparsity_filter_array.T.shape)
+        print("self.col_fold, self.row_fold")
+        print(self.col_fold, self.row_fold)
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
-                # self.ifmap_op_mat_original[]
+                if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
+                    col_start_id = fr * self.arr_row
+                    col_start_id *= 2 # Since we need 2 tiles
+                    col_end_idx = min(col_start_id + self.arr_row, self.Sr)
+                    col_end_idx *= 2
+                    delta = self.arr_row*2 - (col_end_idx - col_start_id) # check once
+                    this_fold_demand = self.ifmap_op_mat_original[:,col_start_id: col_end_idx]
+                    print("col_start_id, col_end_idx, delta")
+                    print(col_start_id, col_end_idx, delta)
+                    print(">one")
+                    print(this_fold_demand)
+                else:
+                    col_start_id = fr * self.arr_row
+                    col_end_idx = min(col_start_id + self.arr_row, self.Sr)
+                    delta = self.arr_row - (col_end_idx - col_start_id)
+                    print("col_start_id, col_end_idx, delta")
+                    print(col_start_id, col_end_idx, delta)
 
+                    # Indexing the cols with row start and row end idx are correct
+                    # See the comment on ifmap_prefetch generation
+                    this_fold_demand = self.ifmap_op_mat[:,col_start_id: col_end_idx]
+                    print(">one")
+                    print(this_fold_demand)
 
-                col_start_id = fr * self.arr_row
-                col_end_idx = min(col_start_id + self.arr_row, self.Sr)
-                delta = self.arr_row - (col_end_idx - col_start_id)
+                # Need to add custom skew for row-wise sparsity
+                if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
+                    this_fold_demand = skew_matrix_row_sparsity(this_fold_demand, self.arr_row, self.config.sparsity_block_size)
+                    print(this_fold_demand)
 
-                # Indexing the cols with row start and row end idx are correct
-                # See the comment on ifmap_prefetch generation
-                this_fold_demand = self.ifmap_op_mat[:,col_start_id: col_end_idx]
-                print(">one")
-                print(this_fold_demand)
-
+                
                 if self.config.sparsity_support:
                     # A single block of input is shared among M/N rows, hence a row needs to be read
                     # M/N times (assume absence of any broadcast)
+                    # NCBS: need to change this
                     self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1] * \
                                         (self.sparsity_ratio_M / self.sparsity_ratio_N)
                 else:
                     self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 
                 # Take into account under utilization
-                if delta > 0:
-                    null_req_mat = np.ones((self.T, delta)) * -1
-                    this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
-                print(">two")
-                print(this_fold_demand)
+                if not self.config.sparsity_optimized_mapping:
+                    if delta > 0:
+                        null_req_mat = np.ones((self.T, delta)) * -1
+                        # if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
+                        #     null_req_mat = np.ones((this_fold_demand.shape[0], delta)) * -1
+                        # print("null_req_mat")
+                        # print(null_req_mat)
+                        this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
+                    print(">two")
+                    print(this_fold_demand)
                 
+                print("prefix_mat")
+                print(inter_fold_gap_prefix_mat)
+                if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
+                    if inter_fold_gap_prefix_mat.shape[1] < this_fold_demand.shape[1]:
+                        inter_fold_gap_prefix_mat = np.pad(
+                            inter_fold_gap_prefix_mat,
+                            ((0, 0), (0, this_fold_demand.shape[1] - inter_fold_gap_prefix_mat.shape[1])),  # Pad only columns, not rows
+                            constant_values=-1
+                        )
+                    print(inter_fold_gap_prefix_mat)
 
                 # Account for the cycles for weights to load
                 this_fold_demand = np.concatenate((inter_fold_gap_prefix_mat, this_fold_demand),
@@ -298,22 +337,32 @@ class systolic_compute_ws:
                 print(this_fold_demand)
 
                 # Account for the cycles for final output to drain out
+                if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
+                    if inter_fold_gap_suffix_mat.shape[1] < this_fold_demand.shape[1]:
+                        inter_fold_gap_suffix_mat = np.pad(
+                            inter_fold_gap_suffix_mat,
+                            ((0, 0), (0, this_fold_demand.shape[1] - inter_fold_gap_suffix_mat.shape[1])),  # Pad only columns, not rows
+                            constant_values=-1
+                        )
                 this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat),
                                                   axis=0)
                 print(">four")
                 print(this_fold_demand)
+                # assert 1==0, "STOP"
+                
 
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
-                this_fold_demand = skew_matrix(this_fold_demand)
-                print(">five")
-                print(this_fold_demand)
+                if not self.config.sparsity_optimized_mapping:
+                    this_fold_demand = skew_matrix(this_fold_demand)
+                    print(">five")
+                    print(this_fold_demand)
 
                 ifmap_demand_matrix_list.append(this_fold_demand)
 
         self.ifmap_demand_matrix = np.concatenate(ifmap_demand_matrix_list)
         print("self.ifmap_demand_matrix final")
         print(self.ifmap_demand_matrix)
-
+        # assert 1==0, "STOP HERE"
         if False:
             if self.config.sparsity_support is True:
                 self.ifmap_demand_matrix = \
@@ -465,7 +514,8 @@ class systolic_compute_ws:
                 #       np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
 
         self.ofmap_demand_matrix = np.concatenate(ofmap_demand_matrix_list)
-
+        # print("self.ofmap_demand_matrix final")
+        # print(self.ofmap_demand_matrix)
         if False:
             if self.config.sparsity_support is True:
                 self.ofmap_demand_matrix = \
@@ -617,3 +667,48 @@ def skew_matrix(input_matrix_np):
         out_matrix_np[c:c + rows, c] = input_matrix_np[:, c]
 
     return out_matrix_np
+
+#
+def skew_matrix_row_sparsity(input_matrix, arr_row, block_size):
+    # Step 1: Ensure the number of columns is arr_row * 2 as we are combining 2 tiles
+    num_tiles = 2
+    num_cols = input_matrix.shape[1]
+    if num_cols < arr_row * num_tiles:
+        padding = arr_row * num_tiles - num_cols
+        input_matrix = np.pad(input_matrix, ((0, 0), (0, padding)), constant_values=-1)
+
+    # Step 2: Split into blocks
+    blocks = []
+    for row in input_matrix:
+        row_blocks = [row[i:i+block_size] for i in range(0, len(row), block_size)]
+        blocks.append(row_blocks)
+
+    # Step 3: Add extra copies to match block_size / 2 copies per column
+    repeated_blocks = []
+    for block_row in blocks:
+        new_row = []
+        for block in block_row:
+            new_row.extend([block] * (block_size // num_tiles))
+        repeated_blocks.append(new_row)
+    # print("repeated_blocks")
+    # print(repeated_blocks)
+
+    # Step 4: Apply skew to the repeated blocks
+    output_matrix = []
+    num_block_rows = len(repeated_blocks)
+    num_block_cols = (len(repeated_blocks[0][0]) * block_size) // num_tiles
+    print("num_block_cols = (len(repeated_blocks[0]) * block_size) // num_tiles")
+    print(num_block_cols, "=" ,len(repeated_blocks[0][0]), "*" ,block_size ,"//", num_tiles)
+    print(num_block_rows, num_block_cols)
+    for i in range(num_block_rows + 8 - 1):
+        row = []
+        for j in range(len(repeated_blocks[0])):
+            block_row_idx = i - j
+            if 0 <= block_row_idx < num_block_rows:
+                row.append(repeated_blocks[block_row_idx][j])
+            else:
+                row.append([-1] * block_size)
+        row = np.concatenate(row)
+        output_matrix.append(row)
+    
+    return np.array(output_matrix, dtype=input_matrix.dtype)
