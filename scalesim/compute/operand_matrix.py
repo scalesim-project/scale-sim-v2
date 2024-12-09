@@ -47,6 +47,7 @@ class operand_matrix(object):
 
         # Sparsity matrices
         self.sparse_filter_array = np.ones((self.conv_window_size, self.num_filters), dtype=int)
+        self.ifmap_addr_matrix_original = np.ones((self.ofmap_px_per_filt, self.conv_window_size), dtype=int)
 
         # Flags
         self.params_set_flag = False
@@ -172,14 +173,34 @@ class operand_matrix(object):
 
         # Call calc_ifmap_elem_addr_numpy with 2D index arrays
         self.ifmap_addr_matrix = self.calc_ifmap_elem_addr(i, j)
-
+        self.ifmap_addr_matrix_original = self.ifmap_addr_matrix
+        print("IFMAP function")
+        print(self.ifmap_addr_matrix)                
+        print(self.ifmap_addr_matrix.shape)   
         if self.config.sparsity_support:
-            sparse_row = self.sparse_filter_array[:, 0].T
-            self.ifmap_addr_matrix *= sparse_row
-            non_zero_columns = np.any(self.ifmap_addr_matrix != 0, axis=0)
-            if self.ifmap_addr_matrix.shape[0] == 1 and self.config.ifmap_offset == 0:
-                non_zero_columns[0] = True # Always keep the first column
-            self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
+            if self.config.sparsity_optimized_mapping is False:
+                sparse_row = self.sparse_filter_array[:, 0].T
+                print(sparse_row)
+                self.ifmap_addr_matrix *= sparse_row
+                print(self.ifmap_addr_matrix)
+                non_zero_columns = np.any(self.ifmap_addr_matrix != 0, axis=0)
+                print(non_zero_columns)
+                if self.ifmap_addr_matrix.shape[0] == 1 and self.config.ifmap_offset == 0:
+                    non_zero_columns[0] = True # Always keep the first column
+                self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
+                print(self.ifmap_addr_matrix)                
+
+            else:
+                sparse_row = self.sparse_filter_array[:, 0].T
+                print(self.sparse_filter_array.T)
+                self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, :self.filter_addr_matrix.shape[0]]
+                # self.ifmap_addr_matrix *= sparse_row
+                # non_zero_columns = np.any(self.ifmap_addr_matrix != 0, axis=0)
+                # if self.ifmap_addr_matrix.shape[0] == 1 and self.config.ifmap_offset == 0:
+                #     non_zero_columns[0] = True # Always keep the first column
+                # self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
+                print(self.ifmap_addr_matrix)                
+                print(self.ifmap_addr_matrix.shape)                
 
         return 0
 
@@ -263,47 +284,196 @@ class operand_matrix(object):
 
         self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
 
+        print("filter matrix start")
+        print(self.filter_addr_matrix)
+        print(self.filter_addr_matrix.shape)
+
         if self.config.sparsity_support is True:
-            pattern = np.concatenate([np.ones(self.sparsity_ratio_N, dtype=int),
-                                      np.zeros(self.sparsity_ratio_M - self.sparsity_ratio_N,
-                                               dtype=int)])
-            num_repeats = (self.filter_addr_matrix.shape[0] + \
-                           self.sparsity_ratio_M - 1) // self.sparsity_ratio_M
-            column_values = np.tile(pattern, num_repeats)[:self.filter_addr_matrix.shape[0]]
-            sparse_array = \
-                np.tile(column_values[:, np.newaxis], (1, self.filter_addr_matrix.shape[1]))
+            if self.config.sparsity_optimized_mapping is False:
+                pattern = np.concatenate([np.ones(self.sparsity_ratio_N, dtype=int),
+                                        np.zeros(self.sparsity_ratio_M - self.sparsity_ratio_N,
+                                                dtype=int)])
+                print(pattern)
+                num_repeats = (self.filter_addr_matrix.shape[0] + \
+                            self.sparsity_ratio_M - 1) // self.sparsity_ratio_M
+                print(num_repeats)
+                column_values = np.tile(pattern, num_repeats)[:self.filter_addr_matrix.shape[0]]
+                print(column_values)
+                self.sparse_filter_array = \
+                    np.tile(column_values[:, np.newaxis], (1, self.filter_addr_matrix.shape[1]))
+                print(self.sparse_filter_array)
 
-            self.sparse_filter_array = sparse_array
-            self.filter_addr_matrix = np.multiply(self.filter_addr_matrix, sparse_array)
+            else:
+                ratio_M = self.config.sparsity_block_size
+                # print("else part")
+                # print(ratio_M)
+                num_repeats = (self.filter_addr_matrix.shape[0] + ratio_M - 1) // ratio_M
+                # print(num_repeats)
+                columns = []
+                for col_idx in range(self.filter_addr_matrix.shape[1]):
+                    ratio_N = np.random.randint(1, ratio_M // 2 + 1)
+                    # print(ratio_N)
+                    pattern = np.concatenate([np.ones(ratio_N, dtype=int), 
+                                            np.zeros(ratio_M - ratio_N, dtype=int)])
+                    # print(pattern)
+                    column_values = np.tile(pattern, num_repeats)[:self.filter_addr_matrix.shape[0]]
+                    # print(column_values)
+                    columns.append(column_values)
+                self.sparse_filter_array = np.column_stack(columns)
+                # print(self.sparse_filter_array)
 
-            sparse_filter_matrix = []
-            for col_num in range(self.filter_addr_matrix.shape[1]):
-                col_data = self.filter_addr_matrix[:, col_num]
-                condensed_col = []
+            self.filter_addr_matrix = np.multiply(self.filter_addr_matrix, self.sparse_filter_array)
+            print("filter matrix after multiplying")
+            print(self.filter_addr_matrix)
 
-                for i in range(0, self.filter_addr_matrix.shape[0], self.sparsity_ratio_M):
-                    block = col_data[i : i+self.sparsity_ratio_M]
-                    block_nonzero = block[block != 0]
+            if self.config.sparsity_optimized_mapping is False:
+                sparse_filter_matrix = []
+                for col_num in range(self.filter_addr_matrix.shape[1]):
+                    col_data = self.filter_addr_matrix[:, col_num]
+                    condensed_col = []
 
-                    if len(block_nonzero) < self.sparsity_ratio_N:
-                        padding_num = self.sparsity_ratio_N - len(block_nonzero)
-                        block_nonzero = np.pad(block_nonzero, (0, padding_num), constant_values=0)
-                    elif len(block_nonzero) > self.sparsity_ratio_N:
-                        assert len(block_nonzero) <= self.sparsity_ratio_N, (
-                            f"Excess non-zero entries ({len(block_nonzero)}) with sparsity ratio "
-                            f"set to {self.sparsity_ratio_N}:{self.sparsity_ratio_M}"
-                            )
+                    for i in range(0, self.filter_addr_matrix.shape[0], self.sparsity_ratio_M):
+                        block = col_data[i : i+self.sparsity_ratio_M]
+                        block_nonzero = block[block != 0]
 
-                    condensed_col.extend(block_nonzero)
+                        if len(block_nonzero) < self.sparsity_ratio_N:
+                            padding_num = self.sparsity_ratio_N - len(block_nonzero)
+                            block_nonzero = np.pad(block_nonzero, (0, padding_num), constant_values=0)
+                        elif len(block_nonzero) > self.sparsity_ratio_N:
+                            assert len(block_nonzero) <= self.sparsity_ratio_N, (
+                                f"Excess non-zero entries ({len(block_nonzero)}) with sparsity ratio "
+                                f"set to {self.sparsity_ratio_N}:{self.sparsity_ratio_M}"
+                                )
 
-                sparse_filter_matrix.append(condensed_col)
+                        condensed_col.extend(block_nonzero)
 
-            sparse_filter_matrix = np.array(sparse_filter_matrix).T
-            while sparse_filter_matrix.shape[0] > 0 and np.all(sparse_filter_matrix[-1] == 0):
-                sparse_filter_matrix = sparse_filter_matrix[:-1]
+                    sparse_filter_matrix.append(condensed_col)
 
-            self.filter_addr_matrix = sparse_filter_matrix
+                sparse_filter_matrix = np.array(sparse_filter_matrix).T
+                
+                print("sparse_filter_matrix")
+                print(sparse_filter_matrix)
+                while sparse_filter_matrix.shape[0] > 0 and np.all(sparse_filter_matrix[-1] == 0):
+                    sparse_filter_matrix = sparse_filter_matrix[:-1]
+                print("sparse_filter_matrix after removing extra zero rowws at the end")
+                print(sparse_filter_matrix)
+                self.filter_addr_matrix = sparse_filter_matrix
+            else:
+                # print("here")
+                remainder = self.filter_addr_matrix.shape[0] % (2 * self.config.sparsity_block_size)
 
+                if remainder != 0:
+                    padding_rows = (2 * self.config.sparsity_block_size) - remainder
+                    self.filter_addr_matrix = np.vstack([
+                        self.filter_addr_matrix,
+                        np.zeros((padding_rows, self.filter_addr_matrix.shape[1]), dtype=int)
+                    ])
+                    print("self.filter_addr_matrix after padding")
+                    print(self.filter_addr_matrix)
+
+                sparse_filter_matrix = np.zeros((self.filter_addr_matrix.shape[0] // 2, self.filter_addr_matrix.shape[1]), dtype=int)
+
+                for col in range(self.filter_addr_matrix.shape[1]):
+                    compressed_col = []  # To store the compressed column values
+                    for start_row in range(0, self.filter_addr_matrix.shape[0], self.config.sparsity_block_size * 2):
+                        block1 = self.filter_addr_matrix[start_row : start_row + self.config.sparsity_block_size, col]
+                        padded_block1 = np.zeros(self.config.sparsity_block_size // 2, dtype=int)
+                        non_zero_block1 = block1[block1 != 0]
+                        padded_block1[:min(len(non_zero_block1), self.config.sparsity_block_size // 2)] = non_zero_block1[: self.config.sparsity_block_size // 2]
+
+                        block2 = self.filter_addr_matrix[start_row + self.config.sparsity_block_size : start_row + self.config.sparsity_block_size * 2, col]
+                        padded_block2 = np.zeros(self.config.sparsity_block_size // 2, dtype=int)
+                        non_zero_block2 = block2[block2 != 0]
+                        padded_block2[:min(len(non_zero_block2), self.config.sparsity_block_size // 2)] = non_zero_block2[: self.config.sparsity_block_size // 2]
+
+                        combined_block = np.concatenate([padded_block1, padded_block2])
+
+                        compressed_col.extend(combined_block)
+
+                    # Update the column in the compressed matrix
+                    sparse_filter_matrix[:len(compressed_col), col] = compressed_col
+
+                # Replace the original matrix with the compressed matrix
+                self.filter_addr_matrix = sparse_filter_matrix
+
+                first_element = self.filter_addr_matrix[0][0]
+                self.filter_addr_matrix[:][self.filter_addr_matrix[:] == 0] = -1
+                if self.config.filter_offset == 0 and first_element == 0:
+                    self.filter_addr_matrix[0][0] = 0
+
+                print(self.filter_addr_matrix)
+                print(self.filter_addr_matrix.shape)
+
+            '''
+            # # Validate that the PE array size is a multiple of 4
+            # if self.config.array_rows % 4 != 0:
+            #     raise ValueError(f"{err_prefix} PE array size must be a multiple of 4. Current size: {self.pe_array_size}")
+
+            # # Determine the dimensions of the output matrix
+            # # num_blocks_vertical = self.filter_addr_matrix.shape[0] // 4
+            # num_blocks_vertical = int(np.ceil(self.filter_addr_matrix.shape[0] / 8))
+            # # num_blocks_horizontal = self.filter_addr_matrix.shape[1] // 8
+            # num_blocks_horizontal = int(np.ceil(self.filter_addr_matrix.shape[1] / 4))
+            # combined_matrix = np.full((num_blocks_vertical * 4, num_blocks_horizontal * 4), -1)  # Initialize with -1
+
+            # print(num_blocks_vertical)
+            # print(num_blocks_horizontal)
+            # print("hellon")
+            
+            # Process each 4x8 block
+            for block_row in range(num_blocks_vertical):
+                for block_col in range(num_blocks_horizontal):
+                    print("hellon")
+                    # Extract the 4x8 block
+                    row_start = block_row * 8
+                    col_start = block_col * 4
+                    block = self.filter_addr_matrix[row_start:row_start + 8, col_start:col_start + 4]
+
+                    print("printing each 8x4 block")
+                    print(block)
+
+                    # Generate the 4x4 sub-matrix
+                    sub_matrix = []
+                    for column in block.T:
+                        column = [i for i in column if i != 0]  # Remove zeros
+
+                        # Fill the 4x4 sub-matrix
+                        # The lengths can only be 2, 4, 6 or 8
+                        if len(column) == 2:
+                            temp = []
+                            temp.append(column[0])
+                            temp.append(-1)
+                            temp.append(column[1])
+                            temp.append(-1)
+                            sub_matrix.append(temp)                      
+                        elif len(column) == 4:  # Exactly 4 non-zero elements
+                            sub_matrix.append(column)
+                        # elif len(column) < 4:  # Pad with -1 for sparsity
+                        #     sub_matrix.append(column + [-1] * (4 - len(column)))
+                        elif len(column) == 6:
+                            sub_matrix.append(column[:3] + [-1])
+                            sub_matrix.append(column[3:] + [-1])
+                        elif len(column) == 8:
+                            sub_matrix.append(column[:4])
+                            sub_matrix.append(column[4:])
+                        # elif len(column) > 4:  # Split into multiple 4-element columns
+                        #     while len(column) > 0:
+                        #         sub_matrix.append(column[:4] + [-1] * (4 - len(column[:4])))
+                        #         column = column[4:]
+
+                    # Ensure sub_matrix size is 4x4
+                    sub_matrix = np.array(sub_matrix).T  # Transpose for row alignment
+                    print("sub_matrix")
+                    print(sub_matrix)
+                    sub_matrix = sub_matrix[:4, :4]  # Keep only the top 4x4 portion
+
+                    # Place the 4x4 sub-matrix in the correct position in the final matrix
+                    combined_matrix[row_start:row_start + 4, block_col * 4:block_col * 4 + 4] = sub_matrix
+
+            self.filter_addr_matrix = combined_matrix
+            
+            assert 1==0, "STOP HERE"
+            '''
         return 0
 
     # logic to translate filter into matrix fed into systolic array MACs

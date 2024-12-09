@@ -39,6 +39,7 @@ class scale_config:
         # self.sparsity_N = 4
         # self.sparsity_M = 4
         self.sparsity_optimized_mapping = False
+        self.sparsity_block_size = 4
 
     #
     def read_conf_file(self, conf_file_in):
@@ -103,6 +104,10 @@ class scale_config:
                 self.sparsity_optimized_mapping = True
             else:
                 self.sparsity_optimized_mapping = False
+
+            if self.sparsity_optimized_mapping:
+                self.sparsity_block_size = int(config.get(section, 'BlockSize'))
+                assert self.sparsity_block_size <= self.array_rows, "ERROR: Invalid block size"
 
         self.valid_conf_flag = True
 
