@@ -9,7 +9,7 @@ from tqdm import tqdm
 mp.set_start_method('spawn',True)
 
 rootPath= os.getcwd()
-resultsPath = rootPath+"/results"
+resultsPath = rootPath+"/results/"
 
 class dram_latency():
     def __init__(self,
@@ -190,7 +190,7 @@ class dram_latency():
 def worker(fileName, topology,shaper):
     #layerNo = fileName.split('.')[0][len(topology)+9:]
     layerNo = fileName.split('.')[0].split('_')[-1]
-    latencyFunc = dram_latency(ramulatorFile=resultsPath+"/"+fileName)
+    latencyFunc = dram_latency(ramulatorFile=resultsPath+fileName)
     latencyFunc.latencyExtraction(layerNo, topology,shaper)
 
 
@@ -206,7 +206,7 @@ if __name__ == "__main__":
                         )
     
     parser.add_argument('-shaper', metavar='Presence of shaper', type=bool,
-                        default=True,
+                        default=False,
                         help="Define if shaper is present"
                         )
     args = parser.parse_args()
@@ -223,4 +223,4 @@ if __name__ == "__main__":
             p = mp.Process(target=worker, args=(tracefile, topology,shaper))
             p.start()
         else:
-            worker(tracefile, topology,shaper)
+            worker(tracefile, topology, shaper)
