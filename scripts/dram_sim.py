@@ -7,7 +7,7 @@ import queue
 import multiprocessing as mp
 
 rootPath=os.getcwd()
-resultsPath=os.getcwd()+"/results"
+resultsPath=os.getcwd()+"/results/"
 
 mp.set_start_method('spawn',True)
 
@@ -194,19 +194,18 @@ class dataExtraction:
         f.write(output)
         f.close()
 
-def worker(layer_path, topo, run, shaper):
+def worker(layer_path, topo, shaper):
     """ Running ramulator for multiple layers request in parallel """
-    #layer_no = layer_path.split(topo,1)[1]
-    layer_no = '0'
-    if not os.path.isdir(layer_path+"/"+run):
+    layer_no = layer_path.split('/')[-1].replace('layer','')
+    if not os.path.isdir(layer_path):
         sys.exit("Please run scalesim with oracle memory first to get the demand requests")
-    ifmap_file  = layer_path+"/"+run+"/layer0/IFMAP_DRAM_TRACE.csv"  #args.ifmap_file
-    filter_file = layer_path+"/"+run+"/layer0/FILTER_DRAM_TRACE.csv" #args.filter_file
-    ofmap_file  = layer_path+"/"+run+"/layer0/OFMAP_DRAM_TRACE.csv"  #args.ofmap_file
+    ifmap_file  = layer_path+"/IFMAP_DRAM_TRACE.csv"  #args.ifmap_file
+    filter_file = layer_path+"/FILTER_DRAM_TRACE.csv" #args.filter_file
+    ofmap_file  = layer_path+"/OFMAP_DRAM_TRACE.csv"  #args.ofmap_file
     if not os.path.isdir(resultsPath):
         os.mkdir(resultsPath)
-    mem_trace_in  = resultsPath+"/"+topo+"_DemandTrace_"+layer_no+".trace" #args.mem_trace_in
-    mem_trace_out = resultsPath+"/"+topo+"_RamulatorTrace_"+layer_no+".trace" #args.mem_trace_out
+    mem_trace_in  = resultsPath+topo+"_DemandTrace_"+layer_no+".trace" #args.mem_trace_in
+    mem_trace_out = resultsPath+topo+"_RamulatorTrace_"+layer_no+".trace" #args.mem_trace_out
     ramulatorExtraction = dataExtraction(
                                         ifmapFile=ifmap_file,
                                         ofmapFile=ofmap_file,
@@ -232,7 +231,7 @@ if __name__ == "__main__":
                         help="Directory path for the layers"
                         )
     parser.add_argument('-run_name', metavar='Config run name', type=str,
-                        default="GoogleTPU_v1_ws",
+                        default="GoogleTPU_v1_os",
                         help="Directory path for the layers"
                         )
     parser.add_argument('-shaper', metavar='Memory shaping logic', type=bool,
@@ -245,13 +244,15 @@ if __name__ == "__main__":
     topology = args.topology
     run = args.run_name
     shaper = args.shaper
-
     layers_path = []
-    for file in os.listdir(rootPath+"/results/"):
-        if file.startswith(topology) and os.path.isdir(rootPath+"/results/"+file):
-            layers_path.append(rootPath+"/results/"+file)
-    
-    worker(layers_path[0],topology,run,shaper)
-    #for layer_path in layers_path:
-    #    p = mp.Process(target=worker, args=(layer_path, topology, run, shaper))
-    #    p.start()
+    if not os.listdir(resultsPath+topology):
+        assert "Generate DRAM demand transactions before running Ramulator"
+    filepath = resultsPath+topology+'/'+run+'/'
+    for file in os.listdir(filepath):
+        if file.startswith('layer') and os.path.isdir(filepath+file):
+            layers_path.append(filepath+file)
+    print(layers_path)
+    #worker(layers_path[0],topology,run,shaper)
+    for layer_path in layers_path:
+        p = mp.Process(target=worker, args=(layer_path, topology, shaper))
+        p.start()
