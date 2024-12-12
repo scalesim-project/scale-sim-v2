@@ -315,7 +315,7 @@ class read_buffer:
         else:
             self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
         
-        return self.last_prefect_cycle - cycles_arr[-1][0]      # Time taken from start to end of loading the scratchpad
+        return (self.last_prefect_cycle - cycles_arr[-1][0]-1)      # Time taken from start to end of loading the scratchpad
 
     #
     def new_prefetch(self):
