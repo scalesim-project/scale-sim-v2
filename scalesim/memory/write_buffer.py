@@ -225,7 +225,7 @@ class write_buffer:
             self.trace_valid = True
         else:
             self.cycles_vec = np.concatenate((self.cycles_vec, serviced_cycles_arr), axis=0)
-
+        #print(serviced_cycles_arr)
         service_end_cycle = np.amax(serviced_cycles_arr)
         self.free_space += data_sz_to_drain
 

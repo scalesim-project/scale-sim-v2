@@ -94,15 +94,15 @@ class double_buffered_scratchpad:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
         
-        if self.config.get_ramulator_trace() == True:
-            root_path = os.getcwd()
-            topology_file = self.topo.split('.')[0]
-            ifmap_dram_trace = (root_path+"/results/"+topology_file+"_runsifmapFile0.npy")
-            filter_dram_trace = (root_path+"/results/"+topology_file+"_runsfilterFile0.npy")
-            ofmap_dram_trace = (root_path+"/results/"+topology_file+"_runsofmapFile0.npy")
-            self.ifmap_port.def_params(config = self.config, latency_file=ifmap_dram_trace)
-            self.filter_port.def_params(config = self.config, latency_file=filter_dram_trace)
-            self.ofmap_port.def_params(config=self.config, latency_file=ofmap_dram_trace)
+            if self.config.get_ramulator_trace() == True:
+                root_path = os.getcwd()
+                topology_file = self.topo.split('.')[0]
+                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile0.npy")
+                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile0.npy")
+                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile0.npy")
+                self.ifmap_port.def_params(config = self.config, latency_file=ifmap_dram_trace)
+                self.filter_port.def_params(config = self.config, latency_file=filter_dram_trace)
+                self.ofmap_port.def_params(config=self.config, latency_file=ofmap_dram_trace)
 
             self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
                                       total_size_bytes=ifmap_buf_size_bytes,
@@ -378,7 +378,7 @@ class double_buffered_scratchpad:
     #
     def get_stall_cycles(self):
         assert self.traces_valid, 'Traces not generated yet'
-        return self.stall_cycles
+        return int(self.stall_cycles[0])
 
     #
     def get_ifmap_sram_start_stop_cycles(self):

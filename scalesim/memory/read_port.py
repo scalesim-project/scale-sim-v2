@@ -1,6 +1,7 @@
 # Dummy memory like interface to service the requests of the last level memory
 import numpy as np
 from scalesim.scale_config import scale_config as config
+from bisect import bisect_left
 
 class read_port:
     def __init__(self):
@@ -53,17 +54,27 @@ class read_port:
             out_cycles_arr = incoming_cycles_arr + self.latency
             return out_cycles_arr
 
+        updated_req_timestamp = incoming_cycles_arr[0]
         out_cycles_arr = np.zeros(incoming_requests_arr_np.shape[0])
         for i in range(len(incoming_cycles_arr)):
             out_cycles_arr[i] = incoming_cycles_arr[i] + self.stall_cycles + self.find_latency()
+            #print(str(incoming_cycles_arr[i]) + ' ' + str(out_cycles_arr[i]) + ' ' +str(self.stall_cycles))
             self.request_array.append(out_cycles_arr[i])
             if len(self.request_array) == self.request_queue_size:
                 updated_req_timestamp = incoming_cycles_arr[i] + self.stall_cycles
-                #self.request_array = self.request_array.sort()[::-1]
-                if self.request_array[0] > updated_req_timestamp:
+                self.request_array.sort()
+                if self.request_array[0] >= updated_req_timestamp:
                     self.stall_cycles += self.request_array[0] - updated_req_timestamp
                     updated_req_timestamp = self.request_array[0]
-                self.request_array.pop(0)
+                    self.request_array.pop(0)
+                else:
+                    index = bisect_left(self.request_array,updated_req_timestamp)
+                    if index == len(self.request_array):
+                        self.request_array = []
+                    else:
+                        self.request_array = self.request_array[index:]
+            elif len(self.request_array) > self.request_queue_size:
+                self.request_array = self.request_array[-self.request_queue_size:]
         
         self.stall_cycles=0
         return out_cycles_arr

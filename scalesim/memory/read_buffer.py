@@ -289,7 +289,7 @@ class read_buffer:
         response_cycles_arr = self.backing_buffer.service_reads(incoming_cycles_arr=cycles_arr,
                                                                 incoming_requests_arr_np=prefetch_requests)
 
-        print(response_cycles_arr)
+        #print(response_cycles_arr)
         # 4. Update the variables
         self.last_prefect_cycle = np.amax(response_cycles_arr)
 
