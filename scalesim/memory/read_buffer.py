@@ -140,6 +140,8 @@ class read_buffer:
         self.fetch_matrix = np.ones((num_lines, self.req_gen_bandwidth)) * -1
         print("set_fetch_matrix")
         print(self.fetch_matrix.shape)
+        print(fetch_matrix_np)
+        print(fetch_matrix_np.shape)
 
         # Put stuff into the fetch matrix
         # This is done to ensure that there is no shape mismatch

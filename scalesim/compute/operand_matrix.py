@@ -190,18 +190,21 @@ class operand_matrix(object):
                 self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
                 print(self.ifmap_addr_matrix)                
 
-            else:
-                sparse_row = self.sparse_filter_array[:, 0].T
-                print(self.sparse_filter_array.T)
-                self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, :self.filter_addr_matrix.shape[0]]
-                # self.ifmap_addr_matrix *= sparse_row
-                # non_zero_columns = np.any(self.ifmap_addr_matrix != 0, axis=0)
-                # if self.ifmap_addr_matrix.shape[0] == 1 and self.config.ifmap_offset == 0:
-                #     non_zero_columns[0] = True # Always keep the first column
-                # self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
-                print(self.ifmap_addr_matrix)                
-                print(self.ifmap_addr_matrix.shape)                
+            # else:
+            #     sparse_row = self.sparse_filter_array[:, 0].T
+            #     print(self.sparse_filter_array.T)
+            #     self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, :self.filter_addr_matrix.shape[0]]
+            #     # self.ifmap_addr_matrix *= sparse_row
+            #     # non_zero_columns = np.any(self.ifmap_addr_matrix != 0, axis=0)
+            #     # if self.ifmap_addr_matrix.shape[0] == 1 and self.config.ifmap_offset == 0:
+            #     #     non_zero_columns[0] = True # Always keep the first column
+            #     # self.ifmap_addr_matrix = self.ifmap_addr_matrix[:, non_zero_columns]
+            #     print(self.ifmap_addr_matrix)                
+            #     print(self.ifmap_addr_matrix.shape)                
 
+        print("IFMAP function final")
+        print(self.ifmap_addr_matrix)                
+        print(self.ifmap_addr_matrix.shape)  
         return 0
 
     # logic to translate ifmap into matrix fed into systolic array MACs
@@ -253,6 +256,10 @@ class operand_matrix(object):
         col_indices = np.arange(self.num_filters)
 
         self.ofmap_addr_matrix = self.calc_ofmap_elem_addr(row_indices, col_indices)
+
+        print("self.ofmap_addr_matrix")
+        print(self.ofmap_addr_matrix)
+        print(self.ofmap_addr_matrix.shape)
 
         return 0
 
@@ -401,6 +408,7 @@ class operand_matrix(object):
                 if self.config.filter_offset == 0 and first_element == 0:
                     self.filter_addr_matrix[0][0] = 0
 
+                print("self.filter_addr_matrix")
                 print(self.filter_addr_matrix)
                 print(self.filter_addr_matrix.shape)
 
