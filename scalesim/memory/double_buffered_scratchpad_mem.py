@@ -193,6 +193,8 @@ class double_buffered_scratchpad:
         assert self.params_valid_flag, 'Memories not initialized yet'
 
         ofmap_lines = ofmap_demand_mat.shape[0]
+        print("ofmap_lines")
+        print(ofmap_lines)
 
         self.total_cycles = 0
         self.stall_cycles = 0
