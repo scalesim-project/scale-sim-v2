@@ -336,8 +336,11 @@ class systolic_compute_ws:
                     # A single block of input is shared among M/N rows, hence a row needs to be read
                     # M/N times (assume absence of any broadcast)
                     # NCBS: need to change this
-                    self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1] * \
-                                        (self.sparsity_ratio_M / self.sparsity_ratio_N)
+                    if self.config.sparsity_optimized_mapping:
+                        self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
+                    else:
+                        self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1] * \
+                                            (self.sparsity_ratio_M / self.sparsity_ratio_N)
                 else:
                     self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 
