@@ -185,10 +185,12 @@ class dataExtraction:
         f.close()
         print("The number of IFMAP, FILTER, OFMAP, integrity index is {} {} {} {}".format(ifmapIndex,filterIndex,ofmapIndex,ofmapIntegrityIndex))
 
-    def runRamulator(self):
+    def runRamulator(self,prefix):
         output=subprocess.check_output([rootPath+"/submodules/ramulator/ramulator",
                         rootPath+"/submodules/ramulator/configs/DDR4-config.cfg",
                         "--mode=dram",
+                        "--stats",
+                        "results/DDR4_"+prefix+".stats",
                         self.traceMap], universal_newlines=True)
         f = open(self.ramulatorOut, "w")
         f.write(output)
@@ -219,8 +221,9 @@ def worker(layer_path, topo, shaper):
     print("starting layer {}".format(layer_path))
     ramulatorExtraction.extractAddress(ifmap_file,ofmap_file,filter_file,layer_no,shaper)
 
+    prefix = topo+layer_no
     print("Starting ramulator for layer {}".format(layer_path))
-    ramulatorExtraction.runRamulator()
+    ramulatorExtraction.runRamulator(prefix)
 
     print("Finished ramulator for layer {}".format(layer_path))
 
