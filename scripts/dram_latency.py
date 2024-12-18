@@ -29,11 +29,12 @@ class dram_latency():
         print("starting to read file " + str(self.ramulatorFile))
         df = pd.read_csv(self.ramulatorFile,header=None,skipfooter=1,delimiter=' ',engine='python')
         print("file read")
-        #df = df.sort_values(by=1,ignore_index=True)
         df = df.sort_values(2)
         print("sorting")
         latency = df[3]-df[2]
         print("latency")
+        df[1] = df[1].str.replace('0x','')
+        df[1] = df[1].apply(lambda x: int(x,16))
         count=0
         flag=0
         lastIndex = 'ifmap'
@@ -64,16 +65,21 @@ class dram_latency():
 #                        print(k)
 #                        print(i)
 #                    k=i
-            startAddress = int(df[1][count].split('x')[1],16)
-            endAddress   = int(df[1][endIndex].split('x')[1],16)
+            addressList = df[1][count:endIndex].sort_values().to_list()
+            startAddress = addressList[0]
+            endAddress = addressList[-1]
+
             if shaper == 1:
                 ifmapAddress =  startAddress < self.filterOffset
                 filterAddress = startAddress < self.ofmapOffset
                 ofmapAddress =  startAddress < self.metaOffset
             else:
-                ifmapAddress =  startAddress < self.filterOffset and endAddress < self.filterOffset
-                filterAddress = startAddress < self.ofmapOffset and endAddress < self.ofmapOffset
-                ofmapAddress =  startAddress < self.metaOffset and endAddress < self.metaOffset
+                ifmapAddress =  (0 <= startAddress < self.filterOffset) and (0 <= endAddress < self.filterOffset)
+                filterAddress = (self.filterOffset <= startAddress < self.ofmapOffset) and (self.filterOffset <= endAddress < self.ofmapOffset)
+                ofmapAddress =  (self.ofmapOffset <= startAddress < self.metaOffset) and (self.ofmapOffset <= startAddress < self.metaOffset)
+                #ifmapAddress =  startAddress in range(0,self.filterOffset) and endAddress in range(0,self.filterOffset)
+                #filterAddress=  startAddress in range(self.filterOffset,self.ofmapOffset) and endAddress in range(self.filterOffset,self.ofmapOffset)
+                #ofmapAddress =  startAddress in range(self.ofmapOffset,self.metaOffset) and endAddress in range(self.ofmapOffset,self.metaOffset)
 
             if shaper == 1:
                 #a=[]
@@ -112,60 +118,26 @@ class dram_latency():
                     self.ofmapLatency.append(np.amax(latency[count:count+self.bw]))  
                     count+=self.bw
                     lastIndex = 'ofmap'
-                else:                       # ---- This is the padding case... Very rare; so not optimized; lousy code
-                    ifmapPad=0
-                    filterPad=0
-                    ofmapPad=0
-                    metaPad=0
-                    flag=0
-
-                    #a = []
-                    #for i in range(count,count+self.bw):
-                    #    a.append(df[2][i])
-
-                    for i in range(count,count+self.bw):
-                        #print(df[2][i])
-                        address = int(df[1][count].split('x')[1],16)
-                        if address <self.filterOffset:
-                            if(filterPad + ofmapPad + metaPad >0):
-                                flag=1
-                            else:
-                                ifmapPad=1
-                        elif address <self.ofmapOffset:
-                            if(ifmapPad + ofmapPad+ metaPad >0):
-                                flag=1
-                            else:
-                                filterPad=1
-                        elif address < self.metaOffset:
-                            if(filterPad + ifmapPad + metaPad>0):
-                                flag=1
-                            else:
-                                ofmapPad=1
-                        elif address < self.fakeOffset:
-                            if(filterPad + ifmapPad + ofmapPad>0):
-                                flag=1
-                            else:
-                                metaPad=1
-                            
-                        if flag==1:
-                            if (ifmapPad == 1):
-                                self.ifmapLatency.append(np.amax(latency[count:i]))
-                                lastIndex = 'ifmap'
-                            elif (filterPad == 1):
-                                self.filterLatency.append(np.amax(latency[count:i]))                            
-                                lastIndex = 'filter'
-                            elif (ofmapPad == 1):
-                                self.ofmapLatency.append(np.amax(latency[count:i]))   
-                                lastIndex = 'ofmap'
-                            elif metaPad == 1:
-                                if lastIndex == 'ifmap':
-                                    self.ifmapLatency.append(np.amax(latency[count:count+i]))
-                                elif lastIndex == 'filter':
-                                    self.filterLatency.append(np.amax(latency[count:count+i]))  
-                                else:
-                                    self.ofmapLatency.append(np.amax(latency[count:count+i]))  
-                            count+=(i -count)
+                else:                       # ---- This is the padding case... 
+                    addressList = df[1][count:count+self.bw].to_list()
+                    ifmapAddress =  0 <= addressList[0] < self.filterOffset
+                    filterAddress = self.filterOffset <= addressList[0] < self.ofmapOffset
+                    ofmapAddress =  self.ofmapOffset  <= addressList[0] < self.metaOffset
+                    for i in range(0,self.bw):
+                        exp = (((0 <= addressList[i] < self.filterOffset) and ifmapAddress) or 
+                               ((self.filterOffset <= addressList[i] < self.ofmapOffset) and filterAddress) or 
+                               ((self.ofmapOffset <= addressList[i] < self.metaOffset) and ofmapAddress))
+                        if(not exp):
+                            endIndex = count + i
                             break
+
+                    if(ifmapAddress):
+                        self.ifmapLatency.append(np.amax(latency[count:endIndex]))
+                    elif(filterAddress):
+                        self.filterLatency.append(np.amax(latency[count:endIndex]))                            
+                    elif(ofmapAddress):
+                        self.ofmapLatency.append(np.amax(latency[count:endIndex]))   
+                    count = endIndex
 
 
         np.asarray(self.ifmapLatency)
@@ -188,7 +160,6 @@ class dram_latency():
         address 
 
 def worker(fileName, topology,shaper):
-    #layerNo = fileName.split('.')[0][len(topology)+9:]
     layerNo = fileName.split('.')[0].split('_')[-1]
     latencyFunc = dram_latency(ramulatorFile=resultsPath+fileName)
     latencyFunc.latencyExtraction(layerNo, topology,shaper)
