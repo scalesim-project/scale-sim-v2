@@ -163,7 +163,6 @@ class write_buffer:
 
         DEBUG_num_drains = 0
         DEBUG_append_to_trace_times = []
-        stall_cycles = 0
         for i in tqdm(range(incoming_requests_arr_np.shape[0]), disable=True):
             row = incoming_requests_arr_np[i]
             cycle = incoming_cycles_arr_np[i]
@@ -183,7 +182,7 @@ class write_buffer:
 
                 elif self.free_space < (self.total_size_elems - self.drain_buf_size):
                     self.append_to_trace_mat(force=True)
-                    (self.drain_end_cycle,stall_cycles) = self.empty_drain_buf(empty_start_cycle=current_cycle)
+                    self.drain_end_cycle = self.empty_drain_buf(empty_start_cycle=current_cycle)
                     current_cycle = self.drain_end_cycle
 
             out_cycles_arr.append(current_cycle)
@@ -196,7 +195,7 @@ class write_buffer:
         #plt.plot(DEBUG_append_to_trace_times)
         #plt.show()
 
-        return (out_cycles_arr_np,stall_cycles)
+        return out_cycles_arr_np
 
     #
     def empty_drain_buf(self, empty_start_cycle=0):
