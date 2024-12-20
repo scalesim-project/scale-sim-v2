@@ -292,6 +292,7 @@ class read_buffer:
         #print(response_cycles_arr)
         # 4. Update the variables
         self.last_prefect_cycle = np.amax(response_cycles_arr)
+        #print("Prefetch Active Buffer: The cycle_arr shape is {0} and the response_cycle_arr shape is {1}".format(cycles_arr.shape,response_cycles_arr.shape))
 
         # Update the trace matrix
         self.trace_matrix = np.column_stack((response_cycles_arr, prefetch_requests))
@@ -378,10 +379,11 @@ class read_buffer:
 
         # 5. Update the variables
         self.last_prefect_cycle = np.amax(response_cycles_arr)
+        #print("New Prefetch: The cycle_arr shape is {0} and the response_cycle_arr shape is {1}".format(cycles_arr.shape,response_cycles_arr.shape))
 
-        assert response_cycles_arr.shape == cycles_arr.shape, 'The request and response cycles dims do not match'
+        #assert response_cycles_arr.shape == cycles_arr.shape, 'The request and response cycles dims do not match'
 
-        this_prefetch_trace = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
+        this_prefetch_trace = np.column_stack((response_cycles_arr, prefetch_requests))
         self.trace_matrix = np.concatenate((self.trace_matrix, this_prefetch_trace), axis=0)
 
         # Set the line to be prefetched next

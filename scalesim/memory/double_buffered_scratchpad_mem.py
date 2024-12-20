@@ -378,7 +378,7 @@ class double_buffered_scratchpad:
     #
     def get_stall_cycles(self):
         assert self.traces_valid, 'Traces not generated yet'
-        return int(self.stall_cycles[0])
+        return int(self.stall_cycles)
 
     #
     def get_ifmap_sram_start_stop_cycles(self):
