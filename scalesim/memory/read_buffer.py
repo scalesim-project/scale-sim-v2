@@ -6,6 +6,7 @@ from tqdm import tqdm
 
 from scalesim.memory.read_port import read_port
 
+debug_JT = False
 
 class read_buffer:
     def __init__(self):
@@ -34,7 +35,7 @@ class read_buffer:
 
         # Variables to enable prefetching
         self.fetch_matrix = np.ones((1, 1))
-        self.last_prefect_cycle = -1
+        self.last_prefetch_cycle = -1
         self.next_line_prefetch_idx = 0
         self.next_col_prefetch_idx = 0
 
@@ -70,6 +71,10 @@ class read_buffer:
         self.active_buf_size = int(math.ceil(self.total_size_elems * self.active_buf_frac))
         self.prefetch_buf_size = self.total_size_elems - self.active_buf_size
 
+        # Layout modeling
+        self.num_bank = 1 # multi-bank support
+        self.num_ports = 2 # number of ports per bank
+
     #
     def reset(self): # TODO: check if all resets are working propoerly
         # Buffer properties: User specified
@@ -94,7 +99,7 @@ class read_buffer:
 
         # Variables to enable prefetching
         self.fetch_matrix = np.ones((1, 1))
-        self.last_prefect_cycle = -1
+        self.last_prefetch_cycle = -1
         self.next_line_prefetch_idx = 0
         self.next_col_prefetch_idx = 0
 
@@ -115,6 +120,8 @@ class read_buffer:
         # In 'user' mode, this will be set in the set_params
 
         num_elems = fetch_matrix_np.shape[0] * fetch_matrix_np.shape[1]
+        if debug_JT:
+            print(f"fetch_matrix_np.shape[0]={fetch_matrix_np.shape[0]} * fetch_matrix_np.shape[1]={fetch_matrix_np.shape[1]}")
         num_lines = int(math.ceil(num_elems / self.req_gen_bandwidth))
         self.fetch_matrix = np.ones((num_lines, self.req_gen_bandwidth)) * -1
 
@@ -188,21 +195,21 @@ class read_buffer:
             for line_id in range(start_id, end_id):
                 this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
                 if addr in this_set:                        # Checking in a set(), O(1) lookup
-                    return True
+                    return line_id
 
         else:
             for line_id in range(start_id, self.num_lines):
                 this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
                 if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return True
+                    return line_id
 
             for line_id in range(end_id):
                 this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
                 if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return True
+                    return line_id
         # Fixing for ISSUE #14
         # return True
-        return False
+        return -1
 
     #
     def service_reads(self, incoming_requests_arr_np,   # 2D array with the requests
@@ -228,6 +235,7 @@ class read_buffer:
             # request_line = set(incoming_requests_arr_np[i]) #shaves off a few seconds
             request_line = incoming_requests_arr_np[i]
 
+            concurrent_line_addr = [[] for _ in range(self.num_bank)] # bank conflict modeling
             for addr in request_line:
                 if addr == -1:
                     continue
@@ -235,14 +243,21 @@ class read_buffer:
                 # if addr not in self.active_buffer_contents: #this is super slow!!!
                 # Fixing for ISSUE #14
                 # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
-                while not self.active_buffer_hit(addr):
+                line_addr = self.active_buffer_hit(addr)
+                while line_addr == -1:
                     self.new_prefetch()
-                    potential_stall_cycles = self.last_prefect_cycle - (cycle + offset)
-                    offset += potential_stall_cycles        # Offset increments if there were potential stalls
+                    potential_stall_cycles = self.last_prefetch_cycle - (cycle + offset)
+                    offset += potential_stall_cycles    # Offset increments if there were potential stalls
                     if potential_stall_cycles > 0:
                         offset += potential_stall_cycles
-                   
-
+                    line_addr = self.active_buffer_hit(addr)
+                bank_id = 0
+                concurrent_line_addr[bank_id].append(line_addr)
+            
+            max_line_request_among_all_banks = 0
+            for bank_id in range(self.num_bank):
+                max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
+            offset += math.ceil(max_line_request_among_all_banks/self.num_ports) - 1
             out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
 
@@ -267,6 +282,8 @@ class read_buffer:
         end_idx = num_lines
 
         prefetch_requests = self.fetch_matrix[start_idx:end_idx, :]
+        if debug_JT:
+            print(f"self.active_buffer_set_limits={self.active_buffer_set_limits}")
 
         # 1.1 See if extra requests are made, if so nullify them
         self.next_col_prefetch_idx = 0
@@ -290,7 +307,7 @@ class read_buffer:
                                                                 incoming_requests_arr_np=prefetch_requests)
 
         # 4. Update the variables
-        self.last_prefect_cycle = int(response_cycles_arr[-1][0])
+        self.last_prefetch_cycle = int(response_cycles_arr[-1][0])
 
         # Update the trace matrix
         self.trace_matrix = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
@@ -313,7 +330,7 @@ class read_buffer:
             self.next_line_prefetch_idx = num_lines % self.fetch_matrix.shape[0]
         else:
             self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
-
+        
     #
     def new_prefetch(self):
         # In a new prefetch, some portion of the original data needs to be deleted to accomodate the prefetched data
@@ -332,6 +349,8 @@ class read_buffer:
 
         self.active_buffer_set_limits = [active_start, active_end]
         self.prefetch_buffer_set_limits = [prefetch_start, prefetch_end]
+        if debug_JT:
+            print(f"self.active_buffer_set_limits={self.active_buffer_set_limits}")
 
         # 2. Create the request
         start_idx = self.next_line_prefetch_idx
@@ -366,15 +385,15 @@ class read_buffer:
         cycles_arr = np.zeros((num_lines, 1))
         for i in range(cycles_arr.shape[0]):
             # Fixing ISSUE #14
-            # cycles_arr[i][0] = self.last_prefect_cycle + i
-            cycles_arr[i][0] = self.last_prefect_cycle + i + 1
+            # cycles_arr[i][0] = self.last_prefetch_cycle + i
+            cycles_arr[i][0] = self.last_prefetch_cycle + i + 1
 
         # 4. Send the request
         response_cycles_arr = self.backing_buffer.service_reads(incoming_cycles_arr=cycles_arr,
                                                                 incoming_requests_arr_np=prefetch_requests)
 
         # 5. Update the variables
-        self.last_prefect_cycle = response_cycles_arr[-1][0]
+        self.last_prefetch_cycle = response_cycles_arr[-1][0]
 
         assert response_cycles_arr.shape == cycles_arr.shape, 'The request and response cycles dims do not match'
 
