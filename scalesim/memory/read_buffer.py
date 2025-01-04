@@ -6,8 +6,6 @@ from tqdm import tqdm
 
 from scalesim.memory.read_port import read_port
 
-debug_JT = False
-debug_bank_conflict = False
 
 class read_buffer:
     def __init__(self):
@@ -64,17 +62,20 @@ class read_buffer:
         self.active_buf_frac = round(active_buf_frac, 2)
         self.hit_latency = hit_latency
 
-        self.backing_buffer = backing_buf_obj
-        self.req_gen_bandwidth = backing_buf_bw
-
         # Calculate these based on the values provided
         self.total_size_elems = math.floor(self.total_size_bytes / self.word_size)
         self.active_buf_size = int(math.ceil(self.total_size_elems * self.active_buf_frac))
         self.prefetch_buf_size = self.total_size_elems - self.active_buf_size
 
+        self.backing_buffer = backing_buf_obj
+        self.req_gen_bandwidth = backing_buf_bw
+
         # Layout modeling
-        self.num_bank = 1 # multi-bank support
+        self.num_bank = 16
         self.num_ports = 2 # number of ports per bank
+        self.bw_per_bank = self.req_gen_bandwidth // self.num_bank # bandwidth per bank
+        assert self.bw_per_bank * self.num_bank == self.req_gen_bandwidth, f"overall bandwidth must be divisible by total number of banks, number of banks = {self.num_bank}, bandwidth of each as {self.bw_per_bank}, total bandwidth = {self.req_gen_bandwidth}"
+
 
     #
     def reset(self): # TODO: check if all resets are working propoerly
@@ -195,21 +196,24 @@ class read_buffer:
             for line_id in range(start_id, end_id):
                 this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
                 if addr in this_set:                        # Checking in a set(), O(1) lookup
-                    return line_id
+                    if list(this_set).index(addr) == 2736:
+                        print(this_set, addr)
+                        raise ValueError("Laozi yao kankan")
+                    return line_id, list(this_set).index(addr)
 
         else:
             for line_id in range(start_id, self.num_lines):
                 this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
                 if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return line_id
+                    return line_id, list(this_set).index(addr)
 
             for line_id in range(end_id):
                 this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
                 if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return line_id
+                    return line_id, list(this_set).index(addr)
         # Fixing for ISSUE #14
         # return True
-        return -1
+        return -1, -1
 
     #
     def service_reads(self, incoming_requests_arr_np,   # 2D array with the requests
@@ -243,22 +247,28 @@ class read_buffer:
                 # if addr not in self.active_buffer_contents: #this is super slow!!!
                 # Fixing for ISSUE #14
                 # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
-                line_addr = self.active_buffer_hit(addr)
+                line_addr, column_addr = self.active_buffer_hit(addr)
                 while line_addr == -1:
                     self.new_prefetch()
                     potential_stall_cycles = self.last_prefetch_cycle - (cycle + offset)
                     offset += potential_stall_cycles    # Offset increments if there were potential stalls
                     if potential_stall_cycles > 0:
                         offset += potential_stall_cycles
-                    line_addr = self.active_buffer_hit(addr)
-                bank_id = 0
+                    line_addr, column_addr = self.active_buffer_hit(addr)
+                
+                # Layout Modeling 1 -- data mapping to multiple bank 
+                # The 2D array is interleaved mapped to multiple banks. 
+                # e.g. (interleave mapping) addr 0 -> bank 0; addr 1 -> bank 1; addr 2 -> bank 2 ...
+                # instead of (contiguous mapping) addr 0,...,lines in a bank - 1 -> bank 0.
+                # because data access in compiled layout turns to be contiguious, which accesses the continuous addresses.
+                # In (contiguous mapping), such multi-bank mapping would result in more bank conflict slowdown.
+                bank_id = column_addr // self.bw_per_bank
+                assert bank_id < self.num_bank, f"bank id = {bank_id} for column_addr = {column_addr} needs to be smaller than total number of bank = {self.num_bank}"
                 if line_addr not in concurrent_line_addr[bank_id]:
                     concurrent_line_addr[bank_id].append(line_addr)
             max_line_request_among_all_banks = 0
             for bank_id in range(self.num_bank):
                 max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
-            if debug_bank_conflict:
-                print(f"service_reads->concurrent_line_addr={concurrent_line_addr}, max_line_request_among_all_banks={max_line_request_among_all_banks}, increased offset={math.ceil(max_line_request_among_all_banks/self.num_ports) - 1}")
             offset += math.ceil(max_line_request_among_all_banks/self.num_ports) - 1
             out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
@@ -284,8 +294,6 @@ class read_buffer:
         end_idx = num_lines
 
         prefetch_requests = self.fetch_matrix[start_idx:end_idx, :]
-        if debug_JT:
-            print(f"prefetch_active_buffer->self.active_buffer_set_limits={self.active_buffer_set_limits}")
 
         # 1.1 See if extra requests are made, if so nullify them
         self.next_col_prefetch_idx = 0
@@ -351,8 +359,6 @@ class read_buffer:
 
         self.active_buffer_set_limits = [active_start, active_end]
         self.prefetch_buffer_set_limits = [prefetch_start, prefetch_end]
-        if debug_JT:
-            print(f"new_prefetch->self.active_buffer_set_limits={self.active_buffer_set_limits}")
 
         # 2. Create the request
         start_idx = self.next_line_prefetch_idx

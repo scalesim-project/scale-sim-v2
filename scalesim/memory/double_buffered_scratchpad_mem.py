@@ -8,8 +8,6 @@ from scalesim.memory.read_port import read_port as rdport
 from scalesim.memory.write_buffer import write_buffer as wrbuf
 from scalesim.memory.write_port import write_port as wrport
 
-debug_bank_conflict = False
-
 class double_buffered_scratchpad:
     def __init__(self):
         self.ifmap_buf = rdbuf()
@@ -175,8 +173,6 @@ class double_buffered_scratchpad:
                                                             incoming_cycles_arr=cycle_arr)
             ifmap_serviced_cycles += [ifmap_cycle_out[0]]
             ifmap_stalls = ifmap_cycle_out[0] - cycle_arr[0] - ifmap_hit_latency
-            if debug_bank_conflict:
-                print(f"cycle_arr[0]={cycle_arr[0]}, ifmap_cycle_out[0]={ifmap_cycle_out[0]}, ifmap_serviced_cycles={ifmap_serviced_cycles}, ifmap_stalls={ifmap_stalls}")
 
             filter_demand_line = filter_demand_mat[i, :].reshape((1, filter_demand_mat.shape[1]))
             filter_cycle_out = self.filter_buf.service_reads(incoming_requests_arr_np=filter_demand_line,
