@@ -7,6 +7,7 @@ from tqdm import tqdm
 from scalesim.memory.read_port import read_port
 
 debug_JT = False
+debug_bank_conflict = False
 
 class read_buffer:
     def __init__(self):
@@ -120,8 +121,6 @@ class read_buffer:
         # In 'user' mode, this will be set in the set_params
 
         num_elems = fetch_matrix_np.shape[0] * fetch_matrix_np.shape[1]
-        if debug_JT:
-            print(f"fetch_matrix_np.shape[0]={fetch_matrix_np.shape[0]} * fetch_matrix_np.shape[1]={fetch_matrix_np.shape[1]}")
         num_lines = int(math.ceil(num_elems / self.req_gen_bandwidth))
         self.fetch_matrix = np.ones((num_lines, self.req_gen_bandwidth)) * -1
 
@@ -252,11 +251,13 @@ class read_buffer:
                         offset += potential_stall_cycles
                     line_addr = self.active_buffer_hit(addr)
                 bank_id = 0
-                concurrent_line_addr[bank_id].append(line_addr)
-            
+                if line_addr not in concurrent_line_addr[bank_id]:
+                    concurrent_line_addr[bank_id].append(line_addr)
             max_line_request_among_all_banks = 0
             for bank_id in range(self.num_bank):
                 max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
+            if debug_bank_conflict:
+                print(f"service_reads->concurrent_line_addr={concurrent_line_addr}, max_line_request_among_all_banks={max_line_request_among_all_banks}, increased offset={math.ceil(max_line_request_among_all_banks/self.num_ports) - 1}")
             offset += math.ceil(max_line_request_among_all_banks/self.num_ports) - 1
             out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
@@ -283,7 +284,7 @@ class read_buffer:
 
         prefetch_requests = self.fetch_matrix[start_idx:end_idx, :]
         if debug_JT:
-            print(f"self.active_buffer_set_limits={self.active_buffer_set_limits}")
+            print(f"prefetch_active_buffer->self.active_buffer_set_limits={self.active_buffer_set_limits}")
 
         # 1.1 See if extra requests are made, if so nullify them
         self.next_col_prefetch_idx = 0
@@ -350,7 +351,7 @@ class read_buffer:
         self.active_buffer_set_limits = [active_start, active_end]
         self.prefetch_buffer_set_limits = [prefetch_start, prefetch_end]
         if debug_JT:
-            print(f"self.active_buffer_set_limits={self.active_buffer_set_limits}")
+            print(f"new_prefetch->self.active_buffer_set_limits={self.active_buffer_set_limits}")
 
         # 2. Create the request
         start_idx = self.next_line_prefetch_idx
