@@ -141,7 +141,8 @@ class read_buffer:
 
     #
     def prepare_hashed_buffer(self):
-        elems_per_set = math.ceil(self.total_size_elems / self.req_gen_bandwidth)
+        # layout modeling: hashed_buffer is being modified to serve as on-chip buffer.
+        elems_per_set = self.req_gen_bandwidth
 
         prefetch_rows = self.fetch_matrix.shape[0]
         prefetch_cols = self.fetch_matrix.shape[1]
