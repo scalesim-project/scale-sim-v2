@@ -141,7 +141,7 @@ class read_buffer:
 
     #
     def prepare_hashed_buffer(self):
-        elems_per_set = math.ceil(self.total_size_elems / 100)
+        elems_per_set = math.ceil(self.total_size_elems / self.req_gen_bandwidth)
 
         prefetch_rows = self.fetch_matrix.shape[0]
         prefetch_cols = self.fetch_matrix.shape[1]
