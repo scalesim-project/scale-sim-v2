@@ -61,7 +61,8 @@ class double_buffered_scratchpad:
                    word_size=1,
                    ifmap_buf_size_bytes=2, filter_buf_size_bytes=2, ofmap_buf_size_bytes=2,
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
-                   ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1):
+                   ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
+                   num_bank=1, num_port=2):
 
         self.estimate_bandwidth_mode = estimate_bandwidth_mode
 
@@ -73,13 +74,17 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=ifmap_backing_buf_bw)
+                                      backing_buf_default_bw=ifmap_backing_buf_bw,
+                                      num_bank=num_bank,
+                                      num_port=num_port)
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
-                                       total_size_bytes=filter_buf_size_bytes,
-                                       word_size=word_size,
-                                       active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_default_bw=filter_backing_buf_bw)
+                                      total_size_bytes=filter_buf_size_bytes,
+                                      word_size=word_size,
+                                      active_buf_frac=rd_buf_active_frac,
+                                      backing_buf_default_bw=filter_backing_buf_bw,
+                                      num_bank=num_bank,
+                                      num_port=num_port)
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()

@@ -167,7 +167,9 @@ class single_layer_sim:
                     filter_backing_buf_bw=filter_backing_bw,
                     ofmap_backing_buf_bw=ofmap_backing_bw,
                     verbose=self.verbose,
-                    estimate_bandwidth_mode=estimate_bandwidth_mode
+                    estimate_bandwidth_mode=estimate_bandwidth_mode,
+                    num_bank=self.config.get_num_bank(),
+                    num_port=self.config.get_num_port(),
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup

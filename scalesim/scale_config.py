@@ -21,6 +21,8 @@ class scale_config:
         self.topofile = ""
         self.bandwidths = []
         self.valid_conf_flag = False
+        self.num_bank = 1
+        self.num_port = 2
 
         self.valid_df_list = ['os', 'ws', 'is']
 
@@ -57,6 +59,9 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
+        self.num_bank = config.get(section, 'OnChipMemoryBanks')
+        self.num_port = config.get(section, 'OnChipMemoryBankPorts')
+        
 
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
@@ -264,6 +269,14 @@ class scale_config:
         if self.valid_conf_flag:
             return self.bandwidths
 
+    def get_num_bank(self):
+        if self.valid_conf_flag:
+            return self.num_bank
+        
+    def get_num_port(self):
+        if self.valid_conf_flag:
+            return self.num_port
+        
     def get_min_dram_bandwidth(self):
         if not self.use_user_dram_bandwidth():
             me = 'scale_config.' + 'get_min_dram_bandwidth()'

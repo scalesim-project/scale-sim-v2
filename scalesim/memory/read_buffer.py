@@ -52,7 +52,7 @@ class read_buffer:
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
-                   hit_latency=1, backing_buf_bw=1
+                   hit_latency=1, backing_buf_bw=1, num_bank=1, num_port=2
                    ):
 
         self.total_size_bytes = total_size_bytes
@@ -71,8 +71,8 @@ class read_buffer:
         self.req_gen_bandwidth = backing_buf_bw
 
         # Layout modeling
-        self.num_bank = 16
-        self.num_ports = 2 # number of ports per bank
+        self.num_bank = num_bank
+        self.num_port = num_port # number of ports per bank
         self.bw_per_bank = self.req_gen_bandwidth // self.num_bank # bandwidth per bank
         assert self.bw_per_bank * self.num_bank == self.req_gen_bandwidth, f"overall bandwidth must be divisible by total number of banks, number of banks = {self.num_bank}, bandwidth of each as {self.bw_per_bank}, total bandwidth = {self.req_gen_bandwidth}"
 
@@ -269,7 +269,7 @@ class read_buffer:
             max_line_request_among_all_banks = 0
             for bank_id in range(self.num_bank):
                 max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
-            offset += math.ceil(max_line_request_among_all_banks/self.num_ports) - 1
+            offset += math.ceil(max_line_request_among_all_banks/self.num_port) - 1
             out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
 
