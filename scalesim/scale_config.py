@@ -19,6 +19,7 @@ class scale_config:
         self.filter_offset = 10000000
         self.ofmap_offset = 20000000
         self.topofile = ""
+        self.layoutfile = ""
         self.bandwidths = []
         self.valid_conf_flag = False
         self.num_bank = 1
@@ -61,8 +62,9 @@ class scale_config:
         self.df = config.get(section, 'Dataflow')
         self.num_bank = config.get(section, 'OnChipMemoryBanks')
         self.num_port = config.get(section, 'OnChipMemoryBankPorts')
+        self.using_ifmap_custom_layout = config.getboolean(section, 'IfmapCustomLayout')
+        self.using_filter_custom_layout = config.getboolean(section, 'FilterCustomLayout')
         
-
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
             self.bandwidths = [int(x.strip())
@@ -160,6 +162,10 @@ class scale_config:
     #
     def set_topology_file(self, topofile=''):
         self.topofile = topofile
+    
+    #
+    def set_layout_file(self, layoutfile=''):
+        self.layoutfile = layoutfile
 
     #
     def set_offsets(self,
@@ -228,6 +234,12 @@ class scale_config:
             print("ERROR: scale_config.get_topology_path() : Config data is not valid")
             return
         return self.topofile
+
+    def get_layout_path(self):
+        if not self.valid_conf_flag:
+            print("ERROR: scale_config.get_layout_path() : Config data is not valid")
+            return
+        return self.layoutfile
 
     def get_topology_name(self):
         if not self.valid_conf_flag:

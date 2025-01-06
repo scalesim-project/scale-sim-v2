@@ -2,6 +2,7 @@ import os
 
 from scalesim.scale_config import scale_config as cfg
 from scalesim.topology_utils import topologies as topo
+from scalesim.layout_utils import layouts as layout
 from scalesim.compute.operand_matrix import operand_matrix as opmat
 from scalesim.compute.systolic_compute_os import systolic_compute_os
 from scalesim.compute.systolic_compute_ws import systolic_compute_ws
@@ -13,6 +14,7 @@ class single_layer_sim:
     def __init__(self):
         self.layer_id = 0
         self.topo = topo()
+        self.layout = layout()
         self.config = cfg()
 
         self.op_mat_obj = opmat()
@@ -68,18 +70,24 @@ class single_layer_sim:
         self.runs_ready = False
         self.report_items_ready = False
 
+        # Layout Modeling
+        self.using_ifmap_custom_layout = True
+        self.using_filter_custom_layout = True
+
     def set_params(self,
                    layer_id=0,
-                   config_obj=cfg(), topology_obj=topo(),
+                   config_obj=cfg(), topology_obj=topo(), layout_obj=layout(),
                    verbose=True):
 
         self.layer_id = layer_id
         self.config = config_obj
         self.topo = topology_obj
+        self.layout = layout_obj
 
         self.op_mat_obj.set_params(layer_id=self.layer_id,
                                    config_obj=self.config,
                                    topoutil_obj=self.topo,
+                                   layoututil_obj=self.layout,
                                    )
 
         self.dataflow = self.config.get_dataflow()
@@ -90,7 +98,14 @@ class single_layer_sim:
         elif self.dataflow == 'is':
             self.compute_system = systolic_compute_is()
 
-        arr_dims =self.config.get_array_dims()
+        arr_dims = self.config.get_array_dims()
+        self.using_ifmap_custom_layout = self.config.using_ifmap_custom_layout
+        self.using_filter_custom_layout = self.config.using_filter_custom_layout
+        if self.using_ifmap_custom_layout:
+            print("self.using_ifmap_custom_layout -- True")
+        if self.using_filter_custom_layout:
+            print("self.using_filter_custom_layout -- True")
+
         self.num_mac_unit = arr_dims[0] * arr_dims[1]
         self.verbose=verbose
 
@@ -123,6 +138,13 @@ class single_layer_sim:
 
         # 1.3 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
+
+        # 1.4 Get the customed layout for ifmap and filter when it's being specified.
+        if self.using_ifmap_custom_layout:
+            ifmap_prefetch_mat = self.op_mat_obj.get_ifmap_prefetch_matrix_custom_layout()
+        if self.using_filter_custom_layout:
+            filter_prefetch_mat = self.op_mat_obj.get_filter_prefetch_matrix_custom_layout()
+    
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
         #print('DEBUG: Compute operations done')
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
