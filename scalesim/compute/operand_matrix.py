@@ -454,7 +454,7 @@ class operand_matrix(object):
         # Transpose data layout to force a specific order.
         filter_overall_data_pad = np.transpose(filter_overall_data_pad, 
            (filter_interline_order[0], filter_interline_order[1], filter_interline_order[2], filter_interline_order[3], 
-            filter_intraline_order[0]+4, filter_intraline_order[1]+4, filter_intraline_order[2]+4, filter_intraline_order[3]+4))
+            filter_intraline_order[0], filter_intraline_order[1], filter_intraline_order[2], filter_intraline_order[3]))
 
         print(f"finalized filter.shape = {filter_overall_data_pad.shape}")
         return filter_overall_data_pad.reshape(1,-1)

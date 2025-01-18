@@ -196,9 +196,6 @@ class read_buffer:
             for line_id in range(start_id, end_id):
                 this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
                 if addr in this_set:                        # Checking in a set(), O(1) lookup
-                    if list(this_set).index(addr) == 2736:
-                        print(this_set, addr)
-                        raise ValueError("Laozi yao kankan")
                     return line_id, list(this_set).index(addr)
 
         else:

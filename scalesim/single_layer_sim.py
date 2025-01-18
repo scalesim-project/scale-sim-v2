@@ -165,8 +165,8 @@ class single_layer_sim:
             estimate_bandwidth_mode = False
             if self.config.use_user_dram_bandwidth():
                 bws = self.config.get_bandwidths_as_list()
-                ifmap_backing_bw = bws[0]
-                filter_backing_bw = bws[0]
+                ifmap_backing_bw = self.config.ifmap_sram_bank_bandwidth
+                filter_backing_bw = self.config.filter_sram_bank_bandwidth
                 ofmap_backing_bw = bws[0]
 
             else:
@@ -190,8 +190,10 @@ class single_layer_sim:
                     ofmap_backing_buf_bw=ofmap_backing_bw,
                     verbose=self.verbose,
                     estimate_bandwidth_mode=estimate_bandwidth_mode,
-                    num_bank=self.config.get_num_bank(),
-                    num_port=self.config.get_num_port(),
+                    ifmap_sram_bank_num=self.config.ifmap_sram_bank_num,
+                    ifmap_sram_bank_port=self.config.ifmap_sram_bank_port,
+                    filter_sram_bank_num=self.config.filter_sram_bank_num,
+                    filter_sram_bank_port=self.config.filter_sram_bank_port,
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup

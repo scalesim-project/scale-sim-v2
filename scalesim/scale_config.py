@@ -60,10 +60,14 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
-        self.num_bank = config.get(section, 'OnChipMemoryBanks')
-        self.num_port = config.get(section, 'OnChipMemoryBankPorts')
         self.using_ifmap_custom_layout = config.getboolean(section, 'IfmapCustomLayout')
         self.using_filter_custom_layout = config.getboolean(section, 'FilterCustomLayout')
+        self.ifmap_sram_bank_bandwidth = int(config.get(section, 'IfmapSRAMBankBandwidth'))
+        self.ifmap_sram_bank_num = int(config.get(section, 'IfmapSRAMBankNum'))
+        self.ifmap_sram_bank_port = int(config.get(section, 'IfmapSRAMBankPort'))
+        self.filter_sram_bank_bandwidth = int(config.get(section, 'FilterSRAMBankBandwidth'))
+        self.filter_sram_bank_num = int(config.get(section, 'FilterSRAMBankNum'))
+        self.filter_sram_bank_port = int(config.get(section, 'FilterSRAMBankPort'))
         
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
@@ -281,6 +285,10 @@ class scale_config:
         if self.valid_conf_flag:
             return self.bandwidths
 
+    def get_bandwidths_as_list(self):
+        if self.valid_conf_flag:
+            return self.bandwidths
+        
     def get_num_bank(self):
         if self.valid_conf_flag:
             return self.num_bank
