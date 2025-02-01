@@ -103,14 +103,10 @@ class systolic_compute_ws:
         self.Sc = self.filter_op_mat.shape[1]
         self.T = self.ifmap_op_mat.shape[0]
 
-        # print("self.Sr, self.Sc, self.T")
-        # print(self.Sr, self.Sc, self.T)
-
         self.arr_row, self.arr_col = self.config.get_array_dims()
 
         self.row_fold = math.ceil(self.Sr / self.arr_row) # to be used for prefetch matrices
         self.row_fold_demand_matrices = math.ceil(self.filter_op_mat.shape[0] / self.arr_row)
-        # print("self.row_fold_demand_matrices", self.row_fold_demand_matrices)
         self.col_fold = math.ceil(self.Sc / self.arr_col)
 
         self.params_set_flag = True
@@ -191,28 +187,18 @@ class systolic_compute_ws:
         """
         assert self.params_set_flag, 'Parameters are not set'
 
-        # print("self.col_fold")
-        # print(self.col_fold)
-
         for fc in range(self.col_fold):
             col_start_id = fc * self.arr_col
             col_end_id = min(col_start_id + self.arr_col, self.Sc)
-            # print("col_start_id, col_end_id")
-            # print(col_start_id, col_end_id)
 
             delta = self.arr_col - (col_end_id - col_start_id)
 
             this_fold_prefetch = self.filter_op_mat[:,col_start_id:col_end_id]
-            # print("this_fold_prefetch")
-            # print(this_fold_prefetch)
-            # print(this_fold_prefetch.shape)
 
             if delta > 0:
                 null_req_mat = np.ones((self.filter_op_mat.shape[0], delta)) * -1 # self.Sr
                 this_fold_prefetch = np.concatenate((this_fold_prefetch, null_req_mat), axis=1)
-            # print("this_fold_prefetch")
-            # print(this_fold_prefetch)
-            # print(this_fold_prefetch.shape)
+
             if fc == 0:
                 self.filter_prefetch_matrix = this_fold_prefetch
             else:
@@ -233,19 +219,7 @@ class systolic_compute_ws:
 
         self.create_ifmap_demand_mat()
         self.create_filter_demand_mat()
-        self.create_ofmap_demand_mat()
-
-        # print("FINAL DEMAND MATRICES")
-        # with np.printoptions(threshold=np.inf):
-        #     print("self.ifmap_demand_matrix")
-        #     print(self.ifmap_demand_matrix)
-        # print(self.ifmap_demand_matrix.shape)
-        #     print("self.filter_demand_matrix")
-        #     print(self.filter_demand_matrix)
-        # print(self.filter_demand_matrix.shape)
-        #     print("self.ofmap_demand_matrix")     
-        #     print(self.ofmap_demand_matrix)     
-        # print(self.ofmap_demand_matrix.shape)     
+        self.create_ofmap_demand_mat()   
 
         # assert self.ifmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], \
         #        'IFMAP and Filter demands out of sync'
@@ -284,61 +258,34 @@ class systolic_compute_ws:
 
         ifmap_demand_matrix_list = []
 
-        # print("########## IFMAP demand matrix ##########")
-        # print("self.ifmap_op_mat_original")
-        # print(self.ifmap_op_mat_original)
-        # print(self.ifmap_op_mat_original.shape)
-        # print(self.ifmap_op_mat)
-        # print(self.ifmap_op_mat.shape)
-        # print("self.sparsity_filter_array")
-        # print(self.sparsity_filter_array.T)
-        # print(self.sparsity_filter_array.T.shape)
-        # print("self.col_fold, self.row_fold")
-        # print(self.col_fold, self.row_fold)
-
         for fc in range(self.col_fold):
             # for fr in range(self.row_fold):
             for fr in range(self.row_fold_demand_matrices):
                 if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
-                    col_start_id = fr * (self.arr_row * 2)
-                    # col_start_id *= 2 # Since we need 2 tiles
+                    col_start_id = fr * (self.arr_row * 2) # Since we need 2 tiles
                     col_end_idx = min(col_start_id + (self.arr_row * 2), self.Sr)
-                    # col_end_idx *= 2
-                    delta = (self.arr_row * 2) - (col_end_idx - col_start_id) # check once
+                    delta = (self.arr_row * 2) - (col_end_idx - col_start_id)
                     this_fold_demand = self.ifmap_op_mat_original[:,col_start_id: col_end_idx]
-                    # print("col_start_id, col_end_idx, delta")
-                    # print(col_start_id, col_end_idx, delta)
-                    # print(">one")
-                    # print(this_fold_demand)
-                    # print(this_fold_demand.shape)
                 else:
                     col_start_id = fr * self.arr_row
                     col_end_idx = min(col_start_id + self.arr_row, self.Sr)
                     delta = self.arr_row - (col_end_idx - col_start_id)
-                    # print("col_start_id, col_end_idx, delta")
-                    # print(col_start_id, col_end_idx, delta)
 
                     # Indexing the cols with row start and row end idx are correct
                     # See the comment on ifmap_prefetch generation
                     this_fold_demand = self.ifmap_op_mat[:,col_start_id: col_end_idx]
-                    # print(">one")
-                    # print(this_fold_demand)
 
                 # Need to add custom skew for row-wise sparsity
                 if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
-                    this_fold_demand = skew_matrix_row_sparsity(this_fold_demand, self.arr_row, self.config.sparsity_block_size)
-                    # print(">two")
-                    # print(this_fold_demand)
-                    # print(this_fold_demand.shape)
-
+                    this_fold_demand = skew_matrix_row_sparsity(this_fold_demand, self.arr_row, \
+                                                                self.config.sparsity_block_size)
                 
                 if self.config.sparsity_support:
-                    # A single block of input is shared among M/N rows, hence a row needs to be read
-                    # M/N times (assume absence of any broadcast)
-                    # NCBS: need to change this
                     if self.config.sparsity_optimized_mapping:
                         self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
                     else:
+                        # A single block of input is shared among M/N rows, hence a row needs to be
+                        # read M/N times (assume absence of any broadcast)
                         self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1] * \
                                             (self.sparsity_ratio_M / self.sparsity_ratio_N)
                 else:
@@ -348,16 +295,8 @@ class systolic_compute_ws:
                 if not self.config.sparsity_optimized_mapping:
                     if delta > 0:
                         null_req_mat = np.ones((self.T, delta)) * -1
-                        # if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
-                        #     null_req_mat = np.ones((this_fold_demand.shape[0], delta)) * -1
-                        # print("null_req_mat")
-                        # print(null_req_mat)
                         this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
-                    # print(">two")
-                    # print(this_fold_demand)
                 
-                # print("prefix_mat")
-                # print(inter_fold_gap_prefix_mat)
                 if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
                     if inter_fold_gap_prefix_mat.shape[1] < this_fold_demand.shape[1]:
                         inter_fold_gap_prefix_mat = np.pad(
@@ -365,13 +304,10 @@ class systolic_compute_ws:
                             ((0, 0), (0, this_fold_demand.shape[1] - inter_fold_gap_prefix_mat.shape[1])),  # Pad only columns, not rows
                             constant_values=-1
                         )
-                    # print(inter_fold_gap_prefix_mat)
 
                 # Account for the cycles for weights to load
                 this_fold_demand = np.concatenate((inter_fold_gap_prefix_mat, this_fold_demand),
                                                   axis=0)
-                # print(">three")
-                # print(this_fold_demand)
 
                 # Account for the cycles for final output to drain out
                 if self.config.sparsity_support and self.config.sparsity_optimized_mapping:
@@ -382,28 +318,16 @@ class systolic_compute_ws:
                             constant_values=-1
                         )
                 this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat),
-                                                  axis=0)
-                # print(">four")
-                # print(this_fold_demand)
-                # assert 1==0, "STOP"
-                
+                                                  axis=0)                
 
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
                 if not self.config.sparsity_optimized_mapping:
                     this_fold_demand = skew_matrix(this_fold_demand)
-                    # print(">five")
-                    # print(this_fold_demand)
 
                 ifmap_demand_matrix_list.append(this_fold_demand)
 
         self.ifmap_demand_matrix = np.concatenate(ifmap_demand_matrix_list)
-        # print("self.ifmap_demand_matrix final")
-        # print(inter_fold_gap_prefix_mat.shape)
-        # print(inter_fold_gap_suffix_mat.shape)
-        # # with np.printoptions(threshold=np.inf):
-        # print(self.ifmap_demand_matrix)
-        # print("self.ifmap_demand_matrix final end")
-        # # assert 1==0, "STOP HERE"
+
         if False:
             if self.config.sparsity_support is True:
                 self.ifmap_demand_matrix = \
@@ -420,7 +344,6 @@ class systolic_compute_ws:
 
         inter_fold_gap_suffix = self.arr_row + self.arr_col + self.T - 2
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
-        # print("inter_fold_gap_suffix, inter_fold_gap_suffix_mat", inter_fold_gap_suffix, inter_fold_gap_suffix_mat)
 
         metadata_conversion_mat = [ [ ] ]
         if False:
@@ -440,7 +363,6 @@ class systolic_compute_ws:
                 # row_end_idx = min(row_start_id + self.arr_row, self.Sr)
                 row_end_idx = min(row_start_id + self.arr_row, self.filter_op_mat.shape[0])
                 row_delta = self.arr_row - (row_end_idx - row_start_id)
-                # print(row_delta, "=", self.arr_row, "-(", row_end_idx, "-", row_start_id, ")")
 
                 col_start_id = fc * self.arr_col
                 col_end_idx = min(col_start_id + self.arr_col, self.Sc)
@@ -449,10 +371,7 @@ class systolic_compute_ws:
                 this_fold_demand = \
                     self.filter_op_mat[row_start_id:row_end_idx, col_start_id: col_end_idx]
                 self.filter_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
-                # print("this_fold_demand before")
-                # print("self.filter_op_mat.shape = ", self.filter_op_mat.shape)
-                # print("row_delta, col_delta", row_delta, col_delta)
-                # print(this_fold_demand)
+
                 # Take into account under utilization
                 if col_delta > 0:
                     null_req_mat = np.ones((this_fold_demand.shape[0], col_delta)) * -1
@@ -461,8 +380,7 @@ class systolic_compute_ws:
                 if row_delta > 0:
                     null_req_mat = np.ones((row_delta, self.arr_col)) * -1
                     this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=0)
-                # print("this_fold_demand")
-                # print(this_fold_demand)
+
                 # The filters are needed to be filled in reverse order to ensure that
                 # top element is pushed in last to maintain alignment with the input elements
                 this_fold_demand = np.flip(this_fold_demand, 0)
@@ -498,21 +416,6 @@ class systolic_compute_ws:
                 #       np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
         
         self.filter_demand_matrix = np.concatenate(filter_demand_matrix_list)
-        # null_req_mat = np.ones((self.Sr - self.filter_op_mat.shape[0], self.filter_demand_matrix.shape[1])) * -1
-        # print(self.ifmap_demand_matrix.shape)
-        # print(self.filter_demand_matrix.shape)
-        
-        # # with np.printoptions(threshold=np.inf):
-        # #     print(self.filter_demand_matrix)
-        # # assert 1==0, "STOP"
-        # # null_req_mat = np.ones((self.ifmap_demand_matrix.shape[0] - self.filter_demand_matrix.shape[0], self.filter_demand_matrix.shape[1])) * -1
-        # # print(self.filter_demand_matrix.shape)
-        # # print(null_req_mat.shape)
-        # # self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, null_req_mat))
-        # print("self.filter_demand_matrix final")
-        # print(self.filter_demand_matrix)
-        # print(self.filter_demand_matrix.shape)
-        # print("self.filter_demand_matrix final end")
 
         if False:
             if self.config.sparsity_support is True:
@@ -542,8 +445,7 @@ class systolic_compute_ws:
                     metadata_conversion_mat = np.ones((0, self.arr_col)) * -1
 
         ofmap_demand_matrix_list = []
-        # print("self.row_fold, self.col_fold")
-        # print(self.row_fold, self.col_fold)
+
         for fc in range(self.col_fold):
             # for fr in range(self.row_fold):
             for fr in range(self.row_fold_demand_matrices):
@@ -577,8 +479,7 @@ class systolic_compute_ws:
                 #       np.concatenate((self.ofmap_demand_matrix, this_fold_demand), axis=0)
 
         self.ofmap_demand_matrix = np.concatenate(ofmap_demand_matrix_list)
-        # print("self.ofmap_demand_matrix final")
-        # print(self.ofmap_demand_matrix)
+
         if False:
             if self.config.sparsity_support is True:
                 self.ofmap_demand_matrix = \
@@ -734,20 +635,17 @@ def skew_matrix(input_matrix_np):
 #
 def skew_matrix_row_sparsity(input_matrix, arr_row, block_size):
     # Step 1: Ensure the number of columns is arr_row * 2 as we are combining 2 tiles
-    # print("1", input_matrix.shape)
     num_tiles = 2
     num_cols = input_matrix.shape[1]
     if num_cols < arr_row * num_tiles:
         padding = arr_row * num_tiles - num_cols
         input_matrix = np.pad(input_matrix, ((0, 0), (0, padding)), constant_values=-1)
-    # print("2", input_matrix.shape)
     
     # Step 2: Split into blocks
     blocks = []
     for row in input_matrix:
         row_blocks = [row[i:i+block_size] for i in range(0, len(row), block_size)]
         blocks.append(row_blocks)
-    # print(blocks)
 
     # Step 3: Add extra copies to match block_size / 2 copies per column
     repeated_blocks = []
@@ -756,16 +654,12 @@ def skew_matrix_row_sparsity(input_matrix, arr_row, block_size):
         for block in block_row:
             new_row.extend([block] * (block_size // num_tiles))
         repeated_blocks.append(new_row)
-    # print("repeated_blocks")
-    # print(repeated_blocks)
 
     # Step 4: Apply skew to the repeated blocks
     output_matrix = []
     num_block_rows = len(repeated_blocks)
     num_block_cols = (len(repeated_blocks[0][0]) * block_size) // num_tiles
-    # print("num_block_cols = (len(repeated_blocks[0]) * block_size) // num_tiles")
-    # print(num_block_cols, "=" ,len(repeated_blocks[0][0]), "*" ,block_size ,"//", num_tiles)
-    # print(num_block_rows, num_block_cols)
+
     for i in range(num_block_rows + arr_row - 1):
         row = []
         for j in range(len(repeated_blocks[0])):
@@ -776,13 +670,5 @@ def skew_matrix_row_sparsity(input_matrix, arr_row, block_size):
                 row.append([-1] * block_size)
         row = np.concatenate(row)
         output_matrix.append(row)
-
-    # print("printing rows")
-    # print(input_matrix)
-    # print(input_matrix.shape)
-    # print("num_cols = ", num_cols)
-    # for row in output_matrix:
-    #     print(row.shape)
-    # print("printing rows end")
     
     return np.array(output_matrix, dtype=input_matrix.dtype)
