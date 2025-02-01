@@ -193,8 +193,6 @@ class double_buffered_scratchpad:
         assert self.params_valid_flag, 'Memories not initialized yet'
 
         ofmap_lines = ofmap_demand_mat.shape[0]
-        print("ofmap_lines")
-        print(ofmap_lines)
 
         self.total_cycles = 0
         self.stall_cycles = 0
@@ -212,8 +210,6 @@ class double_buffered_scratchpad:
             cycle_arr = np.zeros((1,1)) + i + self.stall_cycles
 
             ifmap_demand_line = ifmap_demand_mat[i, :].reshape((1,ifmap_demand_mat.shape[1]))
-            print("ifmap_demand_line")
-            print(ifmap_demand_line)
             ifmap_cycle_out = \
                 self.ifmap_buf.service_reads(incoming_requests_arr_np=ifmap_demand_line,
                                              incoming_cycles_arr=cycle_arr)
