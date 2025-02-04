@@ -32,9 +32,11 @@ The Ramulator reports the response time of each individual requests. The memory 
 SCALE-Sim is rerun with the memory round-trip latency for each request, capturing realistic pipeline stalls caused by memory delays and reporting the resulting execution time.
 Below are the steps to run the SCALE-Sim simulator with the memory component.
 
-source run_ramulator.sh 
+source run_ramulator.sh <benchmark> <load_queue_size>
 OR
-source run_ramulator_mnk.sh
+source run_ramulator_mnk.sh <benchmark> <load_queue_size>
+OR 
+source run_tests.sh
 
 ### * Step 3: Plot the graphs to showcase the execution impact of memory components*
 
