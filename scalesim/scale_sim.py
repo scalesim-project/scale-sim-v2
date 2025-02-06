@@ -6,6 +6,7 @@ from scalesim.simulator import simulator as sim
 
 class scalesim:
     def __init__(self,
+                 layer_id = 0,
                  save_disk_space=False,
                  verbose=True,
                  config='',
@@ -31,6 +32,7 @@ class scalesim:
         self.verbose_flag = verbose
         self.run_done_flag = False
         self.logs_generated_flag = False
+        self.layer_id = layer_id
 
         self.set_params(config_filename=config, topology_filename=topology)
 
@@ -82,7 +84,8 @@ class scalesim:
             topo_obj=self.topo,
             top_path=self.top_path,
             verbosity=self.verbose_flag,
-            save_trace=save_trace
+            save_trace=save_trace,
+            layer_id = self.layer_id
         )
         self.run_once()
 

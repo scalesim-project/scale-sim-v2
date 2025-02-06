@@ -15,6 +15,7 @@ class simulator:
         self.save_trace = True
 
         self.num_layers = 0
+        self.layer_id = 0
 
         self.single_layer_sim_object_list = []
 
@@ -27,7 +28,8 @@ class simulator:
                    topo_obj=topo(),
                    top_path="./",
                    verbosity=True,
-                   save_trace=True
+                   save_trace=True,
+                   layer_id=0
                    ):
 
         self.conf = config_obj
@@ -39,21 +41,33 @@ class simulator:
 
         # Calculate inferrable parameters here
         self.num_layers = self.topo.get_num_layers()
-
+        self.layer_id = layer_id
         self.params_set_flag = True
 
     #
     def run(self):
         assert self.params_set_flag, 'Simulator parameters are not set'
 
+        print("layer" + str(self.layer_id))
         # 1. Create the layer runners for each layer
-        for i in range(self.num_layers):
-            this_layer_sim = layer_sim()
-            this_layer_sim.set_params(layer_id=i,
-                                 config_obj=self.conf,
-                                 topology_obj=self.topo,
-                                 verbose=self.verbose)
+        if self.layer_id == -1:
+            for i in range(self.num_layers):
+                this_layer_sim = layer_sim()
+                this_layer_sim.set_params(parallel = False,
+                                    layer_id=i,
+                                    config_obj=self.conf,
+                                    topology_obj=self.topo,
+                                    verbose=self.verbose)
 
+                self.single_layer_sim_object_list.append(this_layer_sim)
+        else:
+            this_layer_sim = layer_sim()
+            this_layer_sim.set_params(parallel = True,
+                                    layer_id=self.layer_id,
+                                    config_obj=self.conf,
+                                    topology_obj=self.topo,
+                                    verbose=self.verbose
+                                )
             self.single_layer_sim_object_list.append(this_layer_sim)
 
         if not os.path.isdir(self.top_path):

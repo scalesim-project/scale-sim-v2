@@ -12,7 +12,9 @@ from scalesim.memory.double_buffered_scratchpad_mem import double_buffered_scrat
 
 class single_layer_sim:
     def __init__(self):
+        self.parallel = False
         self.layer_id = 0
+        self.layer_id_glue = 0
         self.topo = topo()
         self.config = cfg()
 
@@ -71,15 +73,20 @@ class single_layer_sim:
         self.report_items_ready = False
 
     def set_params(self,
+                   parallel = False,
                    layer_id=0,
                    config_obj=cfg(), topology_obj=topo(),
                    verbose=True):
 
+        self.parallel = parallel
         self.layer_id = layer_id
         self.config = config_obj
         self.topo = topology_obj
 
-        self.op_mat_obj.set_params(layer_id=self.layer_id,
+        # ---- Need to fix the glue code later for layer_id in the compute components
+        self.layer_id_glue = 0 if self.parallel else self.layer_id
+        print("compute layer id is " + str(self.layer_id_glue))
+        self.op_mat_obj.set_params(layer_id= self.layer_id_glue,
                                    config_obj=self.config,
                                    topoutil_obj=self.topo,
                                    )
@@ -106,32 +113,6 @@ class single_layer_sim:
         self.memory_system = mem_sys_obj
         self.memory_system_ready_flag = True
     
-#    def dram_latency(self,filename):
-#        filter_offset = self.config.filter_offset
-#        ofmap_offset  = self.config.ofmap_offset
-#        line_no = 0
-#        print ("Start reading the ramulator files")
-#        with open(filename,'r') as f:
-#            for line in f.readlines():
-#                line = line.strip()
-#                if "Simulation done" in line:
-#                    continue
-#                line = line.replace(';','')
-#                x = line.split(' ')
-#                address = int(x[1],16)
-#                latency = int(x[4]) - int(x[6]) # depart - arrive 
-#                if address < filter_offset:
-#                    self.ifmap_lat.append(latency)
-#                    self.ifmap_addr.append(address)
-#                elif address < ofmap_offset:
-#                    self.filter_lat.append(latency)
-#                    self.filter_addr.append(latency)
-#                else:
-#                    self.ofmap_lat.append(latency)
-#                    self.ofmap_addr.append(address)
-#                line_no+=1
-#        print("DRAM transaction read complete")
-#        f.close()
 #
     def run(self):
         assert self.params_set_flag, 'Parameters are not set. Run set_params()'
@@ -143,8 +124,8 @@ class single_layer_sim:
         _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
         _, ofmap_op_mat = self.op_mat_obj.get_ofmap_matrix()
 
-        self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id) \
-                           * self.topo.get_layer_window_size(self.layer_id)
+        self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id_glue) \
+                           * self.topo.get_layer_window_size(self.layer_id_glue)
 
         # 1.2 Get the prefetch matrices for both operands
         self.compute_system.set_params(config_obj=self.config,
@@ -200,7 +181,8 @@ class single_layer_sim:
                     verbose=self.verbose,
                     estimate_bandwidth_mode=estimate_bandwidth_mode,
                     config=self.config,
-                    topo=self.topo
+                    topo=self.topo,
+                    layer_id = self.layer_id
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup

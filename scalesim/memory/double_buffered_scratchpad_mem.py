@@ -68,7 +68,7 @@ class double_buffered_scratchpad:
                    ifmap_buf_size_bytes=2, filter_buf_size_bytes=2, ofmap_buf_size_bytes=2,
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
                    ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
-                   config=cfg(), topo=topo()
+                   config=cfg(), topo=topo(), layer_id=0
                    ):
 
         self.estimate_bandwidth_mode = estimate_bandwidth_mode
@@ -97,9 +97,9 @@ class double_buffered_scratchpad:
             if self.config.get_ramulator_trace() == True:
                 root_path = os.getcwd()
                 topology_file = self.topo.split('.')[0]
-                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile0.npy")
-                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile0.npy")
-                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile0.npy")
+                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile_"+str(layer_id) + ".npy")
+                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile_"+str(layer_id) + ".npy")
+                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile_"+str(layer_id) + ".npy")
                 self.ifmap_port.def_params(config = self.config, latency_file=ifmap_dram_trace)
                 self.filter_port.def_params(config = self.config, latency_file=filter_dram_trace)
                 self.ofmap_port.def_params(config=self.config, latency_file=ofmap_dram_trace)
