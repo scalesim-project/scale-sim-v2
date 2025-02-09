@@ -1,6 +1,12 @@
 import argparse
+import os
+
+import torch
+import torch.nn as nn
 
 from scalesim.scale_sim import scalesim
+from torch_to_topo import create_conv_topo
+from torchvision import models, datasets
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -20,12 +26,34 @@ if __name__ == '__main__':
                         default="conv",
                         help="Type of input topology, gemm: MNK, conv: conv"
                         )
+    # Changes from torch_to_topo files
+    parser.add_argument('-m', metavar='PyTorch module name', type=str,
+                        default='',
+                        help="Class name of PyTorch module to turn into SCALESim topology"
+                        )
+    parser.add_argument('-l', metavar='Include linear layers?', type=bool,
+                        default=False,
+                        help="Boolean deciding whether or not to include nn.Linear layers in topology"
+                        )    
 
     args = parser.parse_args()
     topology = args.t
     config = args.c
     logpath = args.p
     inp_type = args.i
+
+    if args.m != '':
+        # Changes from torch_to_topo files
+        path = '../topologies/custom/'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        include_lin = args.l
+        model_name = args.m
+        model = getattr(models, model_name)(pretrained=True)
+        file_name = model_name + '.csv'
+        create_conv_topo(model, path=path, filename=file_name, include_lin=include_lin)
+
+        topology = path + file_name
 
     gemm_input = False
     if inp_type == 'gemm':
