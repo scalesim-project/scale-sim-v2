@@ -5,3 +5,4 @@ numpy
 pandas
 cython
 setuptools
+torch
