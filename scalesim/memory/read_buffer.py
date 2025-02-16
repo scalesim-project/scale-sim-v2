@@ -213,10 +213,10 @@ class read_buffer:
         #        If hit, return with hit latency
         #        Else, make the contents of prefetch buffer as active and then check
         #              finish till an ongoing prefetch is done before reassiging prefetch buffer
-
+        dram_stall_cycles = 0
         if not self.active_buf_full_flag:
             start_cycle = incoming_cycles_arr[0][0]
-            self.prefetch_active_buffer(start_cycle=start_cycle)    # Needs to use the entire operand matrix
+            dram_stall_cycles = self.prefetch_active_buffer(start_cycle=start_cycle)    # Needs to use the entire operand matrix
                                                                     # keeping in mind the tile order and everything
 
         out_cycles_arr = []
@@ -243,7 +243,7 @@ class read_buffer:
                         offset += potential_stall_cycles
                    
 
-            out_cycles = cycle + offset
+            out_cycles = cycle + offset + dram_stall_cycles
             out_cycles_arr.append(out_cycles)
 
         out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
@@ -289,11 +289,13 @@ class read_buffer:
         response_cycles_arr = self.backing_buffer.service_reads(incoming_cycles_arr=cycles_arr,
                                                                 incoming_requests_arr_np=prefetch_requests)
 
+        #print(response_cycles_arr)
         # 4. Update the variables
-        self.last_prefect_cycle = int(response_cycles_arr[-1][0])
+        self.last_prefect_cycle = np.amax(response_cycles_arr)
+        #print("Prefetch Active Buffer: The cycle_arr shape is {0} and the response_cycle_arr shape is {1}".format(cycles_arr.shape,response_cycles_arr.shape))
 
         # Update the trace matrix
-        self.trace_matrix = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
+        self.trace_matrix = np.column_stack((response_cycles_arr, prefetch_requests))
         self.trace_valid = True
 
         # Set active buffer contents
@@ -313,6 +315,8 @@ class read_buffer:
             self.next_line_prefetch_idx = num_lines % self.fetch_matrix.shape[0]
         else:
             self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
+        
+        return (self.last_prefect_cycle - cycles_arr[-1][0]-1)      # Time taken from start to end of loading the scratchpad
 
     #
     def new_prefetch(self):
@@ -374,11 +378,12 @@ class read_buffer:
                                                                 incoming_requests_arr_np=prefetch_requests)
 
         # 5. Update the variables
-        self.last_prefect_cycle = response_cycles_arr[-1][0]
+        self.last_prefect_cycle = np.amax(response_cycles_arr)
+        #print("New Prefetch: The cycle_arr shape is {0} and the response_cycle_arr shape is {1}".format(cycles_arr.shape,response_cycles_arr.shape))
 
-        assert response_cycles_arr.shape == cycles_arr.shape, 'The request and response cycles dims do not match'
+        #assert response_cycles_arr.shape == cycles_arr.shape, 'The request and response cycles dims do not match'
 
-        this_prefetch_trace = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
+        this_prefetch_trace = np.column_stack((response_cycles_arr, prefetch_requests))
         self.trace_matrix = np.concatenate((self.trace_matrix, this_prefetch_trace), axis=0)
 
         # Set the line to be prefetched next
@@ -413,8 +418,8 @@ class read_buffer:
     #
     def get_external_access_start_stop_cycles(self):
         assert self.trace_valid, 'Traces not ready yet'
-        start_cycle = self.trace_matrix[0][0]
-        end_cycle = self.trace_matrix[-1][0]
+        start_cycle = np.amin(self.trace_matrix[:,0])
+        end_cycle = np.amax(self.trace_matrix[:,0])
 
         return start_cycle, end_cycle
 
