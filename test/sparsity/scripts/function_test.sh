@@ -5,7 +5,7 @@ path="./"
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 sed -i "s/^RandomNumberGeneratorSeed.*/RandomNumberGeneratorSeed : 40/" "$path/configs/sparsity.cfg"
 
-source venv2/bin/activate
+source venv/bin/activate
 export PYTHONPATH=.
 python3 $path/scalesim/scale.py -c $path/configs/sparsity.cfg -t $path/topologies/sparsity/alexnet_part.csv -p $path/sparsity_outputs
 
