@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 from scalesim.scale_config import scale_config as cfg
 from scalesim.topology_utils import topologies as topo
@@ -23,7 +22,6 @@ class single_layer_sim:
         self.verbose = True
 
         # Report items : Compute report
-        self.overall_cycles = 0
         self.total_cycles = 0
         self.stall_cycles = 0
         self.num_compute = 0
@@ -83,8 +81,6 @@ class single_layer_sim:
                                    config_obj=self.config,
                                    topoutil_obj=self.topo,
                                    )
-        
-
 
         self.dataflow = self.config.get_dataflow()
         if self.dataflow == 'os':
@@ -105,34 +101,7 @@ class single_layer_sim:
     def set_memory_system(self, mem_sys_obj=mem_dbsp()):
         self.memory_system = mem_sys_obj
         self.memory_system_ready_flag = True
-    
-#    def dram_latency(self,filename):
-#        filter_offset = self.config.filter_offset
-#        ofmap_offset  = self.config.ofmap_offset
-#        line_no = 0
-#        print ("Start reading the ramulator files")
-#        with open(filename,'r') as f:
-#            for line in f.readlines():
-#                line = line.strip()
-#                if "Simulation done" in line:
-#                    continue
-#                line = line.replace(';','')
-#                x = line.split(' ')
-#                address = int(x[1],16)
-#                latency = int(x[4]) - int(x[6]) # depart - arrive 
-#                if address < filter_offset:
-#                    self.ifmap_lat.append(latency)
-#                    self.ifmap_addr.append(address)
-#                elif address < ofmap_offset:
-#                    self.filter_lat.append(latency)
-#                    self.filter_addr.append(latency)
-#                else:
-#                    self.ofmap_lat.append(latency)
-#                    self.ofmap_addr.append(address)
-#                line_no+=1
-#        print("DRAM transaction read complete")
-#        f.close()
-#
+
     def run(self):
         assert self.params_set_flag, 'Parameters are not set. Run set_params()'
 
@@ -198,9 +167,7 @@ class single_layer_sim:
                     filter_backing_buf_bw=filter_backing_bw,
                     ofmap_backing_buf_bw=ofmap_backing_bw,
                     verbose=self.verbose,
-                    estimate_bandwidth_mode=estimate_bandwidth_mode,
-                    config=self.config,
-                    topo=self.topo
+                    estimate_bandwidth_mode=estimate_bandwidth_mode
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup
@@ -275,8 +242,6 @@ class single_layer_sim:
         self.ofmap_dram_start_cycle, self.ofmap_dram_stop_cycle, self.ofmap_dram_writes \
             = self.memory_system.get_ofmap_dram_details()
 
-        self.overall_cycles = int(self.ofmap_dram_stop_cycle - min(self.ifmap_dram_start_cycle,self.filter_dram_start_cycle))
-
         # BW calc for DRAM access
         self.avg_ifmap_dram_bw = self.ifmap_dram_reads / (self.ifmap_dram_stop_cycle - self.ifmap_dram_start_cycle + 1)
         self.avg_filter_dram_bw = self.filter_dram_reads / (self.filter_dram_stop_cycle - self.filter_dram_start_cycle + 1)
@@ -294,7 +259,7 @@ class single_layer_sim:
         if not self.report_items_ready:
             self.calc_report_data()
 
-        items = [self.overall_cycles,self.total_cycles, self.stall_cycles, self.overall_util, self.mapping_eff, self.compute_util]
+        items = [self.total_cycles, self.stall_cycles, self.overall_util, self.mapping_eff, self.compute_util]
         return items
 
     #
