@@ -211,7 +211,8 @@ class single_layer_sim:
         if not os.path.isdir(dir_name):
             cmd = 'mkdir ' + dir_name
             os.system(cmd)
-            os.mkdir(dir_name)
+            # os.mkdir(dir_name)
+            os.makedirs(dir_name, exist_ok=True)
 
         ifmap_sram_filename = dir_name +  '/IFMAP_SRAM_TRACE.csv'
         filter_sram_filename = dir_name + '/FILTER_SRAM_TRACE.csv'
