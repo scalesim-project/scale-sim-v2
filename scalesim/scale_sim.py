@@ -10,8 +10,7 @@ class scalesim:
                  verbose=True,
                  config='',
                  topology='',
-                 input_type_gemm=False,
-                 ):
+                 input_type_gemm=False):
 
         # Data structures
         self.config = scale_config()

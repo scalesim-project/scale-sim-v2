@@ -1,10 +1,7 @@
 import time
 import numpy as np
 from tqdm import tqdm
-import os
 
-from scalesim.scale_config import scale_config as cfg
-from scalesim.topology_utils import topologies as topo
 from scalesim.memory.read_buffer import read_buffer as rdbuf
 from scalesim.memory.read_buffer_estimate_bw import ReadBufferEstimateBw as rdbuf_est
 from scalesim.memory.read_port import read_port as rdport
@@ -21,8 +18,6 @@ class double_buffered_scratchpad:
         self.ifmap_port = rdport()
         self.filter_port = rdport()
         self.ofmap_port = wrport()
-        self.config = cfg()
-        self.topo = topo()
 
         self.verbose = True
 
@@ -67,13 +62,9 @@ class double_buffered_scratchpad:
                    word_size=1,
                    ifmap_buf_size_bytes=2, filter_buf_size_bytes=2, ofmap_buf_size_bytes=2,
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
-                   ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
-                   config=cfg(), topo=topo()
-                   ):
+                   ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1):
 
         self.estimate_bandwidth_mode = estimate_bandwidth_mode
-        self.config = config
-        self.topo = topo.topo_file_name
 
         if self.estimate_bandwidth_mode:
             self.ifmap_buf = rdbuf_est()
@@ -93,16 +84,6 @@ class double_buffered_scratchpad:
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
-        
-            if self.config.get_ramulator_trace() == True:
-                root_path = os.getcwd()
-                topology_file = self.topo.split('.')[0]
-                ifmap_dram_trace = (root_path+"/results/"+topology_file+"_ifmapFile0.npy")
-                filter_dram_trace = (root_path+"/results/"+topology_file+"_filterFile0.npy")
-                ofmap_dram_trace = (root_path+"/results/"+topology_file+"_ofmapFile0.npy")
-                self.ifmap_port.def_params(config = self.config, latency_file=ifmap_dram_trace)
-                self.filter_port.def_params(config = self.config, latency_file=filter_dram_trace)
-                self.ofmap_port.def_params(config=self.config, latency_file=ofmap_dram_trace)
 
             self.ifmap_buf.set_params(backing_buf_obj=self.ifmap_port,
                                       total_size_bytes=ifmap_buf_size_bytes,
@@ -163,7 +144,7 @@ class double_buffered_scratchpad:
                              incoming_requests_arr_np,  # 2D array with the requests
                              incoming_cycles_arr):
 
-        out_cycles_arr_np = self.ofmap_buf.service_writes(incoming_requests_arr_np, incoming_cycles_arr, 1)
+        out_cycles_arr_np = self.ofmap_buf.service_writes(incoming_requests_arr_np, incoming_cycles_arr)
 
         return out_cycles_arr_np
 
@@ -205,9 +186,8 @@ class double_buffered_scratchpad:
                                                              incoming_cycles_arr_np=cycle_arr)
             ofmap_serviced_cycles += [ofmap_cycle_out[0]]
             ofmap_stalls = ofmap_cycle_out[0] - cycle_arr[0]
-            #ofmap_stalls = stall_cycles
 
-            self.stall_cycles += ifmap_stalls[0] + filter_stalls[0] + ofmap_stalls[0]
+            self.stall_cycles += int(max(ifmap_stalls[0], filter_stalls[0], ofmap_stalls[0]))
 
         if self.estimate_bandwidth_mode:
             # IDE shows warning as complete_all_prefetches is not implemented in read_buffer class
@@ -226,7 +206,7 @@ class double_buffered_scratchpad:
 
         ofmap_services_cycles_np = np.asarray(ofmap_serviced_cycles).reshape((len(ofmap_serviced_cycles), 1))
         self.ofmap_trace_matrix = np.concatenate((ofmap_services_cycles_np, ofmap_demand_mat), axis=1)
-        self.total_cycles = int(max(ofmap_serviced_cycles))
+        self.total_cycles = int(ofmap_serviced_cycles[-1][0])
 
         # END of serving demands from memory
         self.traces_valid = True
@@ -378,7 +358,7 @@ class double_buffered_scratchpad:
     #
     def get_stall_cycles(self):
         assert self.traces_valid, 'Traces not generated yet'
-        return int(self.stall_cycles)
+        return self.stall_cycles
 
     #
     def get_ifmap_sram_start_stop_cycles(self):
