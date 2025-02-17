@@ -4,3 +4,4 @@ configparser
 numpy
 pandas
 cython
+setuptools

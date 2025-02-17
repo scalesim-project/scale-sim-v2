@@ -1,17 +1,30 @@
+"""
+This file contains 'scalesim' class that provides a framework to run simulations, generate traces
+and reports.
+"""
+
 import os
 from scalesim.scale_config import scale_config
 from scalesim.topology_utils import topologies
-from scalesim.simulator import simulator as sim
+from scalesim.simulator import simulator
 
 
 class scalesim:
+    """
+    The top level class for the SCALE-Sim v2 simulator that provides methods for setting parameters,
+    running sims, and generating results.
+    """
+    #
     def __init__(self,
                  save_disk_space=False,
                  verbose=True,
                  config='',
                  topology='',
-                 input_type_gemm=False):
-
+                 input_type_gemm=False
+                 ):
+        """
+        __init__ method
+        """
         # Data structures
         self.config = scale_config()
         self.topo = topologies()
@@ -19,10 +32,11 @@ class scalesim:
         # File paths
         self.config_file = ''
         self.topology_file = ''
+        self.top_path = ''
 
         # Member objects
         #self.runner = r.run_nets()
-        self.runner = sim()
+        self.runner = simulator()
 
         # Flags
         self.read_gemm_inputs = input_type_gemm
@@ -36,9 +50,12 @@ class scalesim:
     #
     def set_params(self,
                    config_filename='',
-                   topology_filename='' ):
+                   topology_filename=''):
+        """
+        Set or update the paths to the scalesim input files.
+        """
         # First check if the user provided a valid topology file
-        if not topology_filename == '':
+        if topology_filename != '':
             if not os.path.exists(topology_filename):
                 print("ERROR: scalesim.scale.py: Topology file not found")
                 print("Input file:" + topology_filename)
@@ -48,11 +65,11 @@ class scalesim:
                 self.topology_file = topology_filename
 
         if not os.path.exists(config_filename):
-            print("ERROR: scalesim.scale.py: Config file not found") 
+            print("ERROR: scalesim.scale.py: Config file not found")
             print("Input file:" + config_filename)
             print('Exiting')
             exit()
-        else: 
+        else:
             self.config_file = config_filename
 
         # Parse config first
@@ -73,6 +90,9 @@ class scalesim:
 
     #
     def run_scale(self, top_path='.'):
+        """
+        Method to initialize the internal simulation objects and run scalesim once.
+        """
 
         self.top_path = top_path
         save_trace = not self.save_space
@@ -85,7 +105,11 @@ class scalesim:
         )
         self.run_once()
 
+    #
     def run_once(self):
+        """
+        Method to run the simulation once with preset config and topology objects.
+        """
 
         if self.verbose_flag:
             self.print_run_configs()
@@ -113,6 +137,9 @@ class scalesim:
 
     #
     def print_run_configs(self):
+        """
+        Method to print the banner of input parameters for verbose scalesim runs.
+        """
         df_string = "Output Stationary"
         df = self.config.get_dataflow()
 
@@ -145,6 +172,10 @@ class scalesim:
 
     #
     def get_total_cycles(self):
+        """
+        Method to get the total cycles (stalls + compute) for the workload once the simulation is
+        completed.
+        """
         me = 'scale.' + 'get_total_cycles()'
         if not self.run_done_flag:
             message = 'ERROR: ' + me
