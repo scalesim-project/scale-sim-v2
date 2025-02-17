@@ -27,7 +27,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     topology = args.t
     config = args.c
-    logpath = args.p + topology.split('/')[-1].split('.')[0]
+    logpath = args.p #+ topology.split('/')[-1].split('.')[0]
     inp_type = args.i
     save_trace = args.s
 
