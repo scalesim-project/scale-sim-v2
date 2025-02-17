@@ -1,0 +1,2749 @@
+ERT_summary:
+  version: 0.3
+  table_summary:
+  - name: systolic_array.PE[0..1023].mac
+    actions:
+    - name: mac_random
+      energy: 1
+    - name: mac_reused
+      energy: 1
+    - name: mac_gated
+      energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.PE[0..1023].mac:
+        estimator: dummy_table
+  - name: systolic_array.PE[0..1023].ifmap_spad
+    actions:
+    - name: read
+      average_energy: 1.0
+      max_energy: 1
+      min_energy: 1
+    - name: write
+      average_energy: 1.0
+      max_energy: 1
+      min_energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.PE[0..1023].ifmap_spad:
+        estimator: dummy_table
+  - name: systolic_array.PE[0..1023].weights_spad
+    actions:
+    - name: read
+      average_energy: 1.0
+      max_energy: 1
+      min_energy: 1
+    - name: write
+      average_energy: 1.0
+      max_energy: 1
+      min_energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.PE[0..1023].weights_spad:
+        estimator: dummy_table
+  - name: systolic_array.PE[0..1023].psum_spad
+    actions:
+    - name: read
+      average_energy: 1.0
+      max_energy: 1
+      min_energy: 1
+    - name: write
+      average_energy: 1.0
+      max_energy: 1
+      min_energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.PE[0..1023].psum_spad:
+        estimator: dummy_table
+  - name: systolic_array.weights_dram
+    actions:
+    - name: read
+      energy: 1
+    - name: write
+      energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.weights_dram:
+        estimator: dummy_table
+  - name: systolic_array.ifmap_dram
+    actions:
+    - name: read
+      energy: 1
+    - name: write
+      energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.ifmap_dram:
+        estimator: dummy_table
+  - name: systolic_array.psum_dram
+    actions:
+    - name: read
+      energy: 1
+    - name: write
+      energy: 1
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - systolic_array.psum_dram:
+        estimator: dummy_table
+  - name: systolic_array.weights_glb
+    actions:
+    - name: fill
+      average_energy: 5.0
+      max_energy: 7
+      min_energy: 3
+    - name: read
+      average_energy: 6.0
+      max_energy: 8
+      min_energy: 4
+    - name: update
+      average_energy: 5.0
+      max_energy: 7
+      min_energy: 3
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - action_name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 3
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 7
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 4
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 6
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 6
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 8
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 3
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 7
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+    - action_name: idle
+      arguments: null
+      energy: 0
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0..0].scoreboard
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0..0].data_fifos[0..2]
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+  - name: systolic_array.ifmap_glb
+    actions:
+    - name: fill
+      average_energy: 5.0
+      max_energy: 7
+      min_energy: 3
+    - name: read
+      average_energy: 6.0
+      max_energy: 8
+      min_energy: 4
+    - name: update
+      average_energy: 5.0
+      max_energy: 7
+      min_energy: 3
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - action_name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 3
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 7
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 4
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 6
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 6
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 8
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 3
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 7
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+    - action_name: idle
+      arguments: null
+      energy: 0
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0..0].scoreboard
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0..0].data_fifos[0..2]
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+  - name: systolic_array.psum_glb
+    actions:
+    - name: fill
+      average_energy: 5.0
+      max_energy: 7
+      min_energy: 3
+    - name: read
+      average_energy: 6.0
+      max_energy: 8
+      min_energy: 4
+    - name: update
+      average_energy: 5.0
+      max_energy: 7
+      min_energy: 3
+    - name: idle
+      energy: 0
+    primitive_estimation(s):
+    - action_name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 3
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 7
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[0]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 4
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 25.0%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 6
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 6
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 16.67%
+        estimator: dummy_table
+    - action_name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 8
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[1]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 12.5%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      energy: 3
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 33.33%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      energy: 5
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 0
+        interpreted_energy: 0
+        percentage: 0.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 20.0%
+        estimator: dummy_table
+    - action_name: update
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      energy: 7
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0].scoreboard
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].data_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: push
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0].addr_fifos[0]
+        subaction_name: pop
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+      - subcomponent_name: address_generators[2]
+        subaction_name: count
+        arguments: null
+        energy: 1
+        action_share: 1
+        interpreted_energy: 1
+        percentage: 14.29%
+        estimator: dummy_table
+    - action_name: idle
+      arguments: null
+      energy: 0
+      subaction_estimations:
+      - subcomponent_name: buffet_collection.buffet[0..0].scoreboard
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0..0].data_fifos[0..2]
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table
+      - subcomponent_name: buffet_collection.storage
+        subaction_name: idle
+        arguments: null
+        energy: 0
+        action_share: 1
+        interpreted_energy: 0
+        percentage: 0%
+        estimator: dummy_table

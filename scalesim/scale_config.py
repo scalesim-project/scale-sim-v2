@@ -2,6 +2,8 @@ import configparser as cp
 import os
 import sys
 
+from scalesim.memory_map import memory_map
+
 
 class scale_config:
     def __init__(self):
@@ -38,6 +40,9 @@ class scale_config:
         # Anand: ISSUE #2. Patch
         section = 'run_presets'
         bw_mode_string = config.get(section, 'InterfaceBandwidth')
+
+        ####
+
         if bw_mode_string == 'USER':
             self.use_user_bandwidth = True
         elif bw_mode_string == 'CALC':
@@ -62,6 +67,10 @@ class scale_config:
         if self.use_user_bandwidth:
             self.bandwidths = [int(x.strip())
                                for x in config.get(section, 'Bandwidth').strip().split(',')]
+
+            # Anand: ISSUE #12. Fix
+            assert self.memory_banks == len(self.bandwidths), \
+                'In USER mode bandwidths for each memory bank is a required input'
 
         if self.df not in self.valid_df_list:
             print("WARNING: Invalid dataflow")
@@ -208,7 +217,7 @@ class scale_config:
 
         out_list.append(str(self.df))
         out_list.append(str(self.topofile))
-       
+
         return out_list
 
     def get_run_name(self):
