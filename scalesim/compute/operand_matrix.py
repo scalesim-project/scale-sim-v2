@@ -281,6 +281,7 @@ class operand_matrix(object):
                 ratio_M = self.config.sparsity_block_size
                 num_repeats = (self.filter_addr_matrix.shape[0] + ratio_M - 1) // ratio_M
                 columns = []
+                np.random.seed(self.config.sparsity_rand_seed)
                 for col_idx in range(self.filter_addr_matrix.shape[1]):
                     ratio_N = np.random.randint(1, ratio_M // 2 + 1)
                     pattern = np.concatenate([np.ones(ratio_N, dtype=int), 

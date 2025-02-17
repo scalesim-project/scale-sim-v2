@@ -35,6 +35,7 @@ Check the ```sparsity.cfg``` config file in ```scale-sim-v2\configs``` folder fo
         - true -> enables row-sparsity
         - false -> disables row-sparsity (layer-wise sparsity is the default configuration).
     4. BlockSize: M in N:M ratio for row-wise sparsity
+    5. RandomNumberGeneratorSeed: A seed value to be used for random number generator used in row-wise sparsity logic. The default value is set to 40. The user can omit any changes to this setting if no control over seed is desired.
 
 2. Topology file: <br>
 An extra column named "Sparsity" has been added. The entries in this column has be in the "N:M" format. See ```scale-sim-v2\topologies\sparsity\gemm.csv``` for more details.

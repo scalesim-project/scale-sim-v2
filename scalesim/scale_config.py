@@ -40,6 +40,7 @@ class scale_config:
         # self.sparsity_M = 4
         self.sparsity_optimized_mapping = False
         self.sparsity_block_size = 4
+        self.sparsity_rand_seed = 40
 
     #
     def read_conf_file(self, conf_file_in):
@@ -108,6 +109,8 @@ class scale_config:
             if self.sparsity_optimized_mapping:
                 self.sparsity_block_size = int(config.get(section, 'BlockSize'))
                 assert self.sparsity_block_size <= self.array_rows, "ERROR: Invalid block size"
+
+            self.sparsity_rand_seed = int(config.get(section, 'RandomNumberGeneratorSeed'))
 
         self.valid_conf_flag = True
 
