@@ -1,0 +1,108 @@
+ART_summary:
+  version: 0.3
+  table_summary:
+  - name: systolic_array.PE[0..1023].mac
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.PE[0..1023].ifmap_spad
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.PE[0..1023].weights_spad
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.PE[0..1023].psum_spad
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.weights_dram
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.ifmap_dram
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.psum_dram
+    area: 1
+    primitive_estimations: dummy_table
+  - name: systolic_array.weights_glb
+    area: 11
+    primitive_estimations:
+    - name: buffet_collection.buffet[0..0].scoreboard
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 1
+    - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+    - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+    - name: buffet_collection.storage
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 1
+    - name: address_generators[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+  - name: systolic_array.ifmap_glb
+    area: 11
+    primitive_estimations:
+    - name: buffet_collection.buffet[0..0].scoreboard
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 1
+    - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+    - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+    - name: buffet_collection.storage
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 1
+    - name: address_generators[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+  - name: systolic_array.psum_glb
+    area: 11
+    primitive_estimations:
+    - name: buffet_collection.buffet[0..0].scoreboard
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 1
+    - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+    - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3
+    - name: buffet_collection.storage
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 1
+    - name: address_generators[0..2]
+      estimator: dummy_table
+      area: 1
+      area_share: 1
+      total_component_area: 3

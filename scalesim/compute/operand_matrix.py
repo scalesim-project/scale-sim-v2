@@ -138,6 +138,7 @@ class operand_matrix(object):
             print(message)
             return -1
 
+
         row_indices = np.arange(self.batch_size * self.ofmap_px_per_filt)
         col_indices = np.arange(self.conv_window_size)
         # Create 2D index arrays using meshgrid
