@@ -2,6 +2,9 @@
 
 path="./"
 
+sed -i "s2/.*/run_name = scale_example_run_32x32_os/" $path/configs/scale.cfg
+sed -i "s14/.*/Dataflow : os/" $path/configs/scale.cfg
+sed -i "s25/.*/InterfaceBandwidth: USER/" $path/configs/scale.cfg
 sed -i "s/InterfaceBandwidth: CALC/InterfaceBandwidth: USER/" $path/configs/scale.cfg
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 

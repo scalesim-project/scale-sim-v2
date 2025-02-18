@@ -2,6 +2,8 @@
 
 path="./"
 
+sed -i "s2/.*/run_name = scale_example_run_32x32_os/" $path/configs/scale.cfg
+sed -i "s14/.*/Dataflow : os/" $path/configs/scale.cfg
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 sed -i "s/^RandomNumberGeneratorSeed.*/RandomNumberGeneratorSeed : 40/" "$path/configs/sparsity.cfg"
 
