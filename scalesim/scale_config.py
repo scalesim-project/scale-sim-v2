@@ -29,8 +29,11 @@ class scale_config:
         self.filter_offset = 10000000
         self.ofmap_offset = 20000000
         self.topofile = ""
+        self.layoutfile = ""
         self.bandwidths = []
         self.valid_conf_flag = False
+        self.num_bank = 1
+        self.num_port = 2
 
         self.valid_df_list = ['os', 'ws', 'is']
 
@@ -78,7 +81,15 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
-
+        self.using_ifmap_custom_layout = config.getboolean(section, 'IfmapCustomLayout')
+        self.using_filter_custom_layout = config.getboolean(section, 'FilterCustomLayout')
+        self.ifmap_sram_bank_bandwidth = int(config.get(section, 'IfmapSRAMBankBandwidth'))
+        self.ifmap_sram_bank_num = int(config.get(section, 'IfmapSRAMBankNum'))
+        self.ifmap_sram_bank_port = int(config.get(section, 'IfmapSRAMBankPort'))
+        self.filter_sram_bank_bandwidth = int(config.get(section, 'FilterSRAMBankBandwidth'))
+        self.filter_sram_bank_num = int(config.get(section, 'FilterSRAMBankNum'))
+        self.filter_sram_bank_port = int(config.get(section, 'FilterSRAMBankPort'))
+        
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
             self.bandwidths = [int(x.strip())
@@ -218,6 +229,10 @@ class scale_config:
         Method to set the topology file path.
         """
         self.topofile = topofile
+    
+    #
+    def set_layout_file(self, layoutfile=''):
+        self.layoutfile = layoutfile
 
     #
     def set_offsets(self,
@@ -311,7 +326,12 @@ class scale_config:
             return
         return self.topofile
 
-    #
+    def get_layout_path(self):
+        if not self.valid_conf_flag:
+            print("ERROR: scale_config.get_layout_path() : Config data is not valid")
+            return
+        return self.layoutfile
+
     def get_topology_name(self):
         """
         Method to extract the name of the topology file from the topology path.
@@ -379,7 +399,18 @@ class scale_config:
         if self.valid_conf_flag:
             return self.bandwidths
 
-    #
+    def get_bandwidths_as_list(self):
+        if self.valid_conf_flag:
+            return self.bandwidths
+        
+    def get_num_bank(self):
+        if self.valid_conf_flag:
+            return self.num_bank
+        
+    def get_num_port(self):
+        if self.valid_conf_flag:
+            return self.num_port
+        
     def get_min_dram_bandwidth(self):
         """
         Method to get the minimum DRAM bandwidth defined in the configuration.

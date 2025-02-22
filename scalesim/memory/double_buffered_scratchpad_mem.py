@@ -14,7 +14,6 @@ from scalesim.memory.read_port import read_port as rdport
 from scalesim.memory.write_buffer import write_buffer as wrbuf
 from scalesim.memory.write_port import write_port as wrport
 
-
 class double_buffered_scratchpad:
     """
     Class which runs the memory simulation of double buffered scratchpad memories (SRAMs). The
@@ -77,7 +76,9 @@ class double_buffered_scratchpad:
                    word_size=1,
                    ifmap_buf_size_bytes=2, filter_buf_size_bytes=2, ofmap_buf_size_bytes=2,
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
-                   ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1):
+                   ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
+                   ifmap_sram_bank_num=1, ifmap_sram_bank_port=2, filter_sram_bank_num=1, filter_sram_bank_port=2):
+
         """
         Method to set the double buffered memory simulation parameters for housekeeping.
         """
@@ -92,13 +93,17 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=ifmap_backing_buf_bw)
+                                      backing_buf_default_bw=ifmap_backing_buf_bw,
+                                      num_bank=ifmap_sram_bank_num,
+                                      num_port=ifmap_sram_bank_port)
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
-                                       total_size_bytes=filter_buf_size_bytes,
-                                       word_size=word_size,
-                                       active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_default_bw=filter_backing_buf_bw)
+                                      total_size_bytes=filter_buf_size_bytes,
+                                      word_size=word_size,
+                                      active_buf_frac=rd_buf_active_frac,
+                                      backing_buf_default_bw=filter_backing_buf_bw,
+                                      num_bank=filter_sram_bank_num,
+                                      num_port=filter_sram_bank_port)
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()

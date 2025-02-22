@@ -13,6 +13,10 @@ if __name__ == '__main__':
                         default="../topologies/conv_nets/test.csv",
                         help="Path to the topology file"
                         )
+    parser.add_argument('-l', metavar='Layout file', type=str,
+                        default="../layouts/conv_nets/test.csv",
+                        help="Path to the layout file"
+                        )
     parser.add_argument('-c', metavar='Config file', type=str,
                         default="../configs/scale.cfg",
                         help="Path to the config file"
@@ -28,6 +32,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     topology = args.t
+    layout = args.l
     config = args.c
     logpath = args.p
     inp_type = args.i
