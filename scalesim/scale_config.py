@@ -391,6 +391,21 @@ class scale_config:
         if self.valid_conf_flag:
             return ','.join([str(x) for x in self.bandwidths])
 
+  #
+    def get_ifmap_sram_bandwidth(self):
+        """
+        Method to get the bandwidths as a value.
+        """
+        if self.valid_conf_flag:
+            return self.ifmap_sram_bank_bandwidth
+
+    def get_filter_sram_bandwidth(self):
+      """
+      Method to get the bandwidths as a value.
+      """
+      if self.valid_conf_flag:
+          return self.filter_sram_bank_bandwidth     
+
     #
     def get_bandwidths_as_list(self):
         """

@@ -442,7 +442,7 @@ class operand_matrix(object):
         ifmap_interline_order = self.layoututil.get_layer_ifmap_interline_order()
         
         # Sanity Checking
-        assert np.prod(ifmap_intraline_factor) == int(self.config.get_bandwidths_as_string())
+        assert np.prod(ifmap_intraline_factor) <= int(self.config.get_ifmap_sram_bandwidth())
 
         ifmap_overall_data = np.arange(self.ifmap_rows * self.ifmap_cols * self.num_input_channels)
         
@@ -570,9 +570,8 @@ class operand_matrix(object):
         filter_intraline_order  = self.layoututil.get_layer_filter_intraline_order()
         filter_interline_order  = self.layoututil.get_layer_filter_interline_order()
 
-
         # Sanity Checking
-        assert np.prod(filter_intraline_factor) == int(self.config.get_bandwidths_as_string())
+        assert np.prod(filter_intraline_factor) == int(self.config.get_filter_sram_bandwidth())
 
         filter_overall_data = np.arange(self.filter_rows * self.filter_cols * self.num_input_channels * self.num_filters) + self.filter_offset
         
