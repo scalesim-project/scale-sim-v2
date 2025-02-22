@@ -6,7 +6,6 @@ and reports.
 import os
 from scalesim.scale_config import scale_config
 from scalesim.topology_utils import topologies
-from scalesim.layout_utils import layouts
 from scalesim.simulator import simulator
 
 
@@ -21,21 +20,20 @@ class scalesim:
                  verbose=True,
                  config='',
                  topology='',
-                 layout='',
-                 input_type_gemm=False):
+                 input_type_gemm=False
+                 ):
         """
         __init__ method
         """
         # Data structures
         self.config = scale_config()
         self.topo = topologies()
-        self.layout = layouts()
 
         # File paths
         self.config_file = ''
         self.topology_file = ''
-        self.layout_file = ''
         self.top_path = ''
+
         # Member objects
         #self.runner = r.run_nets()
         self.runner = simulator()
@@ -47,14 +45,12 @@ class scalesim:
         self.run_done_flag = False
         self.logs_generated_flag = False
 
-        self.set_params(config_filename=config, topology_filename=topology, layout_filename=layout)
+        self.set_params(config_filename=config, topology_filename=topology)
 
     #
     def set_params(self,
                    config_filename='',
-                   topology_filename='',
-                   layout_filename=''):
-
+                   topology_filename=''):
         """
         Set or update the paths to the scalesim input files.
         """
@@ -67,15 +63,6 @@ class scalesim:
                 exit()
             else:
                 self.topology_file = topology_filename
-
-        if not layout_filename == '':
-            if not os.path.exists(layout_filename):
-                print("ERROR: scalesim.scale.py: Layout file not found")
-                print("Input file:" + layout_filename)
-                print('Exiting')
-                exit()
-            else:
-                self.layout_file = layout_filename
 
         if not os.path.exists(config_filename):
             print("ERROR: scalesim.scale.py: Config file not found")
@@ -95,14 +82,8 @@ class scalesim:
         else:
             self.config.set_topology_file(self.topology_file)
 
-        if self.layout_file == '':
-            self.layout_file = self.config.get_layout_path()
-        else:
-            self.config.set_layout_file(self.layout_file)
-
         # Parse the topology
         self.topo.load_arrays(topofile=self.topology_file, mnk_inputs=self.read_gemm_inputs)
-        self.layout.load_arrays(layoutfile=self.layout_file, mnk_inputs=self.read_gemm_inputs)
 
         #num_layers = self.topo.get_num_layers()
         #self.config.scale_memory_maps(num_layers=num_layers)
@@ -118,7 +99,6 @@ class scalesim:
         self.runner.set_params(
             config_obj=self.config,
             topo_obj=self.topo,
-            layout_obj=self.layout,
             top_path=self.top_path,
             verbosity=self.verbose_flag,
             save_trace=save_trace
@@ -180,8 +160,7 @@ class scalesim:
         print("SRAM Filter (kB): \t" + str(filter_kb))
         print("SRAM OFMAP (kB): \t" + str(ofmap_kb))
         print("Dataflow: \t" + df_string)
-        print("topology file path: \t" + self.config.get_topology_path())
-        print("layout file path: \t" + self.config.get_layout_path())
+        print("CSV file path: \t" + self.config.get_topology_path())
 
         if self.config.use_user_dram_bandwidth():
             print("Bandwidth: \t" + self.config.get_bandwidths_as_string())

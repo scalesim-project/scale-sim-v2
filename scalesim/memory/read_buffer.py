@@ -45,7 +45,7 @@ class read_buffer:
 
         # Variables to enable prefetching
         self.fetch_matrix = np.ones((1, 1))
-        self.last_prefetch_cycle = -1
+        self.last_prefect_cycle = -1
         self.next_line_prefetch_idx = 0
         self.next_col_prefetch_idx = 0
 
@@ -63,7 +63,7 @@ class read_buffer:
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
-                   hit_latency=1, backing_buf_bw=1, num_bank=1, num_port=2
+                   hit_latency=1, backing_buf_bw=1
                    ):
         """
         Method to set the ifmap/filter double buffered memory simulation parameters for
@@ -77,20 +77,13 @@ class read_buffer:
         self.active_buf_frac = round(active_buf_frac, 2)
         self.hit_latency = hit_latency
 
+        self.backing_buffer = backing_buf_obj
+        self.req_gen_bandwidth = backing_buf_bw
+
         # Calculate these based on the values provided
         self.total_size_elems = math.floor(self.total_size_bytes / self.word_size)
         self.active_buf_size = int(math.ceil(self.total_size_elems * self.active_buf_frac))
         self.prefetch_buf_size = self.total_size_elems - self.active_buf_size
-
-        self.backing_buffer = backing_buf_obj
-        self.req_gen_bandwidth = backing_buf_bw
-
-        # Layout modeling
-        self.num_bank = num_bank
-        self.num_port = num_port # number of ports per bank
-        self.bw_per_bank = self.req_gen_bandwidth // self.num_bank # bandwidth per bank
-        assert self.bw_per_bank * self.num_bank == self.req_gen_bandwidth, f"overall bandwidth must be divisible by total number of banks, number of banks = {self.num_bank}, bandwidth of each as {self.bw_per_bank}, total bandwidth = {self.req_gen_bandwidth}"
-
 
     #
     def reset(self): # TODO: check if all resets are working propoerly
@@ -119,7 +112,7 @@ class read_buffer:
 
         # Variables to enable prefetching
         self.fetch_matrix = np.ones((1, 1))
-        self.last_prefetch_cycle = -1
+        self.last_prefect_cycle = -1
         self.next_line_prefetch_idx = 0
         self.next_col_prefetch_idx = 0
 
@@ -164,12 +157,11 @@ class read_buffer:
 
     #
     def prepare_hashed_buffer(self):
-        # layout modeling: hashed_buffer is being modified to serve as on-chip buffer.
         """
         Method to convert the fetch matrix into a hashed buffer for fast lookups.
         """
-        elems_per_set = self.req_gen_bandwidth
-        
+        elems_per_set = math.ceil(self.total_size_elems / 100)
+
         prefetch_rows = self.fetch_matrix.shape[0]
         prefetch_cols = self.fetch_matrix.shape[1]
 
@@ -224,21 +216,21 @@ class read_buffer:
             for line_id in range(start_id, end_id):
                 this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
                 if addr in this_set:                        # Checking in a set(), O(1) lookup
-                    return line_id, list(this_set).index(addr)
+                    return True
 
         else:
             for line_id in range(start_id, self.num_lines):
                 this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
                 if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return line_id, list(this_set).index(addr)
+                    return True
 
             for line_id in range(end_id):
                 this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
                 if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return line_id, list(this_set).index(addr)
+                    return True
         # Fixing for ISSUE #14
         # return True
-        return -1, -1
+        return False
 
     #
     def service_reads(self,
@@ -271,37 +263,21 @@ class read_buffer:
             # request_line = set(incoming_requests_arr_np[i]) #shaves off a few seconds
             request_line = incoming_requests_arr_np[i]
 
-            concurrent_line_addr = [[] for _ in range(self.num_bank)] # bank conflict modeling
             for addr in request_line:
                 if addr == -1:
                     continue
 
                 # if addr not in self.active_buffer_contents: #this is super slow!!!
                 # Fixing for ISSUE #14
-                # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
-                line_addr, column_addr = self.active_buffer_hit(addr)
-                while line_addr == -1:
+                # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches
+                #                                             if needed
+                while not self.active_buffer_hit(addr):
                     self.new_prefetch()
-                    potential_stall_cycles = self.last_prefetch_cycle - (cycle + offset)
-                    offset += potential_stall_cycles    # Offset increments if there were potential stalls
+                    potential_stall_cycles = self.last_prefect_cycle - (cycle + offset)
+                    # Offset increments if there were potential stalls
+                    offset += potential_stall_cycles
                     if potential_stall_cycles > 0:
                         offset += potential_stall_cycles
-                    line_addr, column_addr = self.active_buffer_hit(addr)
-                
-                # Layout Modeling 1 -- data mapping to multiple bank 
-                # The 2D array is interleaved mapped to multiple banks. 
-                # e.g. (interleave mapping) addr 0 -> bank 0; addr 1 -> bank 1; addr 2 -> bank 2 ...
-                # instead of (contiguous mapping) addr 0,...,lines in a bank - 1 -> bank 0.
-                # because data access in compiled layout turns to be contiguious, which accesses the continuous addresses.
-                # In (contiguous mapping), such multi-bank mapping would result in more bank conflict slowdown.
-                bank_id = column_addr // self.bw_per_bank
-                assert bank_id < self.num_bank, f"bank id = {bank_id} for column_addr = {column_addr} needs to be smaller than total number of bank = {self.num_bank}"
-                if line_addr not in concurrent_line_addr[bank_id]:
-                    concurrent_line_addr[bank_id].append(line_addr)
-            max_line_request_among_all_banks = 0
-            for bank_id in range(self.num_bank):
-                max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
-            offset += math.ceil(max_line_request_among_all_banks/self.num_port) - 1
 
             out_cycles = cycle + offset
             out_cycles_arr.append(out_cycles)
@@ -356,7 +332,7 @@ class read_buffer:
                                               incoming_requests_arr_np=prefetch_requests)
 
         # 4. Update the variables
-        self.last_prefetch_cycle = int(response_cycles_arr[-1][0])
+        self.last_prefect_cycle = int(response_cycles_arr[-1][0])
 
         # Update the trace matrix
         self.trace_matrix = np.concatenate((response_cycles_arr, prefetch_requests), axis=1)
@@ -380,7 +356,7 @@ class read_buffer:
             self.next_line_prefetch_idx = num_lines % self.fetch_matrix.shape[0]
         else:
             self.next_line_prefetch_idx = (num_lines + 1) % self.fetch_matrix.shape[0]
-        
+
     #
     def new_prefetch(self):
         """
@@ -440,8 +416,8 @@ class read_buffer:
         cycles_arr = np.zeros((num_lines, 1))
         for i in range(cycles_arr.shape[0]):
             # Fixing ISSUE #14
-            # cycles_arr[i][0] = self.last_prefetch_cycle + i
-            cycles_arr[i][0] = self.last_prefetch_cycle + i + 1
+            # cycles_arr[i][0] = self.last_prefect_cycle + i
+            cycles_arr[i][0] = self.last_prefect_cycle + i + 1
 
         # 4. Send the request
         response_cycles_arr = \
@@ -449,7 +425,7 @@ class read_buffer:
                                               incoming_requests_arr_np=prefetch_requests)
 
         # 5. Update the variables
-        self.last_prefetch_cycle = response_cycles_arr[-1][0]
+        self.last_prefect_cycle = response_cycles_arr[-1][0]
 
         assert response_cycles_arr.shape == cycles_arr.shape, \
                'The request and response cycles dims do not match'
