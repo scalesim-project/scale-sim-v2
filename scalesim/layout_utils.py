@@ -39,42 +39,6 @@ class layouts(object):
     def load_arrays(self, layoutfile='', mnk_inputs=False):
         self.load_layout_conv(layoutfile)
 
-    #
-    def load_layout_gemm(self, layoutfile=''):
-
-        self.layout_file_name = layoutfile.split('/')[-1]
-        name_arr = self.layout_file_name.split('.')
-        if len(name_arr) > 1:
-            self.current_layout_name = self.layout_file_name.split('.')[-2]
-        else:
-            self.current_layout_name = self.layout_file_name
-
-        f = open(layoutfile, 'r')
-        first = True
-
-        for row in f:
-            row = row.strip()
-            if first:
-                first = False
-                continue
-            elif row == '':
-                continue
-            else:
-                elems = row.split(',')[:-1]
-                assert len(elems) > 3, 'There should be at least 4 entries per row'
-                layer_name = elems[0].strip()
-                m = elems[1].strip()
-                n = elems[2].strip()
-                k = elems[3].strip()
-
-                # Entries: layer name, Ifmap h, ifmap w, filter h, filter w, num_ch, num_filt, stride h, stride w
-                entries = [layer_name, m, k, 1, k, 1, n, 1, 1]
-                #entries are later iterated from index 1. Index 0 is used to store layer name in convolution mode. So, to rectify assignment of M, N and K in GEMM mode, layer name has been added at index 0 of entries. 
-                self.append_layout_arrays(layer_name=layer_name, elems=entries)
-
-        self.num_layers = len(self.layout_arrays)
-        self.layout_load_flag = True
-
     def load_layout_conv(self, layoutfile):
         first = True
         self.layout_file_name = layoutfile.split('/')[-1]
