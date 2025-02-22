@@ -4,6 +4,7 @@ operand matrices.
 """
 
 import numpy as np
+import math
 
 from scalesim.topology_utils import topologies as topoutil
 from scalesim.layout_utils import layouts as layoututil
@@ -494,7 +495,6 @@ class operand_matrix(object):
            (ifmap_interline_order[0], ifmap_interline_order[1], ifmap_interline_order[2], 
             ifmap_intraline_order[0], ifmap_intraline_order[1], ifmap_intraline_order[2]))
 
-        print(f"finalized shape = {ifmap_overall_data_pad.shape}")
         return ifmap_overall_data_pad.reshape(1,-1)
         
     # function to get a part or the full filter operand
