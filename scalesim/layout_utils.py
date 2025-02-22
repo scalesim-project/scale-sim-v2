@@ -37,10 +37,7 @@ class layouts(object):
 
     #
     def load_arrays(self, layoutfile='', mnk_inputs=False):
-        if mnk_inputs:
-            self.load_layout_gemm(layoutfile)
-        else:
-            self.load_layout_conv(layoutfile)
+        self.load_layout_conv(layoutfile)
 
     #
     def load_layout_gemm(self, layoutfile=''):
@@ -163,7 +160,6 @@ class layouts(object):
         f.close()
 
 
-    # LEGACY
     def append_layout_arrays(self, layer_name, elems):
         entry = [layer_name]
 
@@ -172,10 +168,6 @@ class layouts(object):
             entry.append(val)
             if i == 7 and len(elems) < 9:
                 entry.append(val)  # Add the same stride in the col direction automatically
-
-        # ISSUE #9 Fix
-        assert entry[3] <= entry[1], 'Filter height cannot be larger than IFMAP height'
-        assert entry[4] <= entry[2], 'Filter width cannot be larger than IFMAP width'
 
         self.layout_arrays.append(entry)
 
@@ -278,8 +270,9 @@ class layouts(object):
 
 
 if __name__ == '__main__':
+    import os
     layout = layouts()
-    layout.load_arrays("/home/jianming/work/scale_custom/layouts/conv_nets/test.csv")
+    layout.load_arrays(os.path.join(os.getcwd(), "../layouts/GEMM_mnk/vit_s_downscale_KM_KN.csv"))
     for i in range(layout.get_num_layers()):
         ifmap_intraline_factor = layout.get_layer_ifmap_intraline_factor(layer_id=i)
         ifmap_intraline_order = layout.get_layer_ifmap_intraline_order(layer_id=i)
@@ -289,6 +282,7 @@ if __name__ == '__main__':
         filter_intraline_order = layout.get_layer_filter_intraline_order(layer_id=i)
         filter_interline_order = layout.get_layer_filter_interline_order(layer_id=i)
 
+        print(f"########### Layer {i} ###########")
         print(f"ifmap_intraline_factor={ifmap_intraline_factor}")
         print(f"ifmap_intraline_order={ifmap_intraline_order}")
         print(f"ifmap_interline_order={ifmap_interline_order}")
