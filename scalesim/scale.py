@@ -44,6 +44,7 @@ if __name__ == '__main__':
     s = scalesim(save_disk_space=True, verbose=True,
                  config=config,
                  topology=topology,
+                 layout=layout,
                  input_type_gemm=GEMM_INPUT
                  )
     s.run_scale(top_path=logpath)
