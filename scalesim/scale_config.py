@@ -81,14 +81,16 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
-        self.using_ifmap_custom_layout = config.getboolean(section, 'IfmapCustomLayout')
-        self.using_filter_custom_layout = config.getboolean(section, 'FilterCustomLayout')
-        self.ifmap_sram_bank_bandwidth = int(config.get(section, 'IfmapSRAMBankBandwidth'))
-        self.ifmap_sram_bank_num = int(config.get(section, 'IfmapSRAMBankNum'))
-        self.ifmap_sram_bank_port = int(config.get(section, 'IfmapSRAMBankPort'))
-        self.filter_sram_bank_bandwidth = int(config.get(section, 'FilterSRAMBankBandwidth'))
-        self.filter_sram_bank_num = int(config.get(section, 'FilterSRAMBankNum'))
-        self.filter_sram_bank_port = int(config.get(section, 'FilterSRAMBankPort'))
+
+        layout_section = 'layout'
+        self.using_ifmap_custom_layout = config.getboolean(layout_section, 'IfmapCustomLayout')
+        self.using_filter_custom_layout = config.getboolean(layout_section, 'FilterCustomLayout')
+        self.ifmap_sram_bank_bandwidth = int(config.get(layout_section, 'IfmapSRAMBankBandwidth'))
+        self.ifmap_sram_bank_num = int(config.get(layout_section, 'IfmapSRAMBankNum'))
+        self.ifmap_sram_bank_port = int(config.get(layout_section, 'IfmapSRAMBankPort'))
+        self.filter_sram_bank_bandwidth = int(config.get(layout_section, 'FilterSRAMBankBandwidth'))
+        self.filter_sram_bank_num = int(config.get(layout_section, 'FilterSRAMBankNum'))
+        self.filter_sram_bank_port = int(config.get(layout_section, 'FilterSRAMBankPort'))
         
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:

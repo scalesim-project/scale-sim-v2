@@ -225,25 +225,46 @@ class read_buffer:
         assert self.active_buf_full_flag, 'Active buffer is not ready yet'
 
         start_id, end_id = self.active_buffer_set_limits
-        if start_id < end_id:
-            for line_id in range(start_id, end_id):
-                this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
-                if addr in this_set:                        # Checking in a set(), O(1) lookup
-                    return line_id, list(this_set).index(addr)
+        if self.enable_layout_evaluation:
+          if start_id < end_id:
+              for line_id in range(start_id, end_id):
+                  this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
+                  if addr in this_set:                        # Checking in a set(), O(1) lookup
+                      return line_id, list(this_set).index(addr)
 
+          else:
+              for line_id in range(start_id, self.num_lines):
+                  this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
+                  if addr in this_set:  # Checking in a set(), O(1) lookup
+                      return line_id, list(this_set).index(addr)
+
+              for line_id in range(end_id):
+                  this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
+                  if addr in this_set:  # Checking in a set(), O(1) lookup
+                      return line_id, list(this_set).index(addr)
+          # Fixing for ISSUE #14
+          # return True
+          return -1, -1
         else:
-            for line_id in range(start_id, self.num_lines):
-                this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
-                if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return line_id, list(this_set).index(addr)
+          if start_id < end_id:
+              for line_id in range(start_id, end_id):
+                  this_set = self.hashed_buffer[line_id]      # O(1) --> accessing hash
+                  if addr in this_set:                        # Checking in a set(), O(1) lookup
+                      return True
 
-            for line_id in range(end_id):
-                this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
-                if addr in this_set:  # Checking in a set(), O(1) lookup
-                    return line_id, list(this_set).index(addr)
-        # Fixing for ISSUE #14
-        # return True
-        return -1, -1
+          else:
+              for line_id in range(start_id, self.num_lines):
+                  this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
+                  if addr in this_set:  # Checking in a set(), O(1) lookup
+                      return True
+
+              for line_id in range(end_id):
+                  this_set = self.hashed_buffer[line_id]  # O(1) --> accessing hash
+                  if addr in this_set:  # Checking in a set(), O(1) lookup
+                      return True
+          # Fixing for ISSUE #14
+          # return True
+          return False
 
     #
     def service_reads(self,
@@ -331,7 +352,7 @@ class read_buffer:
                   # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
                   while not self.active_buffer_hit(addr):
                       self.new_prefetch()
-                      potential_stall_cycles = self.last_prefect_cycle - (cycle + offset)
+                      potential_stall_cycles = self.last_prefetch_cycle - (cycle + offset)
                       offset += potential_stall_cycles        # Offset increments if there were potential stalls
                       if potential_stall_cycles > 0:
                           offset += potential_stall_cycles
