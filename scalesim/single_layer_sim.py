@@ -274,6 +274,8 @@ class single_layer_sim:
                     ifmap_sram_bank_port=self.config.ifmap_sram_bank_port,
                     filter_sram_bank_num=self.config.filter_sram_bank_num,
                     filter_sram_bank_port=self.config.filter_sram_bank_port,
+                    using_ifmap_custom_layout=self.using_ifmap_custom_layout,
+                    using_filter_custom_layout=self.using_filter_custom_layout,
             )
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup

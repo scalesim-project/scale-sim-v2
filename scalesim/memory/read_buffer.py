@@ -60,10 +60,13 @@ class read_buffer:
         self.hashed_buffer_valid = False
         self.trace_valid = False
 
+        self.enable_layout_evaluation = False
+
     #
     def set_params(self, backing_buf_obj,
                    total_size_bytes=1, word_size=1, active_buf_frac=0.9,
-                   hit_latency=1, backing_buf_bw=1, num_bank=1, num_port=2
+                   hit_latency=1, backing_buf_bw=1, num_bank=1, num_port=2,
+                   enable_layout_evaluation=False
                    ):
         """
         Method to set the ifmap/filter double buffered memory simulation parameters for
@@ -89,8 +92,8 @@ class read_buffer:
         self.num_bank = num_bank
         self.num_port = num_port # number of ports per bank
         self.bw_per_bank = self.req_gen_bandwidth // self.num_bank # bandwidth per bank
+        self.enable_layout_evaluation = enable_layout_evaluation
         assert self.bw_per_bank * self.num_bank == self.req_gen_bandwidth, f"overall bandwidth must be divisible by total number of banks, number of banks = {self.num_bank}, bandwidth of each as {self.bw_per_bank}, total bandwidth = {self.req_gen_bandwidth}"
-
 
     #
     def reset(self): # TODO: check if all resets are working propoerly
@@ -168,7 +171,9 @@ class read_buffer:
         """
         Method to convert the fetch matrix into a hashed buffer for fast lookups.
         """
-        elems_per_set = self.req_gen_bandwidth
+        elems_per_set = math.ceil(self.total_size_elems / 100)
+        if self.enable_layout_evaluation:
+            elems_per_set = self.req_gen_bandwidth
         
         prefetch_rows = self.fetch_matrix.shape[0]
         prefetch_cols = self.fetch_matrix.shape[1]
@@ -264,51 +269,80 @@ class read_buffer:
 
         out_cycles_arr = []
         offset = self.hit_latency
-        # for cycle, request_line in tqdm(zip(incoming_cycles_arr, incoming_requests_arr_np)):
-        for i in tqdm(range(incoming_requests_arr_np.shape[0]), disable=True):
-            cycle = incoming_cycles_arr[i]
-            # Fixing for ISSUE #14
-            # request_line = set(incoming_requests_arr_np[i]) #shaves off a few seconds
-            request_line = incoming_requests_arr_np[i]
+        if self.enable_layout_evaluation:
+          for i in tqdm(range(incoming_requests_arr_np.shape[0]), disable=True):
+              cycle = incoming_cycles_arr[i]
+              # Fixing for ISSUE #14
+              # request_line = set(incoming_requests_arr_np[i]) #shaves off a few seconds
+              request_line = incoming_requests_arr_np[i]
 
-            concurrent_line_addr = [[] for _ in range(self.num_bank)] # bank conflict modeling
-            for addr in request_line:
-                if addr == -1:
-                    continue
+              concurrent_line_addr = [[] for _ in range(self.num_bank)] # bank conflict modeling
+              for addr in request_line:
+                  if addr == -1:
+                      continue
 
-                # if addr not in self.active_buffer_contents: #this is super slow!!!
-                # Fixing for ISSUE #14
-                # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
-                line_addr, column_addr = self.active_buffer_hit(addr)
-                while line_addr == -1:
-                    self.new_prefetch()
-                    potential_stall_cycles = self.last_prefetch_cycle - (cycle + offset)
-                    offset += potential_stall_cycles    # Offset increments if there were potential stalls
-                    if potential_stall_cycles > 0:
-                        offset += potential_stall_cycles
-                    line_addr, column_addr = self.active_buffer_hit(addr)
-                
-                # Layout Modeling 1 -- data mapping to multiple bank 
-                # The 2D array is interleaved mapped to multiple banks. 
-                # e.g. (interleave mapping) addr 0 -> bank 0; addr 1 -> bank 1; addr 2 -> bank 2 ...
-                # instead of (contiguous mapping) addr 0,...,lines in a bank - 1 -> bank 0.
-                # because data access in compiled layout turns to be contiguious, which accesses the continuous addresses.
-                # In (contiguous mapping), such multi-bank mapping would result in more bank conflict slowdown.
-                bank_id = column_addr // self.bw_per_bank
-                assert bank_id < self.num_bank, f"bank id = {bank_id} for column_addr = {column_addr} needs to be smaller than total number of bank = {self.num_bank}"
-                if line_addr not in concurrent_line_addr[bank_id]:
-                    concurrent_line_addr[bank_id].append(line_addr)
-            max_line_request_among_all_banks = 0
-            for bank_id in range(self.num_bank):
-                max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
-            offset += math.ceil(max_line_request_among_all_banks/self.num_port) - 1
+                  # if addr not in self.active_buffer_contents: #this is super slow!!!
+                  # Fixing for ISSUE #14
+                  # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
+                  line_addr, column_addr = self.active_buffer_hit(addr)
+                  while line_addr == -1:
+                      self.new_prefetch()
+                      potential_stall_cycles = self.last_prefetch_cycle - (cycle + offset)
+                      offset += potential_stall_cycles    # Offset increments if there were potential stalls
+                      if potential_stall_cycles > 0:
+                          offset += potential_stall_cycles
+                      line_addr, column_addr = self.active_buffer_hit(addr)
+                  
+                  # Layout Modeling 1 -- data mapping to multiple bank 
+                  # The 2D array is interleaved mapped to multiple banks. 
+                  # e.g. (interleave mapping) addr 0 -> bank 0; addr 1 -> bank 1; addr 2 -> bank 2 ...
+                  # instead of (contiguous mapping) addr 0,...,lines in a bank - 1 -> bank 0.
+                  # because data access in compiled layout turns to be contiguious, which accesses the continuous addresses.
+                  # In (contiguous mapping), such multi-bank mapping would result in more bank conflict slowdown.
+                  bank_id = column_addr // self.bw_per_bank
+                  assert bank_id < self.num_bank, f"bank id = {bank_id} for column_addr = {column_addr} needs to be smaller than total number of bank = {self.num_bank}"
+                  if line_addr not in concurrent_line_addr[bank_id]:
+                      concurrent_line_addr[bank_id].append(line_addr)
+              max_line_request_among_all_banks = 0
+              for bank_id in range(self.num_bank):
+                  max_line_request_among_all_banks = max(len(concurrent_line_addr[bank_id]), max_line_request_among_all_banks)
+              offset += math.ceil(max_line_request_among_all_banks/self.num_port) - 1
 
-            out_cycles = cycle + offset
-            out_cycles_arr.append(out_cycles)
+              out_cycles = cycle + offset
+              out_cycles_arr.append(out_cycles)
 
-        out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
+          out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
 
-        return out_cycles_arr_np
+          return out_cycles_arr_np
+        
+        else:
+          for i in tqdm(range(incoming_requests_arr_np.shape[0]), disable=True):
+              cycle = incoming_cycles_arr[i]
+              # Fixing for ISSUE #14
+              # request_line = set(incoming_requests_arr_np[i]) #shaves off a few seconds
+              request_line = incoming_requests_arr_np[i]
+
+              for addr in request_line:
+                  if addr == -1:
+                      continue
+
+                  # if addr not in self.active_buffer_contents: #this is super slow!!!
+                  # Fixing for ISSUE #14
+                  # if not self.active_buffer_hit(addr):  # --> While loop ensures multiple prefetches if needed
+                  while not self.active_buffer_hit(addr):
+                      self.new_prefetch()
+                      potential_stall_cycles = self.last_prefect_cycle - (cycle + offset)
+                      offset += potential_stall_cycles        # Offset increments if there were potential stalls
+                      if potential_stall_cycles > 0:
+                          offset += potential_stall_cycles
+                    
+
+              out_cycles = cycle + offset
+              out_cycles_arr.append(out_cycles)
+
+          out_cycles_arr_np = np.asarray(out_cycles_arr).reshape((len(out_cycles_arr), 1))
+
+          return out_cycles_arr_np
 
     #
     def prefetch_active_buffer(self, start_cycle):

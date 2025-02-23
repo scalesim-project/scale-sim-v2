@@ -69,6 +69,9 @@ class double_buffered_scratchpad:
         self.traces_valid = False
         self.params_valid_flag = True
 
+        self.using_ifmap_custom_layout = False
+        self.using_filter_custom_layout = False
+
     #
     def set_params(self,
                    verbose=True,
@@ -77,7 +80,8 @@ class double_buffered_scratchpad:
                    ifmap_buf_size_bytes=2, filter_buf_size_bytes=2, ofmap_buf_size_bytes=2,
                    rd_buf_active_frac=0.5, wr_buf_active_frac=0.5,
                    ifmap_backing_buf_bw=1, filter_backing_buf_bw=1, ofmap_backing_buf_bw=1,
-                   ifmap_sram_bank_num=1, ifmap_sram_bank_port=2, filter_sram_bank_num=1, filter_sram_bank_port=2):
+                   ifmap_sram_bank_num=1, ifmap_sram_bank_port=2, filter_sram_bank_num=1, filter_sram_bank_port=2,
+                   using_ifmap_custom_layout=False, using_filter_custom_layout=False):
 
         """
         Method to set the double buffered memory simulation parameters for housekeeping.
@@ -93,17 +97,13 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=ifmap_backing_buf_bw,
-                                      num_bank=ifmap_sram_bank_num,
-                                      num_port=ifmap_sram_bank_port)
+                                      backing_buf_default_bw=ifmap_backing_buf_bw)
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
                                       total_size_bytes=filter_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_default_bw=filter_backing_buf_bw,
-                                      num_bank=filter_sram_bank_num,
-                                      num_port=filter_sram_bank_port)
+                                      backing_buf_default_bw=filter_backing_buf_bw)
         else:
             self.ifmap_buf = rdbuf()
             self.filter_buf = rdbuf()
@@ -112,13 +112,19 @@ class double_buffered_scratchpad:
                                       total_size_bytes=ifmap_buf_size_bytes,
                                       word_size=word_size,
                                       active_buf_frac=rd_buf_active_frac,
-                                      backing_buf_bw=ifmap_backing_buf_bw)
+                                      backing_buf_bw=ifmap_backing_buf_bw,
+                                      num_bank=ifmap_sram_bank_num,
+                                      num_port=ifmap_sram_bank_port,
+                                      enable_layout_evaluation=using_ifmap_custom_layout)
 
             self.filter_buf.set_params(backing_buf_obj=self.filter_port,
                                        total_size_bytes=filter_buf_size_bytes,
                                        word_size=word_size,
                                        active_buf_frac=rd_buf_active_frac,
-                                       backing_buf_bw=filter_backing_buf_bw)
+                                       backing_buf_bw=filter_backing_buf_bw,
+                                       num_bank=filter_sram_bank_num,
+                                       num_port=filter_sram_bank_port,
+                                       enable_layout_evaluation=using_filter_custom_layout)
 
         self.ofmap_buf.set_params(backing_buf_obj=self.ofmap_port,
                                   total_size_bytes=ofmap_buf_size_bytes,
@@ -128,7 +134,10 @@ class double_buffered_scratchpad:
 
         self.verbose = verbose
 
+        self.using_ifmap_custom_layout = using_ifmap_custom_layout  
+        self.using_filter_custom_layout = using_filter_custom_layout  
         self.params_valid_flag = True
+
 
     #
     def set_read_buf_prefetch_matrices(self,
