@@ -238,7 +238,7 @@ class read_buffer:
                 while not self.active_buffer_hit(addr):
                     self.new_prefetch()
                     potential_stall_cycles = self.last_prefect_cycle - (cycle + offset)
-                    offset += potential_stall_cycles        # Offset increments if there were potential stalls
+                    # Offset increments if there were potential stalls
                     if potential_stall_cycles > 0:
                         offset += potential_stall_cycles
                    
