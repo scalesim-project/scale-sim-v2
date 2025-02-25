@@ -26,37 +26,37 @@ DIFF9=$(diff $path/test_runs/scale_example_run_32x32_os/layer0/OFMAP_SRAM_TRACE.
 if [ "$DIFF1" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF1"
-    # exit 1
+    exit 1
 elif [ "$DIFF2" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF2"
-    # exit 1
+    exit 1
 elif [ "$DIFF3" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF3"    
-    # exit 1
+    exit 1
 elif [ "$DIFF4" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF4"
-    # exit 1
+    exit 1
 elif [ "$DIFF5" != "" ]; then
     echo "Output does not match!"
     echo "$DIFF5" 
-    # exit 1
+    exit 1
 elif [ "$DIFF6" != "" ]; then
     echo "Output does not match!"
     echo "$DIFF6" 
-    # exit 1
+    exit 1
 elif [ "$DIFF7" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF7" 
-    # exit 1
+    exit 1
 elif [ "$DIFF8" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF8" 
-    # exit 1
+    exit 1
 elif [ "$DIFF9" != "" ]; then
     echo "Output does not match!" 
     echo "$DIFF9" 
-    # exit 1
+    exit 1
 fi
