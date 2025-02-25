@@ -3,8 +3,9 @@
 path="./"
 
 sed -i "2s/.*/run_name = scale_example_run_32x32_is/" $path/configs/scale.cfg
-sed -i "14s/.*/Dataflow : is/" $path/configs/scale.cfg
-sed -i "25s/.*/InterfaceBandwidth: USER/" $path/configs/scale.cfg
+sed -i "s/Dataflow : ws/Dataflow : is/g" $path/configs/scale.cfg
+sed -i "s/Dataflow : os/Dataflow : is/g" $path/configs/scale.cfg
+sed -i 's/InterfaceBandwidth: CALC/InterfaceBandwidth: USER/g' $path/configs/scale.cfg
 sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 
 source venv/bin/activate
