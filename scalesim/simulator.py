@@ -7,6 +7,7 @@ import os
 
 from scalesim.scale_config import scale_config as cfg
 from scalesim.topology_utils import topologies as topo
+from scalesim.layout_utils import layouts as layout
 from scalesim.single_layer_sim import single_layer_sim as layer_sim
 
 
@@ -21,6 +22,7 @@ class simulator:
         """
         self.conf = cfg()
         self.topo = topo()
+        self.layout = layout()
 
         self.top_path = "./"
         self.verbose = True
@@ -37,6 +39,7 @@ class simulator:
     def set_params(self,
                    config_obj=cfg(),
                    topo_obj=topo(),
+                   layout_obj=layout(),
                    top_path="./",
                    verbosity=True,
                    save_trace=True
@@ -46,6 +49,7 @@ class simulator:
         """
         self.conf = config_obj
         self.topo = topo_obj
+        self.layout = layout_obj
 
         self.top_path = top_path
         self.verbose = verbosity
@@ -73,6 +77,7 @@ class simulator:
             this_layer_sim.set_params(layer_id=i,
                                  config_obj=self.conf,
                                  topology_obj=self.topo,
+                                 layout_obj=self.layout,
                                  verbose=self.verbose)
 
             self.single_layer_sim_object_list.append(this_layer_sim)

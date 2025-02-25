@@ -10,15 +10,19 @@ from scalesim.scale_sim import scalesim
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-t', metavar='Topology file', type=str,
-                        default="../topologies/conv_nets/test.csv",
+                        default="./topologies/conv_nets/test.csv",
                         help="Path to the topology file"
                         )
+    parser.add_argument('-l', metavar='Layout file', type=str,
+                        default="./layouts/conv_nets/test.csv",
+                        help="Path to the layout file"
+                        )
     parser.add_argument('-c', metavar='Config file', type=str,
-                        default="../configs/scale.cfg",
+                        default="./configs/scale.cfg",
                         help="Path to the config file"
                         )
     parser.add_argument('-p', metavar='log dir', type=str,
-                        default="../test_runs",
+                        default="./test_runs",
                         help="Path to log dir"
                         )
     parser.add_argument('-i', metavar='input type', type=str,
@@ -28,6 +32,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     topology = args.t
+    layout = args.l
     config = args.c
     logpath = args.p
     inp_type = args.i
@@ -36,9 +41,10 @@ if __name__ == '__main__':
     if inp_type == 'gemm':
         GEMM_INPUT = True
 
-    s = scalesim(save_disk_space=True, verbose=True,
+    s = scalesim(save_disk_space=False, verbose=True,
                  config=config,
                  topology=topology,
+                 layout=layout,
                  input_type_gemm=GEMM_INPUT
                  )
     s.run_scale(top_path=logpath)
