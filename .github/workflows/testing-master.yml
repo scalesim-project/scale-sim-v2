@@ -34,7 +34,7 @@ jobs:
       # To test the default SCALE-Sim run
     - name: Run default SCALE-Sim configuration
       run: |
-         source venv/bin/activate && cd scalesim && python3 scale.py
+         source venv/bin/activate && python3 scalesim/scale.py
          deactivate
       continue-on-error: true
       # To test the functionality of weight stationary dataflow in estimate bandwidth mode
