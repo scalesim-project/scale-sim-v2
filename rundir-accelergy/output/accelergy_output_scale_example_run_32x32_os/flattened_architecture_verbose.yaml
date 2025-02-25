@@ -1,0 +1,1787 @@
+architecture:
+  version: 0.3
+  local:
+  - name: systolic_array.weights_glb
+    class: smartbuffer_SRAM
+    attributes:
+      bank_depth: 65536
+      memory_depth: 65536
+      memory_width: 32
+      n_banks: 1
+      n_buffets: 1
+      n_rdwr_ports: 2
+      scoreboard_depth: 65536
+      technology: 40nm
+      update_fifo_depth: 0
+    primitive_components:
+    - name: buffet_collection.buffet[0..0].scoreboard
+      class: regfile
+      attributes:
+        technology: 40nm
+        depth: 65536
+        width: 1
+        n_ports: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+      class: FIFO
+      attributes:
+        technology: 40nm
+        datawidth: 32
+        depth: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+      class: FIFO
+      attributes:
+        technology: 40nm
+        datawidth: 11.090354888959125
+        depth: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.storage
+      class: SRAM
+      attributes:
+        technology: 40nm
+        width: 32
+        depth: 65536
+        n_rdwr_ports: 2
+        n_banks: 1
+        n_rd_ports: 0
+        n_wr_ports: 0
+        latency: 5ns
+      area_share: 1
+    - name: address_generators[0..2]
+      class: counter
+      attributes:
+        technology: 40nm
+        width: 11.090354888959125
+        latency: 5ns
+      area_share: 1
+    actions:
+    - name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: idle
+      arguments: null
+      primitive_actions:
+      - name: buffet_collection.buffet[0..0].scoreboard
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: idle
+        arguments: null
+        action_share: 1
+  - name: systolic_array.ifmap_glb
+    class: smartbuffer_SRAM
+    attributes:
+      bank_depth: 65536
+      memory_depth: 65536
+      memory_width: 32
+      n_banks: 1
+      n_buffets: 1
+      n_rdwr_ports: 2
+      scoreboard_depth: 65536
+      technology: 40nm
+      update_fifo_depth: 0
+    primitive_components:
+    - name: buffet_collection.buffet[0..0].scoreboard
+      class: regfile
+      attributes:
+        technology: 40nm
+        depth: 65536
+        width: 1
+        n_ports: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+      class: FIFO
+      attributes:
+        technology: 40nm
+        datawidth: 32
+        depth: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+      class: FIFO
+      attributes:
+        technology: 40nm
+        datawidth: 11.090354888959125
+        depth: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.storage
+      class: SRAM
+      attributes:
+        technology: 40nm
+        width: 32
+        depth: 65536
+        n_rdwr_ports: 2
+        n_banks: 1
+        n_rd_ports: 0
+        n_wr_ports: 0
+        latency: 5ns
+      area_share: 1
+    - name: address_generators[0..2]
+      class: counter
+      attributes:
+        technology: 40nm
+        width: 11.090354888959125
+        latency: 5ns
+      area_share: 1
+    actions:
+    - name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: idle
+      arguments: null
+      primitive_actions:
+      - name: buffet_collection.buffet[0..0].scoreboard
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: idle
+        arguments: null
+        action_share: 1
+  - name: systolic_array.psum_glb
+    class: smartbuffer_SRAM
+    attributes:
+      bank_depth: 65536
+      memory_depth: 65536
+      memory_width: 32
+      n_banks: 1
+      n_buffets: 1
+      n_rdwr_ports: 2
+      scoreboard_depth: 65536
+      technology: 40nm
+      update_fifo_depth: 0
+    primitive_components:
+    - name: buffet_collection.buffet[0..0].scoreboard
+      class: regfile
+      attributes:
+        technology: 40nm
+        depth: 65536
+        width: 1
+        n_ports: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+      class: FIFO
+      attributes:
+        technology: 40nm
+        datawidth: 32
+        depth: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+      class: FIFO
+      attributes:
+        technology: 40nm
+        datawidth: 11.090354888959125
+        depth: 2
+        latency: 5ns
+      area_share: 1
+    - name: buffet_collection.storage
+      class: SRAM
+      attributes:
+        technology: 40nm
+        width: 32
+        depth: 65536
+        n_rdwr_ports: 2
+        n_banks: 1
+        n_rd_ports: 0
+        n_wr_ports: 0
+        latency: 5ns
+      area_share: 1
+    - name: address_generators[0..2]
+      class: counter
+      attributes:
+        technology: 40nm
+        width: 11.090354888959125
+        latency: 5ns
+      area_share: 1
+    actions:
+    - name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: fill
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[0]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: read
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[1]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 0
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 0
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 0
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 1
+        data_delta: 0
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 0
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 0
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: update
+      arguments:
+        address_delta: 1
+        data_delta: 1
+      primitive_actions:
+      - name: buffet_collection.buffet[0].scoreboard
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].data_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: push
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0].addr_fifos[0]
+        action: pop
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: write
+        arguments:
+          address_delta: 1
+          data_delta: 1
+        action_share: 1
+      - name: address_generators[2]
+        action: count
+        arguments: null
+        action_share: 1
+    - name: idle
+      arguments: null
+      primitive_actions:
+      - name: buffet_collection.buffet[0..0].scoreboard
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0..0].data_fifos[0..2]
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.buffet[0..0].addr_fifos[0..2]
+        action: idle
+        arguments: null
+        action_share: 1
+      - name: buffet_collection.storage
+        action: idle
+        arguments: null
+        action_share: 1
+  - name: systolic_array.PE[0..1023].mac
+    class: intmac
+    actions:
+    - name: mac_random
+      arguments: null
+    - name: mac_reused
+      arguments: null
+    - name: mac_gated
+      arguments: null
+    - name: idle
+      arguments: null
+  - name: systolic_array.PE[0..1023].ifmap_spad
+    class: regfile
+    actions:
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+    - name: write
+      arguments:
+        address_delta: 0
+        data_delta: 0
+    - name: write
+      arguments:
+        address_delta: 0
+        data_delta: 1
+    - name: write
+      arguments:
+        address_delta: 1
+        data_delta: 0
+    - name: write
+      arguments:
+        address_delta: 1
+        data_delta: 1
+    - name: idle
+      arguments: null
+  - name: systolic_array.PE[0..1023].weights_spad
+    class: regfile
+    actions:
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+    - name: write
+      arguments:
+        address_delta: 0
+        data_delta: 0
+    - name: write
+      arguments:
+        address_delta: 0
+        data_delta: 1
+    - name: write
+      arguments:
+        address_delta: 1
+        data_delta: 0
+    - name: write
+      arguments:
+        address_delta: 1
+        data_delta: 1
+    - name: idle
+      arguments: null
+  - name: systolic_array.PE[0..1023].psum_spad
+    class: regfile
+    actions:
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 0
+    - name: read
+      arguments:
+        address_delta: 0
+        data_delta: 1
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 0
+    - name: read
+      arguments:
+        address_delta: 1
+        data_delta: 1
+    - name: write
+      arguments:
+        address_delta: 0
+        data_delta: 0
+    - name: write
+      arguments:
+        address_delta: 0
+        data_delta: 1
+    - name: write
+      arguments:
+        address_delta: 1
+        data_delta: 0
+    - name: write
+      arguments:
+        address_delta: 1
+        data_delta: 1
+    - name: idle
+      arguments: null
+  - name: systolic_array.weights_dram
+    class: DRAM
+    actions:
+    - name: read
+      arguments: null
+    - name: write
+      arguments: null
+    - name: idle
+      arguments: null
+  - name: systolic_array.ifmap_dram
+    class: DRAM
+    actions:
+    - name: read
+      arguments: null
+    - name: write
+      arguments: null
+    - name: idle
+      arguments: null
+  - name: systolic_array.psum_dram
+    class: DRAM
+    actions:
+    - name: read
+      arguments: null
+    - name: write
+      arguments: null
+    - name: idle
+      arguments: null
