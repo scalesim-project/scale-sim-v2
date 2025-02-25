@@ -10,7 +10,7 @@ sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 
 source venv/bin/activate
 export PYTHONPATH=.
-python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/conv_nets/alexnet_part.csv -l $path/layouts/conv_nets/alexnet_part.csv  -p $path/test_runs
+python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/conv_nets/alexnet_part.csv -p $path/test_runs
 
 DIFF1=$(diff $path/test_runs/scale_example_run_32x32_ws/BANDWIDTH_REPORT.csv $path/test/general/golden_trace_calc/BANDWIDTH_REPORT.csv)
 DIFF2=$(diff $path/test_runs/scale_example_run_32x32_ws/COMPUTE_REPORT.csv $path/test/general/golden_trace_calc/COMPUTE_REPORT.csv)

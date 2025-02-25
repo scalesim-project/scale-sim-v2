@@ -10,7 +10,7 @@ sed -i "s/save_disk_space=True/save_disk_space=False/" $path/scalesim/scale.py
 
 source venv/bin/activate
 export PYTHONPATH=.
-python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/GEMM_mnk/test_mnk_input.csv -l $path/layouts/GEMM_mnk/test_mnk_input.csv -i gemm -p $path/test_runs
+python3 $path/scalesim/scale.py -c $path/configs/scale.cfg -t $path/topologies/GEMM_mnk/test_mnk_input.csv -i gemm -p $path/test_runs
 
 DIFF1=$(diff $path/test_runs/scale_example_run_32x32_os/BANDWIDTH_REPORT.csv $path/test/general/golden_trace_user_os/BANDWIDTH_REPORT.csv)
 DIFF2=$(diff $path/test_runs/scale_example_run_32x32_os/COMPUTE_REPORT.csv $path/test/general/golden_trace_user_os/COMPUTE_REPORT.csv)
