@@ -13,25 +13,39 @@ if __name__ == '__main__':
                         help="Path to the config file"
                         )
     parser.add_argument('-p', metavar='log dir', type=str,
-                        default="../test_runs",
+                        default="./results/",
                         help="Path to log dir"
                         )
     parser.add_argument('-i', metavar='input type', type=str,
                         default="conv",
                         help="Type of input topology, gemm: MNK, conv: conv"
                         )
-
+    parser.add_argument('-s', metavar='save trace', type=str,
+                        default="Y",
+                        help="Save Trace: (Y/N)"
+                        )
     args = parser.parse_args()
     topology = args.t
     config = args.c
-    logpath = args.p
+    logpath = args.p #+ topology.split('/')[-1].split('.')[0]
     inp_type = args.i
+    save_trace = args.s
 
-    gemm_input = False
+    gemm_input  = False
+    save_space  = False
+ 
+ 
+
     if inp_type == 'gemm':
         gemm_input = True
 
-    s = scalesim(save_disk_space=True, verbose=True,
+    if save_trace == 'Y':
+        save_space = False
+    else:
+        save_space = True
+
+    s = scalesim(save_disk_space=save_space, 
+                 verbose=True,
                  config=config,
                  topology=topology,
                  input_type_gemm=gemm_input
