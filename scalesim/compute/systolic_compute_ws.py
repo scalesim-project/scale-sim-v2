@@ -302,12 +302,6 @@ class systolic_compute_ws:
                 this_fold_demand = self.ofmap_op_mat[:, col_start_id: col_end_idx]
                 self.ofmap_writes += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 
-                # Calculate the mapping efficiency
-                row_used = min(self.arr_row, row_end_idx - row_start_id)
-                col_used = min(self.arr_col, col_end_idx - col_start_id)
-                mac_used = row_used * col_used
-                mapping_eff_this_fold = mac_used / (self.arr_row * self.arr_col)
-
                 # Adding null requests when there is under utilization ie. no mapping along a few rows or cols
                 if col_delta > 0:
                     null_req_mat = np.ones((this_fold_demand.shape[0], col_delta)) * -1
@@ -317,6 +311,12 @@ class systolic_compute_ws:
                 # These are the null demands to account for when the operands are streamed in
                 # and the OFMAPS are not ready
                 this_fold_demand = np.concatenate((inter_fold_gap_prefix_mat, this_fold_demand), axis=0)
+                
+                # Calculate the mapping efficiency
+                row_used = min(self.arr_row, row_end_idx - row_start_id)
+                col_used = min(self.arr_col, col_end_idx - col_start_id)
+                mac_used = row_used * col_used
+                mapping_eff_this_fold = mac_used / (self.arr_row * self.arr_col)
 
                 # Add skew to the OFMAP demand matrix to reflect systolic pipeline fill
                 this_fold_demand = skew_matrix(this_fold_demand)
