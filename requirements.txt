@@ -4,4 +4,5 @@ configparser
 numpy
 pandas
 cython
+tk
 setuptools

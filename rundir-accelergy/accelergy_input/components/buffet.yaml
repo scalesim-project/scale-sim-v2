@@ -1,0 +1,112 @@
+compound_components:
+  version: 0.3
+  classes:
+  - name: buffet
+    attributes:
+      technology: 40nm
+      depth: 12
+      width: 16
+      scoreboard_depth: 12
+      address_width: log(depth)
+    subcomponents:
+      - name: scoreboard
+        class: regfile
+        attributes:
+          technology: technology
+          depth: scoreboard_depth
+          width: 1
+      - name: data_fifos[0..2]
+        class: FIFO
+        attributes:
+          technology: technology
+          datawidth: width
+      - name: addr_fifos[0..2]
+        class: FIFO
+        attributes:
+          technology: technology
+          datawidth: address_width
+    actions:
+      - name: fill
+        arguments:
+          address_delta: 0..1
+          data_delta: 0..1
+        subcomponents:
+          - name: scoreboard
+            actions:
+              - name: write
+                arguments:
+                  address_delta: 1
+                  data_delta: 1
+          - name: data_fifos[0]
+            actions:
+              - name: push
+                repeat: data_delta
+              - name: pop
+                repeat: data_delta
+          - name: addr_fifos[0]
+            actions:
+              - name: push
+                repeat: address_delta
+              - name: pop
+                repeat: address_delta
+      - name: read
+        arguments:
+          address_delta: 0..1
+          data_delta: 0..1
+        subcomponents:
+          - name: scoreboard
+            actions:
+              - name: read
+                arguments:
+                  address_delta: 1
+                  data_delta: 1  # 1 bit flag not related to actual data
+              - name: write
+                arguments:
+                  address_delta: 1
+                  data_delta: 1 # 1 bit flag not related to actual data
+          - name: data_fifos[0]
+            actions:
+              - name: push
+                repeat: data_delta  # use repeat to control generated energy
+              - name: pop
+                repeat: data_delta
+          - name: addr_fifos[0]
+            actions:
+              - name: push
+                repeat: address_delta
+              - name: pop
+                repeat: address_delta
+      - name: update
+        arguments:
+          address_delta: 0..1
+          data_delta: 0..1
+        subcomponents:
+          - name: scoreboard
+            actions:
+              - name: write
+                arguments:
+                  address_delta: 1
+                  data_delta: 1
+          - name: data_fifos[0]
+            actions:
+              - name: push
+                repeat: data_delta
+              - name: pop
+                repeat: data_delta
+          - name: addr_fifos[0]
+            actions:
+              - name: push
+                repeat: address_delta
+              - name: pop
+                repeat: address_delta
+      - name: idle
+        subcomponents:
+          - name: scoreboard
+            actions:
+              - name: idle
+          - name: data_fifos[0..2]
+            actions:
+              - name: idle
+          - name: addr_fifos[0..2]
+            actions:
+              - name: idle
